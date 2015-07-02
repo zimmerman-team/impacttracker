@@ -1,3 +1,48 @@
+// A line node container, nodes are displayed on the line
+function CircleContainer(cx, cy, r, options) {
+    this.cx = cx;
+    this.cy = cy;
+    this.r = r;
+    this.options = typeof options !== "undefined" ? options : {};
+
+
+    this.radius_scale = 0; // determined when adding nodes
+
+    this.nodes = [];
+
+    // todo: replace by passing class name in constructor
+    this.uniqueSelector = CircleContainer.instanceCount++;
+}
+
+CircleContainer.instanceCount = 0;
+
+CircleContainer.prototype.draw = function(parent) {
+    this.instance = parent.append("circle")
+        .attr("cx", this.cx)
+        .attr("cy", this.cy)
+        .attr("r", this.r)
+        .attr("stroke-opacity", 0.3)
+        .style("stroke", "red")
+        .style("fill", "none")
+}
+
+CircleContainer.prototype.addNode = function(parent) {
+/*
+    Add node on the circumference
+*/
+    var degree = 360 / (this.nodes.length + 1);
+}
+
+LineContainer.prototype.getCoords = function(i) {
+    return {
+        x: this.x1,
+        y: (this.y2 / this.nodes.length) * i 
+    }
+}
+
+CircleContainer.prototype.updateNodes = function() {
+
+}
 
 
 // A line node container, nodes are displayed on the line
@@ -6,35 +51,26 @@ function LineContainer(x1, y1, x2, y2, options) {
     this.y1 = y1;
     this.x2 = x2;
     this.y2 = y2;
+    this.options = typeof options !== "undefined" ? options : {};
 
     this.radius_scale = 0; // determined when adding nodes
 
     this.nodes = [];
-    this.links = [];
 
     this.linkDict = {}
 
     // todo: replace by passing class name in constructor
     this.uniqueSelector = LineContainer.instanceCount++;
 
-    this.options = typeof options !== "undefined" ? options : {};
-    // this.nodeClass = options.nodeClass || 
-
-
-    // this.force = d3.layout.force();
 }
 
 LineContainer.instanceCount = 0;
 
 LineContainer.prototype.draw = function(parent) {
     /*
-        For optional line visibility
+        For optional circle visibility
     */
-    this.instance = parent.append("line")
-        .attr("x1", this.x1)
-        .attr("y1", this.y1)
-        .attr("x2", this.x2)
-        .attr("y2", this.y2)
+
 }
 
 LineContainer.prototype.getCoords = function(i) {
@@ -208,6 +244,14 @@ var addLink = function(source, target) {
     var targetGroup = target[0];
     var targetId = target[1];
 
+    var sourceNode = groups[source[0]].findNode(source[1]),
+        targetNode = groups[target[0]].findNode(target[1]);
+
+    if (!sourceNode || !targetNode) {
+        console.log("doesnt exist");
+        return;  
+    } 
+
     // update linkDict
     // source -> target
     sourceDict[sourceId].push(targetId);
@@ -218,8 +262,8 @@ var addLink = function(source, target) {
 
 
     links.push({
-        source: groups[source[0]].findNode(source[1]),
-        target: groups[target[0]].findNode(target[1]),
+        source: sourceNode,
+        target: targetNode,
         intermediate: {} // intermediate node for bezier curves
     });
 
@@ -235,8 +279,6 @@ var updateLinks = function() {
     //update
     link
         .transition()
-        .attr("stroke-width", 2)
-        .attr("stroke", "black")
         // .attr("d", function(d) {
         //     return "M" + d.source.x + "," + d.source.y
         //         + "S" + d.intermediate.x + "," + d.intermediate.y
@@ -263,8 +305,6 @@ var updateLinks = function() {
         .attr("id", function(d) {
             return d.source.id + "-" + d.target.id;
         })
-        .attr("stroke-width", 2)
-        .attr("stroke", "black")
         .attr("x1", function(d) {
             return d.source.x
         })
@@ -348,9 +388,12 @@ var tip = d3.tip()
 svg.call(tip);
 
 var groups = {
-    "unrelated": new LineContainer(0, height, 0, height, {
+    "unrelated": new CircleContainer((width/3)/2, height/2, height/2, {
         "nodeClass": "unrelated"
     }),
+    // "unrelated": new LineContainer(0, height, 0, height, {
+    //     "nodeClass": "unrelated"
+    // }),
     "sources": new LineContainer(width/3, height, width/3, height, {
         "nodeClass": "sources"
     }),
@@ -367,9 +410,9 @@ groups["sources"].draw(svg);
 groups["targets"].draw(svg);
 groups["targets"].draw(svg);
 
-groups["unrelated"].addNode("Giorgi_Gogia")
-groups["unrelated"].addNode("PRLTUN")
-groups["unrelated"].addNode("ntbowdoin")
+// groups["unrelated"].addNode("Giorgi_Gogia")
+// groups["unrelated"].addNode("PRLTUN")
+// groups["unrelated"].addNode("ntbowdoin")
 
 groups["sources"].addNode("OCHA_CAR")
 groups["sources"].addNode("vincentduhem")
@@ -382,7 +425,7 @@ groups["intermediaries"].addNode("marselhagm")
 groups["intermediaries"].addNode("justinforsyth")
 
 groups["targets"].addNode("Noy_Official")
-groups["targets"].addNode("FAOKnowledge")
+groups["targets"].addNode("FAOK12nowledge")
 groups["targets"].addNode("UNDPAfrica")
 groups["targets"].addNode("FCOMattBaugh")
 groups["targets"].addNode("robynleekriel")
