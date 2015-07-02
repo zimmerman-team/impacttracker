@@ -1,57 +1,16 @@
-// A line node container, nodes are displayed on the line
-function CircleContainer(cx, cy, r, options) {
-    this.cx = cx;
-    this.cy = cy;
-    this.r = r;
-    this.options = typeof options !== "undefined" ? options : {};
-
-
-    this.radius_scale = 0; // determined when adding nodes
-
-    this.nodes = [];
-
-    // todo: replace by passing class name in constructor
-    this.uniqueSelector = CircleContainer.instanceCount++;
-}
-
-CircleContainer.instanceCount = 0;
-
-CircleContainer.prototype.draw = function(parent) {
-    this.instance = parent.append("circle")
-        .attr("cx", this.cx)
-        .attr("cy", this.cy)
-        .attr("r", this.r)
-        .attr("stroke-opacity", 0.3)
-        .style("stroke", "red")
-        .style("fill", "none")
-}
-
-CircleContainer.prototype.addNode = function(parent) {
 /*
-    Add node on the circumference
+    Graph test    
 */
-    var degree = 360 / (this.nodes.length + 1);
-}
-
-LineContainer.prototype.getCoords = function(i) {
-    return {
-        x: this.x1,
-        y: (this.y2 / this.nodes.length) * i 
-    }
-}
-
-CircleContainer.prototype.updateNodes = function() {
-
-}
-
 
 // A line node container, nodes are displayed on the line
 function LineContainer(x1, y1, x2, y2, options) {
-    this.x1 = x1;
-    this.y1 = y1;
-    this.x2 = x2;
-    this.y2 = y2;
-    this.options = typeof options !== "undefined" ? options : {};
+    if (arguments.length > 0) { // for inheritance
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.options = typeof options !== "undefined" ? options : {};
+    }
 
     this.radius_scale = 0; // determined when adding nodes
 
@@ -196,6 +155,59 @@ LineContainer.prototype.deleteNode = function(node) {
 LineContainer.prototype.swapNodes = function(node1, node2) {
     
 }
+
+// A line node container, nodes are displayed on the line
+function CircleContainer(cx, cy, r, options) {
+        this.cx = cx;
+        this.cy = cy;
+        this.r = r;
+        this.options = typeof options !== "undefined" ? options : {};
+
+    this.radius_scale = 0; // determined when adding nodes
+
+    this.nodes = [];
+
+    // todo: replace by passing class name in constructor
+    this.uniqueSelector = CircleContainer.instanceCount++;
+}
+
+CircleContainer.prototype = new LineContainer(); // inherit some methods; we overwrite most of them
+CircleContainer.instanceCount = 0;
+
+CircleContainer.prototype.draw = function(parent) {
+    this.instance = parent.append("circle")
+        .attr("cx", this.cx)
+        .attr("cy", this.cy)
+        .attr("r", this.r)
+        .attr("stroke-opacity", 0.3)
+        .style("stroke", "red")
+        .style("fill", "none")
+}
+
+CircleContainer.prototype.getCoords = function(i) {
+    var degree = 360 / (this.nodes.length),
+        rad = (Math.PI / 180) * degree,
+        irad = rad * i;
+        x = Math.floor(this.cx + Math.cos(irad) * this.r),
+        y = Math.floor(this.cy + Math.sin(irad) * this.r)
+
+        // console.log(i)
+        // console.log(this.nodes.length + 1)
+        // console.log(degree)
+
+        // console.log(x);
+        // console.log("newx: " + this.cx);
+
+        // console.log(y);
+        // console.log("newy: " + this.cy);
+
+        return {
+            x: x,
+            y: y
+        }
+}
+
+
 
 var links = [];
 // var linkDict = {"source": {}, "target": {}}; // maps nodes to links for fading
@@ -388,9 +400,15 @@ var tip = d3.tip()
 svg.call(tip);
 
 var groups = {
-    "unrelated": new CircleContainer((width/3)/2, height/2, height/2, {
+    "unrelated1": new CircleContainer((width/3)/2, height/2, height/2, {
         "nodeClass": "unrelated"
     }),
+    // "unrelated2": new CircleContainer((width/3)/2, height/2, height/3, {
+    //     "nodeClass": "unrelated"
+    // }),
+    // "unrelated3": new CircleContainer((width/3)/2, height/2, height/5, {
+    //     "nodeClass": "unrelated"
+    // }),
     // "unrelated": new LineContainer(0, height, 0, height, {
     //     "nodeClass": "unrelated"
     // }),
@@ -405,36 +423,44 @@ var groups = {
     })
 }
 
-groups["unrelated"].draw(svg);
+groups["unrelated1"].draw(svg);
+// groups["unrelated2"].draw(svg);
+// groups["unrelated3"].draw(svg);
 groups["sources"].draw(svg);
 groups["targets"].draw(svg);
 groups["targets"].draw(svg);
 
-// groups["unrelated"].addNode("Giorgi_Gogia")
-// groups["unrelated"].addNode("PRLTUN")
-// groups["unrelated"].addNode("ntbowdoin")
+groups["unrelated1"].addNode("Giorgi_Gogia")
+groups["unrelated1"].addNode("PRLTUN")
+groups["unrelated1"].addNode("ntbowdoin")
+groups["unrelated1"].addNode("1")
+groups["unrelated1"].addNode("2")
+groups["unrelated1"].addNode("3")
+groups["unrelated1"].addNode("4")
+groups["unrelated1"].addNode("5")
+groups["unrelated1"].addNode("6")
+groups["unrelated1"].addNode("7")
 
-groups["sources"].addNode("OCHA_CAR")
-groups["sources"].addNode("vincentduhem")
-groups["sources"].addNode("unicpretoria")
-groups["sources"].addNode("JigmeUgen")
-groups["sources"].addNode("UNICEF_CAR")
+groups["sources"].addNode("OCHA_CAR");
+groups["sources"].addNode("vincentduhem");
+groups["sources"].addNode("unicpretoria");
+groups["sources"].addNode("JigmeUgen");
+groups["sources"].addNode("UNICEF_CAR");
 
-groups["intermediaries"].addNode("CIVICUSalliance")
-groups["intermediaries"].addNode("marselhagm")
-groups["intermediaries"].addNode("justinforsyth")
+groups["intermediaries"].addNode("CIVICUSalliance");
+groups["intermediaries"].addNode("marselhagm");
+groups["intermediaries"].addNode("justinforsyth");
 
-groups["targets"].addNode("Noy_Official")
-groups["targets"].addNode("FAOK12nowledge")
-groups["targets"].addNode("UNDPAfrica")
-groups["targets"].addNode("FCOMattBaugh")
-groups["targets"].addNode("robynleekriel")
-
-
+groups["targets"].addNode("Noy_Official");
+groups["targets"].addNode("FAOK12nowledge");
+groups["targets"].addNode("UNDPAfrica");
+groups["targets"].addNode("FCOMattBaugh");
+groups["targets"].addNode("robynleekriel");
 
 addLink("sources:OCHA_CAR", "targets:Noy_Official");
 addLink("sources:UNICEF_CAR", "targets:robynleekriel");
 addLink("sources:unicpretoria", "intermediaries:CIVICUSalliance");
+// addLink("unrelated:Giorgi_Gogia", "intermediaries:CIVICUSalliance");
 
 // line.addNode();
 
