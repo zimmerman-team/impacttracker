@@ -1,4 +1,5 @@
 
+
 // A line node container, nodes are displayed on the line
 function LineContainer(x1, y1, x2, y2, options) {
     this.x1 = x1;
@@ -89,7 +90,7 @@ LineContainer.prototype.updateNodes = function() {
 
     // todo: better scale
     // var radius_scale = d3.scale.pow().exponent(0.5).domain([0, max_amount]).range([1, 2]);
-    var radius_scale = d3.scale.linear().domain([0, max_amount]).range([10, 50]);
+    var radius_scale = d3.scale.linear().domain([0, max_amount]).range([5, 25]);
 
     var node = svg.selectAll(".node" + this.uniqueSelector) // todo: use options.className
         .data(this.nodes, function (d) {
@@ -167,7 +168,7 @@ var targetDict = {}
 
 
 var fade = function(id, opacity) {
-    // todo: improve performance, by reducing to a dict look-up, hence no loops
+    // todo: improve performance, by reducing to a dict look-up, hence no loops in selector
 
     var sources = sourceDict[id];
     var targets = targetDict[id];
@@ -184,6 +185,7 @@ var fade = function(id, opacity) {
 
     // show connecting links
     var link = svg.selectAll('.link')
+
     link.style("opacity", function(d) {
         return d.source.id === id || d.target.id === id ? 1 : opacity
         // console.log(d);
@@ -229,8 +231,6 @@ var updateLinks = function() {
         .data(links, function (d) {
             return d.source.id + d.target.id;
         })
-
-    // console.log(svg.selectAll('.link'));
 
     //update
     link
@@ -297,7 +297,8 @@ var updateLinks = function() {
 var clientWidth = Window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth,
     clientHeight = Window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight
 
-var margin = {top: 20, right: 10, bottom: 20, left: 10},
+// todo: make responsive
+var margin = {top: clientHeight / 10, right: clientWidth / 10, bottom: clientHeight / 10, left: clientWidth / 10},
     width = clientWidth - margin.left - margin.right,
     height = clientHeight - margin.top - margin.bottom;
 
