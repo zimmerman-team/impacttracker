@@ -1,0 +1,41 @@
+{
+  "name": "AID-INC",
+  "version": "0.0.1",
+  "description": "AID-INC prototype",
+  "repository": "https://github.com/zimmerman-zimmerman/AID-INC",
+  "main": "app/app.js",
+  "dependencies": {},
+  "devDependencies": {
+    "uglify-js": "~2.4.15",
+    "live-reload": "latest",
+    "opener": "latest",
+    "parallelshell": "~1.1.1",
+    "fsmonitor": "~0.2.4",
+    "http-server": "~0.8.0"
+  },
+  "config": {
+    "folder": "app"
+  },
+  "scripts": {
+    "watch": "fsmonitor -s -d app/ !.* npm run build:dev",
+    "build": "parallelshell 'npm run build:move' 'npm run build:js' 'npm run build:sass'",
+    "build:dev": "parallelshell 'npm run build:move' 'npm run build:js:dev' 'npm run build:sass:dev'",
+    "build:move": "parallelshell 'npm run move:html' 'npm run move:css' 'npm run move:map'",
+    "build:js": "NODE_ENV=production browserify app/app.js | uglifyjs -cm > dist/bundle.min.js",
+    "build:js:dev": "browserify app/app.js > dist/bundle.js",
+    "build:sass": "cat app/sass/*.scss | node-sass --output-style compressed > dist/css/main.css",
+    "build:sass:dev": "cat app/sass/*.scss | node-sass --output-style expanded > dist/css/main.css",
+    "open:dev": "opener http://localhost:2000/index.html",
+    "livereload": "live-reload --port 9091 ./",
+    "serve": "http-server -p 2000 ./ -c-1",
+    "move:html": "cd app && find . -name '*.html' -exec cp {} --parents -t ../dist ';' && cd ..",
+    "move:css": "cd app && find . -name '*.css' -exec cp {} --parents -t ../dist ';' && cd ..",
+    "move:map": "cd app && find . -name '*.map' -exec cp {} --parents -t ../dist ';' && cd ..",
+    "dev": "parallelshell 'npm run open:dev' 'npm run livereload' 'npm run serve' 'npm run watch'",
+    "dev:no-open": "parallelshell 'npm run livereload' 'npm run serve' 'npm run watch'"
+  },
+  "author": "Bryan",
+  "jest": {
+    "rootDir": "./js"
+  }
+}
