@@ -410,16 +410,16 @@ var tip = d3.tip()
     html +=("<b>" + d.id + "</b><br />")
 
 
-    if (ntargets) {
+    if (ntargets.length) {
         html += "<ul>"
-        html += ("<b>Targets</b> <br><ul class='tip-sources'>")
+        html += ("<b>Targets</b> <br><ul class='tip-targets'>")
         _.forEach(ntargets, function(source) {
             html += ("<li>" + source + "</li>")
         })
         html += ("</ul>")
     }
 
-    if (nsources) {
+    if (nsources.length) {
         html += "<ul>"
         html += ("<b>Sources</b> <br><ul class='tip-sources'>")
         _.forEach(nsources, function(source) {
@@ -428,18 +428,18 @@ var tip = d3.tip()
         html += ("</ul>")
     }
 
-    if (nintermediaries) {
+    if (nintermediaries.length) {
         html += "<ul>"
-        html += ("<b>Intermediaries</b> <br><ul class='tip-sources'>")
+        html += ("<b>Intermediaries</b> <br><ul class='tip-intermediaries'>")
         _.forEach(nintermediaries, function(source) {
             html += ("<li>" + source + "</li>")
         })
         html += ("</ul>")
     }
 
-    if (nunrelated) {
+    if (nunrelated.length) {
         html += "<ul>"
-        html += ("<b>Unrelated</b> <br><ul class='tip-sources'>")
+        html += ("<b>Unrelated</b> <br><ul class='tip-unrelated'>")
         _.forEach(nunrelated, function(source) {
             html += ("<li>" + source + "</li>")
         })
