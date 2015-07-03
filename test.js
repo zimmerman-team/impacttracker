@@ -378,24 +378,79 @@ var tip = d3.tip()
   .offset([-10, 0])
   .html(function(sources, targets, d) {
 
+    var sources = sources.slice(1);
+    var targets = targets.slice(1);
+
+    var sourcetargets = _.union(sources, targets);
+
+    var nsources = [];
+    var ntargets = [];
+    var nintermediaries = [];
+    var nunrelated = [];
+
+    _.forEach(sourcetargets, function(item) {
+        switch(sourceDict[item][0]) {
+            case "sources":
+                nsources.push(item)
+                break;
+            case "targets":
+                ntargets.push(item)
+                break;
+            case "intermediaries":
+                nintermediaries.push(item)
+                break;
+            case "unrelated":
+                nunrelated.push(item)
+                break;
+        }
+    });
+
     var html = ""
 
     html +=("<b>" + d.id + "</b><br />")
 
-    html += "<ul>"
 
-    console.log(sources)
-    // html += ("<b>Sources</b> <br><ul class='tip-sources'>")
-    _.forEach(sources.slice(1), function(source) {
-        html += ("<li>" + source + "</li>")
-    })
+    if (ntargets) {
+        html += "<ul>"
+        html += ("<b>Targets</b> <br><ul class='tip-sources'>")
+        _.forEach(ntargets, function(source) {
+            html += ("<li>" + source + "</li>")
+        })
+        html += ("</ul>")
+    }
+
+    if (nsources) {
+        html += "<ul>"
+        html += ("<b>Sources</b> <br><ul class='tip-sources'>")
+        _.forEach(nsources, function(source) {
+            html += ("<li>" + source + "</li>")
+        })
+        html += ("</ul>")
+    }
+
+    if (nintermediaries) {
+        html += "<ul>"
+        html += ("<b>Intermediaries</b> <br><ul class='tip-sources'>")
+        _.forEach(nintermediaries, function(source) {
+            html += ("<li>" + source + "</li>")
+        })
+        html += ("</ul>")
+    }
+
+    if (nunrelated) {
+        html += "<ul>"
+        html += ("<b>Unrelated</b> <br><ul class='tip-sources'>")
+        _.forEach(nunrelated, function(source) {
+            html += ("<li>" + source + "</li>")
+        })
+        html += ("</ul>")
+    }
+
+    // // html += ("<b>Targets</b> <br><ul class='tip-targets'>")
+    // _.forEach(targets.slice(1), function(source) {
+    //     html += ("<li>" + source + "</li>")
+    // })
     // html += ("</ul>")
-
-    // html += ("<b>Targets</b> <br><ul class='tip-targets'>")
-    _.forEach(targets.slice(1), function(source) {
-        html += ("<li>" + source + "</li>")
-    })
-    html += ("</ul>")
 
     return html
   })
