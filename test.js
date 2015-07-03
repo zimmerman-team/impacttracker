@@ -171,10 +171,7 @@ CircleContainer.prototype.draw = function(parent) {
         .attr("cx", this.cx)
         .attr("cy", this.cy)
         .attr("r", this.r)
-        .attr("stroke-opacity", 0.3)
-        .style("stroke", "red")
-        .style("fill", "none")
-        .style("opacity", "red")
+        .attr('class', 'unrelatedcircle')       
 }
 
 CircleContainer.prototype.getCoords = function(i) {
@@ -370,13 +367,13 @@ var tip = d3.tip()
 
     var html = ""
 
-    html += ("Sources: <br><ul>")
+    html += ("<b>Sources</b> <br><ul class='tip-sources'>")
     _.forEach(sources, function(source) {
         html += ("<li>" + source + "</li>")
     })
     html += ("</ul>")
 
-    html += ("Targets: <br><ul>")
+    html += ("<b>Targets</b> <br><ul class='tip-targets'>")
     _.forEach(targets, function(source) {
         html += ("<li>" + source + "</li>")
     })
