@@ -383,14 +383,16 @@ var tip = d3.tip()
     html +=("<b>" + d.id + "</b><br />")
 
     html += "<ul>"
+
+    console.log(sources)
     // html += ("<b>Sources</b> <br><ul class='tip-sources'>")
-    _.forEach(sources, function(source) {
+    _.forEach(sources.slice(1), function(source) {
         html += ("<li>" + source + "</li>")
     })
     // html += ("</ul>")
 
     // html += ("<b>Targets</b> <br><ul class='tip-targets'>")
-    _.forEach(targets, function(source) {
+    _.forEach(targets.slice(1), function(source) {
         html += ("<li>" + source + "</li>")
     })
     html += ("</ul>")
