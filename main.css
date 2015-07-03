@@ -35,15 +35,15 @@ body{
 }
 
 .sources-color{
-  background-color: #d3bd00;
+  background-color: #bbfefd;
 }
 
 .intermediaries-color{
-  background-color: #cf4fb0;
+  background-color: #d3bd00;
 }
 
 .targets-color{
-  background-color: #bbfefd;
+  background-color: #cf4fb0;
 }
 
 .legend-icon{
@@ -99,29 +99,34 @@ svg{
 }
 
 .sources {
-    fill: #d3bd00;
-    stroke-width: 0px;
-}
-
-.intermediaries {
-    fill: #cf4fb0;
-    stroke-width: 0px;
-}
-
-.targets {
     fill: #bbfefd;
     stroke-width: 0px;
 }
 
+.intermediaries {
+    fill: #d3bd00;
+    stroke-width: 0px;
+}
+
+.targets {
+    fill: #cf4fb0;
+    stroke-width: 0px;
+}
+
 .d3-tip {
+  top: 6% !important;
+  right: 1% !important;
+  left: auto !important;
+  height: 90% !important;
+  width: 200px !important;
+  background-color: rgba(22,22,22,0.7);
+  opacity: 1 !important;
   line-height: 1;
   font-weight: normal;
   padding: 0 12px 12px;
-  background: rgba(0, 0, 0, 0.8);
   color: #fff;
   border: 1px solid #666;
   border-radius: 2px;
-  min-width: 150px;
 }
 
 .d3-tip b{
