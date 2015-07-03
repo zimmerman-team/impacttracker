@@ -41,8 +41,8 @@ LineContainer.prototype.addNode = function(id, data) {
     });
 
     // initialize source and target dict
-    if (!sourceDict.hasOwnProperty(id)) sourceDict[id] = []; // check probaply not nescessary
-    if (!targetDict.hasOwnProperty(id)) targetDict[id] = [];
+    if (!sourceDict.hasOwnProperty(id)) sourceDict[id] = [this.options.nodeGroup]; // check probaply not nescessary
+    if (!targetDict.hasOwnProperty(id)) targetDict[id] = [this.options.nodeGroup]; // by convention, first item in dict is the group it belongs to, should change this
 
     this.updateNodes(); // the order here matters
     updateLinks();
@@ -206,21 +206,34 @@ var fade = function(id, opacity) {
 
     var sources = sourceDict[id];
     var targets = targetDict[id];
+    var group = sourceDict[id][0]; // first item is the group name...
 
     // for now, no difference between source -> target and target -> source
-    var combined = _.union(sources, targets, [id]);
+    var combined = _.union(sources.slice(1), targets.slice(1), [id]);
+
+    // console.log(combined)
 
     // show connected nodes
     var node = svg.selectAll(".node")
     
     node.style("opacity", function(d) {
-        return _.includes(combined, d.id) ? 1 : opacity
+        return _.includes(combined, d.id) ? 1 : opacity // null is don't change
     })
 
+    // if (group !== "intermediaries") { // intermediates should link forward
+    //     _.forEach(combined, function(item) {
+    //         if (sourceDict[item][0] === "intermediaries") {
+    //             console.log(item)
+    //             fade(item, 0)
+    //         }
+    //     })
+    // }
     // show connecting links
     var link = svg.selectAll('.link')
 
     link.style("opacity", function(d) {
+        // console.log(d)
+        // return 0;
         return d.source.id === id || d.target.id === id ? 1 : opacity
         // console.log(d);
     })
@@ -336,7 +349,7 @@ var clientWidth = Window.innerWidth || document.documentElement.clientWidth || d
     clientHeight = Window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight
 
 // todo: make responsive
-var margin = {top: clientHeight / 20, right: clientWidth / 20, bottom: clientHeight / 20, left: clientWidth / 20},
+var margin = {top: 50, right: 0, bottom: 50, left: 0},
     width = clientWidth - margin.left - margin.right,
     height = clientHeight - margin.top - margin.bottom;
 
@@ -407,10 +420,10 @@ svg.call(tip);
 //     })
 // }
 
-var circleWidth = width / 2;
+var circleWidth = width / 3;
 var circleCenter = circleWidth / 2;
 
-var lineWidth = circleWidth / 3;
+var lineWidth = (2 * width/3) / 3;
 var lineOffset = lineWidth / 2;
 
 var line1 = circleWidth + lineOffset;
@@ -418,33 +431,40 @@ var line2 = circleWidth + lineWidth + lineOffset;
 var line3 = circleWidth + 2*lineWidth + lineOffset;
 
 var groups = {
-    "unrelated1": new CircleContainer(circleCenter, height/2, circleWidth/2, {
-        "uniqueNodeClass": "unrelated1"
+    "unrelated1": new CircleContainer(circleCenter, height/2, circleWidth/3, {
+        "uniqueNodeClass": "unrelated1",
+        "nodeGroup": "unrelated"
     }),
-    "unrelated2": new CircleContainer(circleCenter, height/2, circleWidth/2.5, {
-        "uniqueNodeClass": "unrelated2"
+    "unrelated2": new CircleContainer(circleCenter, height/2, circleWidth/4, {
+        "uniqueNodeClass": "unrelated2",
+        "nodeGroup": "unrelated"
     }),
-    "unrelated3": new CircleContainer(circleCenter, height/2, circleWidth/3, {
-        "uniqueNodeClass": "unrelated3"
+    "unrelated3": new CircleContainer(circleCenter, height/2, circleWidth/5, {
+        "uniqueNodeClass": "unrelated3",
+        "nodeGroup": "unrelated"
     }),
-    "unrelated4": new CircleContainer(circleCenter, height/2, circleWidth/4, {
-        "uniqueNodeClass": "unrelated4"
+    "unrelated4": new CircleContainer(circleCenter, height/2, circleWidth/6, {
+        "uniqueNodeClass": "unrelated4",
+        "nodeGroup": "unrelated"
     }),
     "sources": new LineContainer(line1, height, line1, height, {
-        "uniqueNodeClass": "sources"
+        "uniqueNodeClass": "sources",
+        "nodeGroup": "sources"
     }),
     "intermediaries": new LineContainer(line2, height, line2, height, {
-       "uniqueNodeClass": "intermediaries" 
+       "uniqueNodeClass": "intermediaries",
+        "nodeGroup": "intermediaries"
     }),
     "targets": new LineContainer(line3, height, line3, height, {
-        "uniqueNodeClass": "targets"
+        "uniqueNodeClass": "targets",
+        "nodeGroup": "targets"
     })
 }
 
 groups["unrelated1"].draw(svg);
-groups["unrelated2"].draw(svg);
-groups["unrelated3"].draw(svg);
-groups["unrelated4"].draw(svg);
+// groups["unrelated2"].draw(svg);
+// groups["unrelated3"].draw(svg);
+// groups["unrelated4"].draw(svg);
 groups["sources"].draw(svg);
 groups["targets"].draw(svg);
 groups["targets"].draw(svg);
@@ -496,9 +516,9 @@ var layerMapping = {
     "2": "sources",
     "3": "sources",
     "4": "unrelated1",
-    "5": "unrelated2",
-    "6": "unrelated3",
-    "7": "unrelated4",
+    "5": "unrelated1",
+    "6": "unrelated1",
+    "7": "unrelated1",
 }
 
 var layerDict = {}; // keep track of what layer the node with id x is in
