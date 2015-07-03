@@ -18,9 +18,6 @@ function LineContainer(x1, y1, x2, y2, options) {
 
     this.linkDict = {}
 
-    // todo: replace by passing class name in constructor
-    this.uniqueSelector = LineContainer.instanceCount++;
-
 }
 
 LineContainer.instanceCount = 0;
@@ -87,7 +84,7 @@ LineContainer.prototype.updateNodes = function() {
     // var radius_scale = d3.scale.pow().exponent(0.5).domain([0, max_amount]).range([1, 2]);
     var radius_scale = d3.scale.linear().domain([0, max_amount]).range([5, 25]);
 
-    var node = svg.selectAll(".node" + this.uniqueSelector) // todo: use options.className
+    var node = svg.selectAll("." + this.options.uniqueNodeClass) // todo: use options.className
         .data(this.nodes, function (d) {
             return d.id;
         })
@@ -110,7 +107,7 @@ LineContainer.prototype.updateNodes = function() {
         .attr("transform", function(d) {
             return "translate(" + d.x + "," + d.y + ")";
         })
-        .attr("class", "node node" + this.uniqueSelector + " " + this.options.nodeClass) // todo: add as html5 data- attribute to identify
+        .attr("class", "node " + this.options.uniqueNodeClass) // todo: add as html5 data- attribute to identify
         .on("mouseover", function(d) {
             fade(d.id, 0.2);
 
@@ -166,9 +163,6 @@ function CircleContainer(cx, cy, r, options) {
     this.radius_scale = 0; // determined when adding nodes
 
     this.nodes = [];
-
-    // todo: replace by passing class name in constructor
-    this.uniqueSelector = CircleContainer.instanceCount++;
 }
 
 CircleContainer.prototype = new LineContainer(); // inherit some methods; we overwrite most of them
@@ -182,6 +176,7 @@ CircleContainer.prototype.draw = function(parent) {
         .attr("stroke-opacity", 0.3)
         .style("stroke", "red")
         .style("fill", "none")
+        .style("opacity", "red")
 }
 
 CircleContainer.prototype.getCoords = function(i) {
@@ -190,16 +185,6 @@ CircleContainer.prototype.getCoords = function(i) {
         irad = rad * i;
         x = Math.floor(this.cx + Math.cos(irad) * this.r),
         y = Math.floor(this.cy + Math.sin(irad) * this.r)
-
-        // console.log(i)
-        // console.log(this.nodes.length + 1)
-        // console.log(degree)
-
-        // console.log(x);
-        // console.log("newx: " + this.cx);
-
-        // console.log(y);
-        // console.log("newy: " + this.cy);
 
         return {
             x: x,
@@ -401,31 +386,28 @@ svg.call(tip);
 
 var groups = {
     "unrelated1": new CircleContainer((width/3)/2, height/2, height/2, {
-        "nodeClass": "unrelated"
+        "uniqueNodeClass": "unrelated1"
     }),
-    // "unrelated2": new CircleContainer((width/3)/2, height/2, height/3, {
-    //     "nodeClass": "unrelated"
-    // }),
-    // "unrelated3": new CircleContainer((width/3)/2, height/2, height/5, {
-    //     "nodeClass": "unrelated"
-    // }),
-    // "unrelated": new LineContainer(0, height, 0, height, {
-    //     "nodeClass": "unrelated"
-    // }),
+    "unrelated2": new CircleContainer((width/3)/2, height/2, height/3, {
+        "uniqueNodeClass": "unrelated2"
+    }),
+    "unrelated3": new CircleContainer((width/3)/2, height/2, height/5, {
+        "uniqueNodeClass": "unrelated3"
+    }),
     "sources": new LineContainer(width/3, height, width/3, height, {
-        "nodeClass": "sources"
+        "uniqueNodeClass": "sources"
     }),
     "intermediaries": new LineContainer((2*width)/3, height, (2*width)/3, height, {
-       "nodeClass": "intermediaries" 
+       "uniqueNodeClass": "intermediaries" 
     }),
     "targets": new LineContainer(width, height, width, height, {
-        "nodeClass": "targets"
+        "uniqueNodeClass": "targets"
     })
 }
 
 groups["unrelated1"].draw(svg);
-// groups["unrelated2"].draw(svg);
-// groups["unrelated3"].draw(svg);
+groups["unrelated2"].draw(svg);
+groups["unrelated3"].draw(svg);
 groups["sources"].draw(svg);
 groups["targets"].draw(svg);
 groups["targets"].draw(svg);
@@ -440,6 +422,12 @@ groups["unrelated1"].addNode("4")
 groups["unrelated1"].addNode("5")
 groups["unrelated1"].addNode("6")
 groups["unrelated1"].addNode("7")
+
+groups["unrelated2"].addNode("8")
+groups["unrelated2"].addNode("9")
+groups["unrelated2"].addNode("10")
+groups["unrelated2"].addNode("11")
+groups["unrelated2"].addNode("12")
 
 groups["sources"].addNode("OCHA_CAR");
 groups["sources"].addNode("vincentduhem");
@@ -460,6 +448,7 @@ groups["targets"].addNode("robynleekriel");
 addLink("sources:OCHA_CAR", "targets:Noy_Official");
 addLink("sources:UNICEF_CAR", "targets:robynleekriel");
 addLink("sources:unicpretoria", "intermediaries:CIVICUSalliance");
+addLink("unrelated1:7", "sources:UNICEF_CAR");
 // addLink("unrelated:Giorgi_Gogia", "intermediaries:CIVICUSalliance");
 
 // line.addNode();
