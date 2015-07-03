@@ -108,13 +108,13 @@ LineContainer.prototype.updateNodes = function() {
         })
         .attr("class", "node " + this.options.uniqueNodeClass) // todo: add as html5 data- attribute to identify
         .on("mouseover", function(d) {
-            fade(d.id, 0.1);
+            fade(d.id, 0);
 
             // get links
             var sources = sourceDict[d.id];
             var targets = targetDict[d.id];
 
-            tip.show(sources, targets);
+            tip.show(sources, targets, d);
         })
         .on("mouseout", function(d) {
             svg.selectAll('.node, .link').style("opacity", 1);
@@ -363,9 +363,11 @@ d3.select(window).on('resize', function() {
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
-  .html(function(sources, targets) {
+  .html(function(sources, targets, d) {
 
     var html = ""
+
+    html +=("<b>" + d.id + "</b><br />")
 
     html += ("<b>Sources</b> <br><ul class='tip-sources'>")
     _.forEach(sources, function(source) {
