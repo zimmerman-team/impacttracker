@@ -127,6 +127,7 @@ svg{
   color: #fff;
   border: 1px solid #666;
   border-radius: 2px;
+  overflow-y: scroll;
 }
 
 .d3-tip b{
