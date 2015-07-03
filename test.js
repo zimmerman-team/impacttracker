@@ -20,8 +20,6 @@ function LineContainer(x1, y1, x2, y2, options) {
 
 }
 
-LineContainer.instanceCount = 0;
-
 LineContainer.prototype.draw = function(parent) {
     /*
         For optional circle visibility
@@ -166,7 +164,6 @@ function CircleContainer(cx, cy, r, options) {
 }
 
 CircleContainer.prototype = new LineContainer(); // inherit some methods; we overwrite most of them
-CircleContainer.instanceCount = 0;
 
 CircleContainer.prototype.draw = function(parent) {
     this.instance = parent.append("circle")
@@ -379,28 +376,58 @@ var tip = d3.tip()
     html += ("</ul>")
 
     return html
-    // return "<strong>Item:</strong> <span style='color:red'>" + d.id+ "</span>";
   })
 
 svg.call(tip);
 
+// var groups = {
+//     "unrelated1": new CircleContainer((width/3)/2, height/2, width/3, {
+//         "uniqueNodeClass": "unrelated1"
+//     }),
+//     "unrelated2": new CircleContainer((width/3)/2, height/2, width/4, {
+//         "uniqueNodeClass": "unrelated2"
+//     }),
+//     "unrelated3": new CircleContainer((width/3)/2, height/2, width/5, {
+//         "uniqueNodeClass": "unrelated3"
+//     }),
+//     "sources": new LineContainer(width/3, height, width/3, height, {
+//         "uniqueNodeClass": "sources"
+//     }),
+//     "intermediaries": new LineContainer((2*width)/3, height, (2*width)/3, height, {
+//        "uniqueNodeClass": "intermediaries" 
+//     }),
+//     "targets": new LineContainer(width, height, width, height, {
+//         "uniqueNodeClass": "targets"
+//     })
+// }
+
+var circleWidth = width / 2;
+var circleCenter = circleWidth / 2;
+
+var lineWidth = circleWidth / 3;
+var lineOffset = lineWidth / 2;
+
+var line1 = circleWidth + lineOffset;
+var line2 = circleWidth + lineWidth + lineOffset;
+var line3 = circleWidth + 2*lineWidth + lineOffset;
+
 var groups = {
-    "unrelated1": new CircleContainer((width/3)/2, height/2, height/2, {
+    "unrelated1": new CircleContainer(circleCenter, height/2, circleWidth/3, {
         "uniqueNodeClass": "unrelated1"
     }),
-    "unrelated2": new CircleContainer((width/3)/2, height/2, height/3, {
+    "unrelated2": new CircleContainer(circleCenter, height/2, circleWidth/5, {
         "uniqueNodeClass": "unrelated2"
     }),
-    "unrelated3": new CircleContainer((width/3)/2, height/2, height/5, {
+    "unrelated3": new CircleContainer(circleCenter, height/2, circleWidth/9, {
         "uniqueNodeClass": "unrelated3"
     }),
-    "sources": new LineContainer(width/3, height, width/3, height, {
+    "sources": new LineContainer(line1, height, line1, height, {
         "uniqueNodeClass": "sources"
     }),
-    "intermediaries": new LineContainer((2*width)/3, height, (2*width)/3, height, {
+    "intermediaries": new LineContainer(line2, height, line2, height, {
        "uniqueNodeClass": "intermediaries" 
     }),
-    "targets": new LineContainer(width, height, width, height, {
+    "targets": new LineContainer(line3, height, line3, height, {
         "uniqueNodeClass": "targets"
     })
 }
