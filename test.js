@@ -38,7 +38,7 @@ LineContainer.prototype.addNode = function(id, data) {
     this.nodes.push({
         "id": id,
         "data": data
-    })
+    });
 
     // initialize source and target dict
     if (!sourceDict.hasOwnProperty(id)) sourceDict[id] = []; // check probaply not nescessary
@@ -74,13 +74,14 @@ LineContainer.prototype.updateNodes = function() {
     });
 
     var max_amount = d3.max(this.nodes, function(d) {
-        // todo: return max links in the graph
-        return 5;
+        // todo: return max links in the graph, set it as max
+        return 100;
     })
 
     // todo: better scale
     // var radius_scale = d3.scale.pow().exponent(0.5).domain([0, max_amount]).range([1, 2]);
     var radius_scale = d3.scale.linear().domain([0, max_amount]).range([5, 25]);
+    // var radius_scale = d3.scale.log().domain([0, max_amount]).range([5, 25]);
 
     var node = svg.selectAll("." + this.options.uniqueNodeClass) // todo: use options.className
         .data(this.nodes, function (d) {
@@ -107,7 +108,7 @@ LineContainer.prototype.updateNodes = function() {
         })
         .attr("class", "node " + this.options.uniqueNodeClass) // todo: add as html5 data- attribute to identify
         .on("mouseover", function(d) {
-            fade(d.id, 0.2);
+            fade(d.id, 0.1);
 
             // get links
             var sources = sourceDict[d.id];
@@ -183,12 +184,18 @@ CircleContainer.prototype.getCoords = function(i) {
         x = Math.floor(this.cx + Math.cos(irad) * this.r),
         y = Math.floor(this.cy + Math.sin(irad) * this.r)
 
+    // console.log(degree);
+    // console.log(this.nodes.length);
+
         return {
             x: x,
             y: y
         }
 }
 
+
+// need to know which node is in which layer, to avoid having to search through all layers
+var nodeDict = {};
 
 
 var links = [];
@@ -332,7 +339,7 @@ var clientWidth = Window.innerWidth || document.documentElement.clientWidth || d
     clientHeight = Window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight
 
 // todo: make responsive
-var margin = {top: clientHeight / 10, right: clientWidth / 10, bottom: clientHeight / 10, left: clientWidth / 10},
+var margin = {top: clientHeight / 20, right: clientWidth / 20, bottom: clientHeight / 20, left: clientWidth / 20},
     width = clientWidth - margin.left - margin.right,
     height = clientHeight - margin.top - margin.bottom;
 
@@ -412,14 +419,17 @@ var line2 = circleWidth + lineWidth + lineOffset;
 var line3 = circleWidth + 2*lineWidth + lineOffset;
 
 var groups = {
-    "unrelated1": new CircleContainer(circleCenter, height/2, circleWidth/3, {
+    "unrelated1": new CircleContainer(circleCenter, height/2, circleWidth/2, {
         "uniqueNodeClass": "unrelated1"
     }),
-    "unrelated2": new CircleContainer(circleCenter, height/2, circleWidth/5, {
+    "unrelated2": new CircleContainer(circleCenter, height/2, circleWidth/2.5, {
         "uniqueNodeClass": "unrelated2"
     }),
-    "unrelated3": new CircleContainer(circleCenter, height/2, circleWidth/9, {
+    "unrelated3": new CircleContainer(circleCenter, height/2, circleWidth/3, {
         "uniqueNodeClass": "unrelated3"
+    }),
+    "unrelated4": new CircleContainer(circleCenter, height/2, circleWidth/4, {
+        "uniqueNodeClass": "unrelated4"
     }),
     "sources": new LineContainer(line1, height, line1, height, {
         "uniqueNodeClass": "sources"
@@ -435,51 +445,87 @@ var groups = {
 groups["unrelated1"].draw(svg);
 groups["unrelated2"].draw(svg);
 groups["unrelated3"].draw(svg);
+groups["unrelated4"].draw(svg);
 groups["sources"].draw(svg);
 groups["targets"].draw(svg);
 groups["targets"].draw(svg);
 
-groups["unrelated1"].addNode("Giorgi_Gogia")
-groups["unrelated1"].addNode("PRLTUN")
-groups["unrelated1"].addNode("ntbowdoin")
-groups["unrelated1"].addNode("1")
-groups["unrelated1"].addNode("2")
-groups["unrelated1"].addNode("3")
-groups["unrelated1"].addNode("4")
-groups["unrelated1"].addNode("5")
-groups["unrelated1"].addNode("6")
-groups["unrelated1"].addNode("7")
+// groups["unrelated1"].addNode("Giorgi_Gogia")
+// groups["unrelated1"].addNode("PRLTUN")
+// groups["unrelated1"].addNode("ntbowdoin")
+// groups["unrelated1"].addNode("1")
+// groups["unrelated1"].addNode("2")
+// groups["unrelated1"].addNode("3")
+// groups["unrelated1"].addNode("4")
+// groups["unrelated1"].addNode("5")
+// groups["unrelated1"].addNode("6")
+// groups["unrelated1"].addNode("7")
 
-groups["unrelated2"].addNode("8")
-groups["unrelated2"].addNode("9")
-groups["unrelated2"].addNode("10")
-groups["unrelated2"].addNode("11")
-groups["unrelated2"].addNode("12")
+// groups["unrelated2"].addNode("8")
+// groups["unrelated2"].addNode("9")
+// groups["unrelated2"].addNode("10")
+// groups["unrelated2"].addNode("11")
+// groups["unrelated2"].addNode("12")
 
-groups["sources"].addNode("OCHA_CAR");
-groups["sources"].addNode("vincentduhem");
-groups["sources"].addNode("unicpretoria");
-groups["sources"].addNode("JigmeUgen");
-groups["sources"].addNode("UNICEF_CAR");
+// groups["sources"].addNode("OCHA_CAR");
+// groups["sources"].addNode("vincentduhem");
+// groups["sources"].addNode("unicpretoria");
+// groups["sources"].addNode("JigmeUgen");
+// groups["sources"].addNode("UNICEF_CAR");
 
-groups["intermediaries"].addNode("CIVICUSalliance");
-groups["intermediaries"].addNode("marselhagm");
-groups["intermediaries"].addNode("justinforsyth");
+// groups["intermediaries"].addNode("CIVICUSalliance");
+// groups["intermediaries"].addNode("marselhagm");
+// groups["intermediaries"].addNode("justinforsyth");
 
-groups["targets"].addNode("Noy_Official");
-groups["targets"].addNode("FAOK12nowledge");
-groups["targets"].addNode("UNDPAfrica");
-groups["targets"].addNode("FCOMattBaugh");
-groups["targets"].addNode("robynleekriel");
+// groups["targets"].addNode("Noy_Official");
+// groups["targets"].addNode("FAOK12nowledge");
+// groups["targets"].addNode("UNDPAfrica");
+// groups["targets"].addNode("FCOMattBaugh");
+// groups["targets"].addNode("robynleekriel");
 
-addLink("sources:OCHA_CAR", "targets:Noy_Official");
-addLink("sources:UNICEF_CAR", "targets:robynleekriel");
-addLink("sources:unicpretoria", "intermediaries:CIVICUSalliance");
-addLink("unrelated1:7", "sources:UNICEF_CAR");
-// addLink("unrelated:Giorgi_Gogia", "intermediaries:CIVICUSalliance");
+// addLink("sources:OCHA_CAR", "targets:Noy_Official");
+// addLink("sources:UNICEF_CAR", "targets:robynleekriel");
+// addLink("sources:unicpretoria", "intermediaries:CIVICUSalliance");
+// addLink("unrelated1:7", "sources:UNICEF_CAR");
 
-// line.addNode();
+var nodes = json.nodes;
+var links = json.edges;
 
-// var node = svg.selectAll('.node'),
-//     link = svg.selectAll('.link');
+var layerMapping = {
+    "0": "targets",
+    "1": "intermediaries",
+    "2": "sources",
+    "3": "sources",
+    "4": "unrelated1",
+    "5": "unrelated2",
+    "6": "unrelated3",
+    "7": "unrelated4",
+}
+
+var layerDict = {}; // keep track of what layer the node with id x is in
+
+var numUnrelated = 0;
+_.forEach(nodes, function(node) {
+    if (node.LayerNo > 7) {
+        var layer = "unrelated1"
+    } else {
+        var layer = layerMapping[node.LayerNo];
+    }
+
+    groups[layer].addNode(node.id);
+
+    layerDict[node.id] = layer;
+});
+
+_.forEach(links, function(link) {
+    var source = link.source;
+    var target = link.target;
+
+    var sourceLayer = layerDict[source];
+    var targetLayer = layerDict[target];
+
+    addLink(sourceLayer + ":" + source, targetLayer + ":" + target);
+
+})
+
 
