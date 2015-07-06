@@ -148,15 +148,27 @@ svg{
   text-indent: -.7em;
 }
 
-.d3-tip .tip-sources li:before {
+.d3-tip .tip-unrelated li:before {
+  content: "• ";
+  color: #6b6b6b;
+  font-size: 16px;
+}
+
+.d3-tip .tip-intermediaries li:before {
   content: "• ";
   color: #d3bd00;
   font-size: 16px;
 }
 
-.d3-tip .tip-targets li:before {
+.d3-tip .tip-sources li:before {
   content: "• ";
   color: #bbfefd;
+  font-size: 16px;
+}
+
+.d3-tip .tip-targets li:before {
+  content: "• ";
+  color: #cf4fb0;
 }
 
 
