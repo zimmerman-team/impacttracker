@@ -113,13 +113,13 @@ LineContainer.prototype.updateNodes = function() {
         .attr("class", "node " + this.options.uniqueNodeClass) // todo: add as html5 data- attribute to identify
         .on("mouseover", function(d) {
             if (!focusLock) {
-                fade(d.id, 0.1);
+                var intermediateConnections = fade(d.id, 0.1);
 
                 // get links
                 var sources = sourceDict[d.id];
                 var targets = targetDict[d.id];
 
-                tip.show(sources, targets, d);
+                tip.show(sources, targets, intermediateConnections, d);
             }
         })
         .on("click", function(d) {
@@ -221,6 +221,8 @@ var fade = function(id, opacity, turnOff, groupToFade) {
     if (turnOff) {
         svg.selectAll(".node, .link")
             .style("opacity", opacity); // initialize to 0
+
+        var intermediateNodes = []; 
     }
 
     var sources = sourceDict[id];
@@ -250,38 +252,25 @@ var fade = function(id, opacity, turnOff, groupToFade) {
         };
     }
 
-    svg.selectAll(".node")
+    var filteredNodes = svg.selectAll(".node")
         .filter(nodeFilter)
         .style("opacity", 1)
 
-    svg.selectAll('.link')
+    var filteredLinks = svg.selectAll('.link')
         .filter(linkFilter)
         .style("opacity", 1)
+
 
     if (group !== "intermediaries") {
         _.forEach(combined, function(id) {
             if (layerDict[id] === "intermediaries") {
                 var groupToFade = group === "sources" ? "targets" : "sources";
-                fade(id, opacity, false, groupToFade) // also fade-in intermediate nodes and link connections
+                intermediateNodes.push(fade(id, opacity, false, groupToFade)) // also fade-in intermediate nodes and link connections
             }
-            
         })
     }
 
-    // if (group !== "intermediaries") { // intermediates should link forward
-    //     _.forEach(combined, function(item) {
-    //         if (sourceDict[item][0] === "intermediaries") {
-    //             console.log(item)
-    //             fade(item, 0)
-    //         }
-    //     })
-    // }
-    // show connecting links
-
-    // _.forEach(combined, function(neighbour, index) {
-
-    // });
-
+    return groupToFade ? filteredNodes.data() : _.flatten(intermediateNodes);
 }
 
 var numLinks = function(id) {
@@ -313,9 +302,7 @@ var addLink = function(source, target) {
     // update linkDict
     // source -> target
     sourceDict[sourceId].push(targetId);
-    // sourceDict[sourceId].length > 0 ? sourceDict[sourceId].push(targetId) : sourceDict[sourceId] = [targetId]
     // target -> source
-    // targetDict[targetId].length > 0 ? targetDict[targetId].push(sourceId) : targetDict[targetId] = [sourceId]
     targetDict[targetId].push(sourceId)
 
 
@@ -334,29 +321,6 @@ var updateLinks = function() {
             return d.source.id + d.target.id;
         })
 
-    //update
-    link
-        .transition()
-        // .attr("d", function(d) {
-        //     return "M" + d.source.x + "," + d.source.y
-        //         + "S" + d.intermediate.x + "," + d.intermediate.y
-        //         + " " + d.target.x + "," + d.target.y;
-        //     });
-        .attr("x1", function(d) {
-            return d.source.x
-        })
-        .attr("y1", function(d) {
-            return d.source.y
-        })
-        .attr("x2", function(d) {
-            return d.target.x
-        })
-        .attr("y2", function(d) {
-            return d.target.y
-        })
-
-    // console.log(link)
-
     var diagonal = d3.svg.diagonal()
         .source(function(d) {
             return {"x": d.source.y, "y": d.source.x };
@@ -368,32 +332,22 @@ var updateLinks = function() {
             return [d.y, d.x]
         })
 
+    //update
+    link
+        .transition()
+        .attr("d", diagonal)
+
     // new links
     link.enter()
         .insert("path", ".node")
         .attr("id", function(d) {
             return d.source.id + "-" + d.target.id;
         })
-        .attr("x1", function(d) {
-            return d.source.x
-        })
-        .attr("y1", function(d) {
-            return d.source.y
-        })
-        .attr("x2", function(d) {
-            return d.target.x
-        })
-        .attr("y2", function(d) {
-            return d.target.y
-        })
         .attr("class", "link")
         .attr("d", diagonal)
         // .attr("class", "node" + this.uniqueSelector)
 
-    // console.log(link)
-
     link.exit().remove()
-    
 
     // update node radius
     // todo: improve performance
@@ -448,11 +402,10 @@ d3.select(window).on('resize', function() {
     // todo: resize windows appropriately
 })
 
-// todo: don't use third-party library for this, create a separate module
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
-  .html(function(sources, targets, d) {
+  .html(function(sources, targets, intermediateConnections, d) {
 
     var sources = sources.slice(1);
     var targets = targets.slice(1);
@@ -461,6 +414,7 @@ var tip = d3.tip()
 
     var nsources = [];
     var ntargets = [];
+    var nintermediateconnections = intermediateConnections;
     var nintermediaries = [];
     var nunrelated = [];
 
@@ -481,6 +435,8 @@ var tip = d3.tip()
         }
     });
 
+
+
     var html = ""
 
     html +=("<b>" + d.id + "</b><br />")
@@ -500,6 +456,16 @@ var tip = d3.tip()
         html += ("<b>Sources</b> <br><ul class='tip-sources'>")
         _.forEach(nsources, function(source) {
             html += ("<li>" + source + "</li>")
+        })
+        html += ("</ul>")
+    }
+
+    if (nintermediateconnections.length) {
+
+        html += "<ul>"
+        html += ("<b>Intermediate " + (layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
+        _.forEach(nintermediateconnections, function(source) {
+            html += ("<li>" + source.id + "</li>")
         })
         html += ("</ul>")
     }
