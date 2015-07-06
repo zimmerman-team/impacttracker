@@ -216,7 +216,6 @@ CircleContainer.prototype.getCoords = function(i) {
         }
 }
 
-
 // need to know which node is in which layer, to avoid having to search through all layers
 var nodeDict = {};
 
@@ -446,7 +445,9 @@ var tip = d3.tip()
 
     var nsources = [];
     var ntargets = [];
+
     var nintermediateconnections = intermediateConnections;
+
     var nintermediaries = [];
     var nunrelated = [];
 
@@ -467,7 +468,11 @@ var tip = d3.tip()
         }
     });
 
-
+    if (layerDict[d.id] === "sources") {
+        ntargets = _.union(ntargets, _.map(nintermediateconnections, function(i) { return i.id }))
+    } else if (layerDict[d.id] === "targets"){
+        nsources = _.union(nsources, _.map(nintermediateconnections, function(i) { return i.id }))
+    }
 
     var html = ""
 
@@ -483,21 +488,20 @@ var tip = d3.tip()
         html += ("</ul>")
     }
 
+    // if (nintermediateconnections.length) {
+    //     html += "<ul>"
+    //     html += ("<b>Indirect " + (layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
+    //     _.forEach(nintermediateconnections, function(source) {
+    //         html += ("<li>" + source.id + "</li>")
+    //     })
+    //     html += ("</ul>")
+    // }
+
     if (nsources.length) {
         html += "<ul>"
         html += ("<b>Sources</b> <br><ul class='tip-sources'>")
         _.forEach(nsources, function(source) {
             html += ("<li>" + source + "</li>")
-        })
-        html += ("</ul>")
-    }
-
-    if (nintermediateconnections.length) {
-
-        html += "<ul>"
-        html += ("<b>Intermediate " + (layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
-        _.forEach(nintermediateconnections, function(source) {
-            html += ("<li>" + source.id + "</li>")
         })
         html += ("</ul>")
     }
