@@ -200,24 +200,60 @@ var sourceDict = {}
 var targetDict = {}
 
 
-var fade = function(id, opacity) {
+var fade = function(id, opacity, turnOff, groupToFade) {
     // todo: improve performance, by reducing to a dict look-up, hence no loops in selector
+    var turnOff = typeof turnOff === "undefined" ? true : turnOff;
+    var groupToFade = typeof groupToFade === "undefined" ? null : groupToFade;
+
+    if (turnOff) {
+        svg.selectAll(".node, .link")
+            .style("opacity", opacity); // initialize to 0
+    }
 
     var sources = sourceDict[id];
     var targets = targetDict[id];
-    var group = sourceDict[id][0]; // first item is the group name...
+    var group = layerDict[id]; // first item is the group name...
 
     // for now, no difference between source -> target and target -> source
     var combined = _.union(sources.slice(1), targets.slice(1), [id]);
 
-    // console.log(combined)
+    if (groupToFade) {
+        var nodeFilter = function(d) {
+            return _.includes(combined, d.id)
+                && layerDict[d.id] === groupToFade
+        };
 
-    // show connected nodes
-    var node = svg.selectAll(".node")
-    
-    node.style("opacity", function(d) {
-        return _.includes(combined, d.id) ? 1 : opacity // null is don't change
-    })
+        var linkFilter = function(d) {
+            return (d.source.id === id || d.target.id === id)
+                && (layerDict[d.source.id] === groupToFade || layerDict[d.target.id] === groupToFade);
+        };
+    } else {
+        var nodeFilter = function(d) {
+            return _.includes(combined, d.id)
+        };
+
+        var linkFilter = function(d) {
+            return d.source.id === id || d.target.id === id;
+        };
+    }
+
+    svg.selectAll(".node")
+        .filter(nodeFilter)
+        .style("opacity", 1)
+
+    svg.selectAll('.link')
+        .filter(linkFilter)
+        .style("opacity", 1)
+
+    if (group !== "intermediaries") {
+        _.forEach(combined, function(id) {
+            if (layerDict[id] === "intermediaries") {
+                var groupToFade = group === "sources" ? "targets" : "sources";
+                fade(id, opacity, false, groupToFade) // also fade-in intermediate nodes and link connections
+            }
+            
+        })
+    }
 
     // if (group !== "intermediaries") { // intermediates should link forward
     //     _.forEach(combined, function(item) {
@@ -228,15 +264,6 @@ var fade = function(id, opacity) {
     //     })
     // }
     // show connecting links
-    var link = svg.selectAll('.link')
-
-    link.style("opacity", function(d) {
-        // console.log(d)
-        // return 0;
-        return d.source.id === id || d.target.id === id ? 1 : opacity
-        // console.log(d);
-    })
-
 
     // _.forEach(combined, function(neighbour, index) {
 
