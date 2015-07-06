@@ -37,7 +37,9 @@ LineContainer.prototype.getCoords = function(i) {
     }
 }
 
-LineContainer.prototype.addNode = function(id, data) {
+LineContainer.prototype.addNode = function(id, data, update) {
+    update = typeof update === "undefined" ? true : false;
+
     this.nodes.push({
         "id": id,
         "data": data
@@ -47,7 +49,19 @@ LineContainer.prototype.addNode = function(id, data) {
     if (!sourceDict.hasOwnProperty(id)) sourceDict[id] = [this.options.nodeGroup]; // check probaply not nescessary
     if (!targetDict.hasOwnProperty(id)) targetDict[id] = [this.options.nodeGroup]; // by convention, first item in dict is the group it belongs to, should change this
 
-    this.updateNodes(); // the order here matters
+    if (update) {
+        this.updateNodes(); // the order here matters
+        updateLinks();
+    }
+}
+
+LineContainer.prototype.addNodes = function(nodes) {
+    var self = this;
+    _.forEach(nodes, function(node) {
+        self.addNode(node.id, node.data, false)
+    })
+
+    this.updateNodes();
     updateLinks();
 }
 
@@ -282,7 +296,9 @@ var getLinks = function(id) {
 }
 
 // Links are global
-var addLink = function(source, target) {
+var addLink = function(source, target, update) {
+    update = typeof update === "undefined" ? true : false;
+
     var source = source.split(":");
     var target = target.split(":");
 
@@ -312,6 +328,16 @@ var addLink = function(source, target) {
         intermediate: {} // intermediate node for bezier curves
     });
 
+    if (update) {
+        updateLinks();
+    }
+}
+
+var addLinks = function(links) {
+    _.forEach(links, function(link) {
+        addLink(link.source, link.target);
+    })
+
     updateLinks();
 }
 
@@ -331,6 +357,12 @@ var updateLinks = function() {
         .projection(function(d) {
             return [d.y, d.x]
         })
+
+    // todo: nodes in same group: curved line
+    var line = d3.svg.line()
+        .x(function(d) { return d.x })
+        .y(function(d) { return d.y })
+        .interpolate("linear")
 
     //update
     link
@@ -651,7 +683,7 @@ _.forEach(rest, function(node) {
     //     console.log('exists');
     // }
 
-    groups[layer].addNode(node.id);
+    groups[layer].addNode(node.id, {}, false);
     layerDict[node.id] = layer;
         
 });
@@ -664,10 +696,10 @@ _.forEach(intermediaries, function(node) {
 
     if (!match) {
         // move to unrelated users
-        groups["unrelated1"].addNode(node.id);
+        groups["unrelated1"].addNode(node.id, {}, false);
         layerDict[node.id] = "unrelated1";
     } else {
-        groups["intermediaries"].addNode(node.id);
+        groups["intermediaries"].addNode(node.id, {}, false);
         layerDict[node.id] = "intermediaries";
     }
 })
@@ -684,8 +716,13 @@ _.forEach(links, function(link) {
     // console.log(targetLayer);
     // console.log(target);
 
-    addLink(sourceLayer + ":" + source, targetLayer + ":" + target);
-
+    addLink(sourceLayer + ":" + source, targetLayer + ":" + target, false);
 })
+
+_.forEach(groups, function(group) {
+    group.updateNodes();
+})
+
+updateLinks();
 
 
