@@ -18,6 +18,9 @@ function LineContainer(x1, y1, x2, y2, options) {
 
     this.linkDict = {}
 
+
+
+
 }
 
 LineContainer.prototype.draw = function(parent) {
@@ -107,17 +110,25 @@ LineContainer.prototype.updateNodes = function() {
         })
         .attr("class", "node " + this.options.uniqueNodeClass) // todo: add as html5 data- attribute to identify
         .on("mouseover", function(d) {
-            fade(d.id, 0);
+            if (!focusLock) {
+                fade(d.id, 0);
 
-            // get links
-            var sources = sourceDict[d.id];
-            var targets = targetDict[d.id];
+                // get links
+                var sources = sourceDict[d.id];
+                var targets = targetDict[d.id];
 
-            tip.show(sources, targets, d);
+                tip.show(sources, targets, d);
+            }
+        })
+        .on("click", function(d) {
+            focusLock = true;
+            d3.event.stopPropagation();
         })
         .on("mouseout", function(d) {
-            svg.selectAll('.node, .link').style("opacity", 1);
-            tip.hide(d);
+            if (!focusLock) {
+                svg.selectAll('.node, .link').style("opacity", 1);
+                tip.hide(d);
+            }
         })
 
     // remove old elements
@@ -387,6 +398,8 @@ var margin = {top: 50, right: 0, bottom: 50, left: 0},
     width = clientWidth - margin.left - margin.right,
     height = clientHeight - margin.top - margin.bottom;
 
+var focusLock = false; // focusLock for tooltip
+
 // zoom behaviour
 var zoom = d3.behavior.zoom()
     .scaleExtent([0, 10])
@@ -394,13 +407,21 @@ var zoom = d3.behavior.zoom()
         svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); 
     })
 
+
 var svg = d3.select("body")
     .append("svg")
+    .on("click", function() {
+        focusLock = false;
+        tip.hide();
+        svg.selectAll('.node, .link').style("opacity", 1);
+
+    })
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .call(zoom) // zoom behaviour on parent container
     .append('g')
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
 
 d3.select(window).on('resize', function() {
     // todo: resize windows appropriately
@@ -552,6 +573,8 @@ var groups = {
         "nodeGroup": "targets"
     })
 }
+
+
 
 groups["unrelated1"].draw(svg);
 // groups["unrelated2"].draw(svg);
