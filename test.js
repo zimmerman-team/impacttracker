@@ -101,6 +101,8 @@ LineContainer.prototype.updateNodes = function() {
             return radius_scale(numLinks(d.id))
         })
 
+
+
     // add new
     node.enter()
         .append("circle")
@@ -111,7 +113,7 @@ LineContainer.prototype.updateNodes = function() {
         .attr("class", "node " + this.options.uniqueNodeClass) // todo: add as html5 data- attribute to identify
         .on("mouseover", function(d) {
             if (!focusLock) {
-                fade(d.id, 0);
+                fade(d.id, 0.1);
 
                 // get links
                 var sources = sourceDict[d.id];
@@ -355,9 +357,20 @@ var updateLinks = function() {
 
     // console.log(link)
 
+    var diagonal = d3.svg.diagonal()
+        .source(function(d) {
+            return {"x": d.source.y, "y": d.source.x };
+        })
+        .target(function(d) {
+            return {"x": d.target.y, "y": d.target.x};
+        })
+        .projection(function(d) {
+            return [d.y, d.x]
+        })
+
     // new links
     link.enter()
-        .insert("line", ".node")
+        .insert("path", ".node")
         .attr("id", function(d) {
             return d.source.id + "-" + d.target.id;
         })
@@ -374,6 +387,7 @@ var updateLinks = function() {
             return d.target.y
         })
         .attr("class", "link")
+        .attr("d", diagonal)
         // .attr("class", "node" + this.uniqueSelector)
 
     // console.log(link)
@@ -407,10 +421,17 @@ var zoom = d3.behavior.zoom()
         svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); 
     })
 
+var drag = d3.behavior.drag()
+    .on("dragstart", function(d) {
+        d3.event.sourceEvent.stopPropagation();
+        d3.event.sourceEvent.preventDefault();
+    })    
 
 var svg = d3.select("body")
     .append("svg")
+    .call(drag)
     .on("click", function() {
+        if (d3.event.defaultPrevented) return;
         focusLock = false;
         tip.hide();
         svg.selectAll('.node, .link').style("opacity", 1);
