@@ -95,8 +95,7 @@ LineContainer.prototype.updateNodes = function() {
             return "translate(" + d.x + "," + d.y + ")";
         })
         .attr("r", function(d) {
-            var numLinks = sourceDict[d.id].length + targetDict[d.id].length;
-            return radius_scale(numLinks)
+            return radius_scale(numLinks(d.id))
         })
 
     // add new
@@ -145,7 +144,7 @@ LineContainer.prototype.updateNodes = function() {
 }
 
 LineContainer.prototype.deleteNode = function(node) {
-    
+    _.find()
 }
 
 LineContainer.prototype.swapNodes = function(node1, node2) {
@@ -243,6 +242,14 @@ var fade = function(id, opacity) {
 
     // });
 
+}
+
+var numLinks = function(id) {
+    return sourceDict[id].length + targetDict[id].length
+}
+
+var getLinks = function(id) {
+    return _.union(sourceDict[id].slice(1), targetDict[id].slice(1));
 }
 
 // Links are global
@@ -582,17 +589,51 @@ var layerMapping = {
 var layerDict = {}; // keep track of what layer the node with id x is in
 
 var numUnrelated = 0;
-_.forEach(nodes, function(node) {
+
+
+var intermediaries = nodes.filter(function(node) {
+    return layerMapping[node.LayerNo] === "intermediaries"
+})
+
+var rest = nodes.filter(function(node) {
+    return layerMapping[node.LayerNo] !== "intermediaries"
+})
+
+
+// console.log(intermediaries)
+// console.log(rest);
+
+_.forEach(rest, function(node) {
     if (node.LayerNo > 7) {
         var layer = "unrelated1"
     } else {
         var layer = layerMapping[node.LayerNo];
     }
 
-    groups[layer].addNode(node.id);
+    // if(node.id === "ManonScharmay") {
+    //     console.log('exists');
+    // }
 
+    groups[layer].addNode(node.id);
     layerDict[node.id] = layer;
+        
 });
+
+_.forEach(intermediaries, function(node) {
+    var match = _.some(links, function(link) {
+        return (link.source === node.id || link.target === node.id)
+        && (layerDict[link.source] === "targets" || layerDict[link.target] === "targets");
+    }) 
+
+    if (!match) {
+        // move to unrelated users
+        groups["unrelated1"].addNode(node.id);
+        layerDict[node.id] = "unrelated1";
+    } else {
+        groups["intermediaries"].addNode(node.id);
+        layerDict[node.id] = "intermediaries";
+    }
+})
 
 _.forEach(links, function(link) {
     var source = link.source;
@@ -600,6 +641,11 @@ _.forEach(links, function(link) {
 
     var sourceLayer = layerDict[source];
     var targetLayer = layerDict[target];
+
+    // console.log(sourceLayer);
+    // console.log(source);
+    // console.log(targetLayer);
+    // console.log(target);
 
     addLink(sourceLayer + ":" + source, targetLayer + ":" + target);
 
