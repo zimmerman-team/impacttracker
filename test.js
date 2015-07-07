@@ -18,9 +18,6 @@ function LineContainer(x1, y1, x2, y2, options) {
 
     this.linkDict = {}
 
-
-
-
 }
 
 LineContainer.prototype.draw = function(parent) {
@@ -70,15 +67,6 @@ LineContainer.prototype.findNode = function(id) {
         if (this.nodes[i]["id"] === id) return this.nodes[i]
     }
 }
-
-
-// LineContainer.prototype.fade = function(opacity) {
-//     svg.selectAll("circle, line").style("opacity", opacity)
-
-//     for (var i in this.nodes) {
-//         if (this.nodes[i]["id"] === id) return this.nodes[i]
-//     }   
-// }
 
 LineContainer.prototype.updateNodes = function() {
     var self = this;
@@ -314,6 +302,8 @@ var addLink = function(source, target, update) {
         return;  
     } 
 
+    console.log(sourceNode);
+
     // update linkDict
     // source -> target
     sourceDict[sourceId].push(targetId);
@@ -476,8 +466,7 @@ var tip = d3.tip()
 
     var html = ""
 
-    html +=("<b>" + d.id + "</b><br />")
-
+    html +=("<b><a href=\"" + "https://twitter.com/"+d.id + "\">" + d.id + "</a>"  + "</b><br />")
 
     if (ntargets.length) {
         html += "<ul>"
@@ -600,10 +589,6 @@ var groups = {
 
 
 groups["unrelated1"].draw(svg);
-// groups["unrelated2"].draw(svg);
-// groups["unrelated3"].draw(svg);
-// groups["unrelated4"].draw(svg);
-groups["sources"].draw(svg);
 groups["targets"].draw(svg);
 groups["targets"].draw(svg);
 
@@ -672,20 +657,12 @@ var rest = nodes.filter(function(node) {
     return layerMapping[node.LayerNo] !== "intermediaries"
 })
 
-
-// console.log(intermediaries)
-// console.log(rest);
-
 _.forEach(rest, function(node) {
     if (node.LayerNo > 7) {
         var layer = "unrelated1"
     } else {
         var layer = layerMapping[node.LayerNo];
     }
-
-    // if(node.id === "ManonScharmay") {
-    //     console.log('exists');
-    // }
 
     groups[layer].addNode(node.id, {}, false);
     layerDict[node.id] = layer;
@@ -714,11 +691,6 @@ _.forEach(links, function(link) {
 
     var sourceLayer = layerDict[source];
     var targetLayer = layerDict[target];
-
-    // console.log(sourceLayer);
-    // console.log(source);
-    // console.log(targetLayer);
-    // console.log(target);
 
     addLink(sourceLayer + ":" + source, targetLayer + ":" + target, false);
 })
