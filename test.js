@@ -513,37 +513,10 @@ var tip = d3.tip()
         html += ("</ul>")
     }
 
-    // // html += ("<b>Targets</b> <br><ul class='tip-targets'>")
-    // _.forEach(targets.slice(1), function(source) {
-    //     html += ("<li>" + source + "</li>")
-    // })
-    // html += ("</ul>")
-
     return html
   })
 
 svg.call(tip);
-
-// var groups = {
-//     "unrelated1": new CircleContainer((width/3)/2, height/2, width/3, {
-//         "uniqueNodeClass": "unrelated1"
-//     }),
-//     "unrelated2": new CircleContainer((width/3)/2, height/2, width/4, {
-//         "uniqueNodeClass": "unrelated2"
-//     }),
-//     "unrelated3": new CircleContainer((width/3)/2, height/2, width/5, {
-//         "uniqueNodeClass": "unrelated3"
-//     }),
-//     "sources": new LineContainer(width/3, height, width/3, height, {
-//         "uniqueNodeClass": "sources"
-//     }),
-//     "intermediaries": new LineContainer((2*width)/3, height, (2*width)/3, height, {
-//        "uniqueNodeClass": "intermediaries" 
-//     }),
-//     "targets": new LineContainer(width, height, width, height, {
-//         "uniqueNodeClass": "targets"
-//     })
-// }
 
 var circleWidth = width / 3;
 var circleCenter = circleWidth / 2;
