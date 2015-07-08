@@ -68,10 +68,14 @@ svg{
 }
 
 
-.node {
-    /*fill: lightsteelblue;*/
+/*.node {
     stroke: steelblue;
     stroke-width: 2px;
+}
+*/
+
+.nodeText {
+  font-size: 0.7em;
 }
 
 .link {
@@ -170,8 +174,6 @@ svg{
   content: "• ";
   color: #cf4fb0;
 }
-
-
 
 /* Creates a small triangle extender for the tooltip */
 .d3-tip:after {

@@ -88,31 +88,32 @@ LineContainer.prototype.updateNodes = function() {
     var radius_scale = d3.scale.linear().domain([0, max_amount]).range([5, 25]);
     // var radius_scale = d3.scale.log().domain([0, max_amount]).range([5, 25]);
 
-    var node = svg.selectAll("." + this.options.uniqueNodeClass) // todo: use options.className
+
+    var nodeGroup = svg.selectAll("." + this.options.uniqueNodeGroupClass) // todo: use options.className
         .data(this.nodes, function (d) {
             return d.id;
         })
 
-    // update
-    node
-        .transition()
-        .attr("transform", function(d) {
-            return "translate(" + d.x + "," + d.y + ")";
-        })
+    // enter selection
+    var nodeGroupEnter = nodeGroup.enter()
+        .append("g")
+        .attr("class", "nodeGroup " + this.options.uniqueNodeGroupClass) // todo: add as html5 data- attribute to identify
+        
+    nodeGroupEnter.append("circle")
+    nodeGroupEnter.append("text")
+
+
+    // update selection
+    nodeGroup.select("circle")
+        // .append("g")
+        // .append("circle")
+        .attr("class", "node") // todo: add as html5 data- attribute to identify
         .attr("r", function(d) {
             return radius_scale(numLinks(d.id))
         })
-
-
-
-    // add new
-    node.enter()
-        .append("circle")
-        // .attr("r", 20)
         .attr("transform", function(d) {
             return "translate(" + d.x + "," + d.y + ")";
         })
-        .attr("class", "node " + this.options.uniqueNodeClass) // todo: add as html5 data- attribute to identify
         .on("mouseover", function(d) {
             if (!focusLock) {
                 var intermediateConnections = fade(d.id, 0.1);
@@ -130,32 +131,79 @@ LineContainer.prototype.updateNodes = function() {
         })
         .on("mouseout", function(d) {
             if (!focusLock) {
-                svg.selectAll('.node, .link').style("opacity", 1);
+                svg.selectAll('.nodeGroup, .link').style("opacity", 1);
+                if (!textToggle) svg.selectAll('.nodeText').style("opacity", 0);
                 tip.hide(d);
             }
         })
 
-    // remove old elements
-    node.exit().remove();
+    var label = nodeGroup.select("text")
+        .attr("class", "nodeText")
+        .attr("dx", function(d) {
+            return radius_scale(numLinks(d.id)) + 5
+        })
+        .attr("dy", ".35em")
+        .attr("opacity", 0)
+        .text(function(d) {
+            return d.id;
+        })
+        .attr("transform", function(d) {
+            return "translate(" + d.x + "," + d.y + ")";
+        })
 
 
-    // this.force.on("tick", function() {
-    //     node.attr("transform", function(d) {
-    //         console.log(d.y)
+    // exit selection
+    nodeGroup.exit().remove()
+
+    // var node = svg.selectAll("." + this.options.uniqueNodeGroupClass) // todo: use options.className
+    //     .data(this.nodes, function (d) {
+    //         return d.id;
+    //     })
+
+
+    // // update
+    // node
+    //     .transition()
+    //     .attr("transform", function(d) {
     //         return "translate(" + d.x + "," + d.y + ")";
-    //     });
+    //     })
+    //     .attr("r", function(d) {
+    //         return radius_scale(numLinks(d.id))
+    //     })
 
-          // node.attr("cx", function(d) { return d.x; })
-          //     .attr("cy", function(d) { return d.y; })
-          //     .attr("r", function(d) { return d.r; })
-    // })
+    // // add new
+    // node.enter()
+    //     .append("g")
+    //     .append("circle")
+    //     // .attr("r", 20)
+    //     .attr("transform", function(d) {
+    //         return "translate(" + d.x + "," + d.y + ")";
+    //     })
+    //     .attr("class", "node " + this.options.uniqueNodeGroupClass) // todo: add as html5 data- attribute to identify
+    //     .on("mouseover", function(d) {
+    //         if (!focusLock) {
+    //             var intermediateConnections = fade(d.id, 0.1);
 
-    // this.force
-    //     .nodes(this.nodes)
-    //     .links(this.links)
-    //     .size([width, height])
-    //     .start();
+    //             // get links
+    //             var sources = sourceDict[d.id];
+    //             var targets = targetDict[d.id];
 
+    //             tip.show(sources, targets, intermediateConnections, d);
+    //         }
+    //     })
+    //     .on("click", function(d) {
+    //         focusLock = true;
+    //         d3.event.stopPropagation();
+    //     })
+    //     .on("mouseout", function(d) {
+    //         if (!focusLock) {
+    //             svg.selectAll('.node, .link').style("opacity", 1);
+    //             tip.hide(d);
+    //         }
+    //     })
+
+    // remove old elements
+    // node.exit().remove();
 }
 
 LineContainer.prototype.deleteNode = function(node) {
@@ -195,9 +243,6 @@ CircleContainer.prototype.getCoords = function(i) {
         x = Math.floor(this.cx + Math.cos(irad) * this.r),
         y = Math.floor(this.cy + Math.sin(irad) * this.r)
 
-    // console.log(degree);
-    // console.log(this.nodes.length);
-
         return {
             x: x,
             y: y
@@ -220,7 +265,7 @@ var fade = function(id, opacity, turnOff, groupToFade) {
     var groupToFade = typeof groupToFade === "undefined" ? null : groupToFade;
 
     if (turnOff) {
-        svg.selectAll(".node, .link")
+        svg.selectAll(".nodeGroup, .link")
             .style("opacity", opacity); // initialize to 0
 
         var intermediateNodes = []; 
@@ -253,8 +298,11 @@ var fade = function(id, opacity, turnOff, groupToFade) {
         };
     }
 
-    var filteredNodes = svg.selectAll(".node")
+    var filteredNodes = svg.selectAll(".nodeGroup")
         .filter(nodeFilter)
+        .style("opacity", 1);
+
+    filteredNodes.select("text")
         .style("opacity", 1)
 
     var filteredLinks = svg.selectAll('.link')
@@ -301,8 +349,6 @@ var addLink = function(source, target, update) {
         console.log("doesnt exist");
         return;  
     } 
-
-    console.log(sourceNode);
 
     // update linkDict
     // source -> target
@@ -360,7 +406,7 @@ var updateLinks = function() {
 
     // new links
     link.enter()
-        .insert("path", ".node")
+        .insert("path", ".nodeGroup")
         .attr("id", function(d) {
             return d.source.id + "-" + d.target.id;
         })
@@ -391,7 +437,7 @@ var focusLock = false; // focusLock for tooltip
 
 // zoom behaviour
 var zoom = d3.behavior.zoom()
-    .scaleExtent([0, 10])
+    .scaleExtent([0.5, 10])
     .on('zoom', function() {
         svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); 
     })
@@ -409,7 +455,10 @@ var svg = d3.select("body")
         if (d3.event.defaultPrevented) return;
         focusLock = false;
         tip.hide();
-        svg.selectAll('.node, .link').style("opacity", 1);
+        svg.selectAll('.nodeGroup, .link').style("opacity", 1);
+        if (!textToggle) svg.selectAll('.nodeText').style("opacity", 0);
+
+
 
     })
     .attr("width", width + margin.left + margin.right)
@@ -421,6 +470,22 @@ var svg = d3.select("body")
 
 d3.select(window).on('resize', function() {
     // todo: resize windows appropriately
+})
+
+var textToggle = false;
+
+// toggle nodeText opacity
+d3.select("input").on("change", function() {
+    var checked = d3.select("input").property("checked");
+
+    if (checked) {
+        svg.selectAll(".nodeText").style("opacity", 1);
+        textToggle = true;
+    } else {
+        svg.selectAll(".nodeText").style("opacity", 0);
+        textToggle = false;
+    }
+
 })
 
 var tip = d3.tip()
@@ -530,31 +595,31 @@ var line3 = circleWidth + 2*lineWidth + lineOffset;
 
 var groups = {
     "unrelated1": new CircleContainer(circleCenter, height/2, circleWidth/3, {
-        "uniqueNodeClass": "unrelated1",
+        "uniqueNodeGroupClass": "unrelated1",
         "nodeGroup": "unrelated"
     }),
     "unrelated2": new CircleContainer(circleCenter, height/2, circleWidth/4, {
-        "uniqueNodeClass": "unrelated2",
+        "uniqueNodeGroupClass": "unrelated2",
         "nodeGroup": "unrelated"
     }),
     "unrelated3": new CircleContainer(circleCenter, height/2, circleWidth/5, {
-        "uniqueNodeClass": "unrelated3",
+        "uniqueNodeGroupClass": "unrelated3",
         "nodeGroup": "unrelated"
     }),
     "unrelated4": new CircleContainer(circleCenter, height/2, circleWidth/6, {
-        "uniqueNodeClass": "unrelated4",
+        "uniqueNodeGroupClass": "unrelated4",
         "nodeGroup": "unrelated"
     }),
     "sources": new LineContainer(line1, height, line1, height, {
-        "uniqueNodeClass": "sources",
+        "uniqueNodeGroupClass": "sources",
         "nodeGroup": "sources"
     }),
     "intermediaries": new LineContainer(line2, height, line2, height, {
-       "uniqueNodeClass": "intermediaries",
+       "uniqueNodeGroupClass": "intermediaries",
         "nodeGroup": "intermediaries"
     }),
     "targets": new LineContainer(line3, height, line3, height, {
-        "uniqueNodeClass": "targets",
+        "uniqueNodeGroupClass": "targets",
         "nodeGroup": "targets"
     })
 }
