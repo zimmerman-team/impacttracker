@@ -10,7 +10,7 @@ function LineContainer(x1, y1, x2, y2, options) {
         this.x2 = x2;
         this.y2 = y2;
         this.options = typeof options !== "undefined" ? options : {};
-    }
+    } 
 
     this.radius_scale = 0; // determined when adding nodes
 
