@@ -2,6 +2,10 @@
     Graph test    
 */
 
+Math.logBase = function(base, n) {
+    return Math.log(n) / Math.log(base);
+}
+
 // A line node container, nodes are displayed on the line
 function LineContainer(x1, y1, x2, y2, options) {
     if (arguments.length > 0) { // for inheritance
@@ -28,9 +32,21 @@ LineContainer.prototype.draw = function(parent) {
 }
 
 LineContainer.prototype.getCoords = function(i) {
+    var min_y_space = 10; // minimal space between nodes
+    // console.log((this.y2 / this.nodes.length))
+
+    if ((this.y2 / this.nodes.length) < 10) {
+        // console.log(this.y2 / this.nodes.length)
+        // console.log(((this.y2 - this.y1)))
+        this.y1 -= ((this.y2 - this.y1) / 4)   
+        this.y2 += ((this.y2 - this.y1) / 4)   
+        // console.log(this.y2 / this.nodes.length)
+    }
+
+
     return {
         x: this.x1,
-        y: (this.y2 / this.nodes.length) * i 
+        y: ((this.y1 + this.y2) / this.nodes.length) * i 
     }
 }
 
@@ -79,15 +95,13 @@ LineContainer.prototype.updateNodes = function() {
     });
 
     var max_amount = d3.max(this.nodes, function(d) {
-        // todo: return max links in the graph, set it as max
-        return 100;
+        return nodeScale === "log" ? Math.logBase(10, maxLinks) : maxLinks  
     })
 
     // todo: better scale
     // var radius_scale = d3.scale.pow().exponent(0.5).domain([0, max_amount]).range([1, 2]);
-    var radius_scale = d3.scale.linear().domain([0, max_amount]).range([5, 25]);
-    // var radius_scale = d3.scale.log().domain([0, max_amount]).range([5, 25]);
-
+    var linear_radius_scale = d3.scale.linear().domain([0, max_amount]).range([5, 25]);
+    var log_radius_scale = d3.scale.log().clamp(true).domain([1, max_amount]).range([5, 25]);
 
     var nodeGroup = svg.selectAll("." + this.options.uniqueNodeGroupClass) // todo: use options.className
         .data(this.nodes, function (d) {
@@ -109,7 +123,12 @@ LineContainer.prototype.updateNodes = function() {
         // .append("circle")
         .attr("class", "node") // todo: add as html5 data- attribute to identify
         .attr("r", function(d) {
-            return radius_scale(numLinks(d.id))
+            var thisLinks = numLinks(d.id);
+            if (thisLinks > maxLinks) maxLinks = thisLinks; 
+            // console.log(Math.logBase(10, thisLinks))
+            // console.log(radius_scale(Math.logBase(10, thisLinks)))
+
+            return nodeScale === "log" ? log_radius_scale(Math.logBase(10, thisLinks)) : linear_radius_scale(thisLinks)
         })
         .attr("transform", function(d) {
             return "translate(" + d.x + "," + d.y + ")";
@@ -122,7 +141,12 @@ LineContainer.prototype.updateNodes = function() {
                 var sources = sourceDict[d.id];
                 var targets = targetDict[d.id];
 
-                tip.show(sources, targets, intermediateConnections, d);
+
+                d3.selectAll('.node-depth-selection').on("change", function() {
+                    console.log(this);
+                })
+
+                return tip.show(sources, targets, intermediateConnections, d);
             }
         })
         .on("click", function(d) {
@@ -140,7 +164,8 @@ LineContainer.prototype.updateNodes = function() {
     var label = nodeGroup.select("text")
         .attr("class", "nodeText")
         .attr("dx", function(d) {
-            return radius_scale(numLinks(d.id)) + 5
+            // todo: get radius directly from circle
+            return nodeScale === "log" ? log_radius_scale(Math.logBase(10, numLinks(d.id))) + 5 : linear_radius_scale(numLinks(d.id)) + 5
         })
         .attr("dy", ".35em")
         .attr("opacity", 0)
@@ -154,6 +179,7 @@ LineContainer.prototype.updateNodes = function() {
 
     // exit selection
     nodeGroup.exit().remove()
+
 
     // var node = svg.selectAll("." + this.options.uniqueNodeGroupClass) // todo: use options.className
     //     .data(this.nodes, function (d) {
@@ -253,14 +279,16 @@ CircleContainer.prototype.getCoords = function(i) {
 var nodeDict = {};
 
 
+var maxLinks = 0; // the biggest node size
 var links = [];
+
 // var linkDict = {"source": {}, "target": {}}; // maps nodes to links for fading
 var sourceDict = {}
 var targetDict = {}
 
 
-var fade = function(id, opacity, turnOff, groupToFade) {
-    // todo: improve performance, by reducing to a dict look-up, hence no loops in selector
+var fade = function(id, opacity, indirect, turnOff, groupToFade) {
+    var indirect = typeof indirect === "undefined" ? true : indirect;
     var turnOff = typeof turnOff === "undefined" ? true : turnOff;
     var groupToFade = typeof groupToFade === "undefined" ? null : groupToFade;
 
@@ -310,11 +338,11 @@ var fade = function(id, opacity, turnOff, groupToFade) {
         .style("opacity", 1)
 
 
-    if (group !== "intermediaries") {
+    if (indirect && group !== "intermediaries") {
         _.forEach(combined, function(id) {
             if (layerDict[id] === "intermediaries") {
                 var groupToFade = group === "sources" ? "targets" : "sources";
-                intermediateNodes.push(fade(id, opacity, false, groupToFade)) // also fade-in intermediate nodes and link connections
+                intermediateNodes.push(fade(id, opacity, true, false, groupToFade)) // also fade-in intermediate nodes and link connections
             }
         })
     }
@@ -473,21 +501,53 @@ d3.select(window).on('resize', function() {
 })
 
 var textToggle = false;
+var nodeScale = "linear" 
 
-// toggle nodeText opacity
+// toggle node text
 d3.select("input").on("change", function() {
-    var checked = d3.select("input").property("checked");
-
-    if (checked) {
+    if (this.checked) {
         svg.selectAll(".nodeText").style("opacity", 1);
         textToggle = true;
     } else {
         svg.selectAll(".nodeText").style("opacity", 0);
         textToggle = false;
     }
+});
 
+// toggle scale
+d3.selectAll('input[name="scale"]').on("change", function() {
+    switch(this.value) {
+        case "linear":
+            nodeScale = "linear";
+            break;
+        case "log":
+            nodeScale = "log";
+            break;
+    }
+
+    _.forEach(groups, function(group) {
+        group.updateNodes();
+    })
 })
 
+// todo: bad method, change this
+var depthChanged = function() {
+    var selection = d3.selectAll('.node-depth-selection')
+
+    var direct = selection[0][0].checked
+    var id = selection[0][0].attributes["data-id"].value;
+    var indirect = selection[0][1].checked
+
+    console.log(selection[0][0].attributes["data-id"].value)
+    fade(id, 0.1, indirect)
+
+
+
+    // if (direct && !indirect)
+}
+
+
+// todo: remove this dependency or rewrite to d3 select notation
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
@@ -523,15 +583,29 @@ var tip = d3.tip()
         }
     });
 
-    if (layerDict[d.id] === "sources") {
-        ntargets = _.union(ntargets, _.map(nintermediateconnections, function(i) { return i.id }))
-    } else if (layerDict[d.id] === "targets"){
-        nsources = _.union(nsources, _.map(nintermediateconnections, function(i) { return i.id }))
-    }
+    // if (layerDict[d.id] === "sources") {
+    //     ntargets = _.union(ntargets, _.map(nintermediateconnections, function(i) { return i.id }))
+    // } else if (layerDict[d.id] === "targets"){
+    //     nsources = _.union(nsources, _.map(nintermediateconnections, function(i) { return i.id }))
+    // }
 
     var html = ""
 
     html +=("<b><a href=\"" + "https://twitter.com/"+d.id + "\">" + d.id + "</a>"  + "</b><br />")
+
+    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Direct")
+    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Indirect")
+
+    // d3.select("input[name=''').on("change", function() {
+    //     if (this.checked) {
+    //         svg.selectAll(".nodeText").style("opacity", 1);
+    //         textToggle = true;
+    //     } else {
+    //         svg.selectAll(".nodeText").style("opacity", 0);
+    //         textToggle = false;
+    //     }
+    // });
+
 
     if (ntargets.length) {
         html += "<ul>"
@@ -542,14 +616,14 @@ var tip = d3.tip()
         html += ("</ul>")
     }
 
-    // if (nintermediateconnections.length) {
-    //     html += "<ul>"
-    //     html += ("<b>Indirect " + (layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
-    //     _.forEach(nintermediateconnections, function(source) {
-    //         html += ("<li>" + source.id + "</li>")
-    //     })
-    //     html += ("</ul>")
-    // }
+    if (nintermediateconnections.length) {
+        html += "<ul>"
+        html += ("<b>Indirect " + (layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
+        _.forEach(nintermediateconnections, function(source) {
+            html += ("<li>" + source.id + "</li>")
+        })
+        html += ("</ul>")
+    }
 
     if (nsources.length) {
         html += "<ul>"
@@ -610,21 +684,19 @@ var groups = {
         "uniqueNodeGroupClass": "unrelated4",
         "nodeGroup": "unrelated"
     }),
-    "sources": new LineContainer(line1, height, line1, height, {
+    "sources": new LineContainer(line1, 0, line1, height, {
         "uniqueNodeGroupClass": "sources",
         "nodeGroup": "sources"
     }),
-    "intermediaries": new LineContainer(line2, height, line2, height, {
+    "intermediaries": new LineContainer(line2, 0, line2, height, {
        "uniqueNodeGroupClass": "intermediaries",
         "nodeGroup": "intermediaries"
     }),
-    "targets": new LineContainer(line3, height, line3, height, {
+    "targets": new LineContainer(line3, 0, line3, height, {
         "uniqueNodeGroupClass": "targets",
         "nodeGroup": "targets"
     })
 }
-
-
 
 groups["unrelated1"].draw(svg);
 groups["targets"].draw(svg);
