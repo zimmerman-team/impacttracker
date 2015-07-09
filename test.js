@@ -38,7 +38,10 @@ LineContainer.prototype.getCoords = function(i) {
     if ((this.y2 / this.nodes.length) < 10) {
         // console.log(this.y2 / this.nodes.length)
         // console.log(((this.y2 - this.y1)))
+        console.log("a: " + this.y1)
+        console.log("b: " + ((this.y2 - this.y1) / 4))
         this.y1 -= ((this.y2 - this.y1) / 4)   
+        console.log("c: " + this.y1)
         this.y2 += ((this.y2 - this.y1) / 4)   
         // console.log(this.y2 / this.nodes.length)
     }
@@ -46,7 +49,7 @@ LineContainer.prototype.getCoords = function(i) {
 
     return {
         x: this.x1,
-        y: ((this.y1 + this.y2) / this.nodes.length) * i 
+        y: this.y1 + ((Math.abs(this.y1) + this.y2) / this.nodes.length) * i 
     }
 }
 
@@ -100,8 +103,8 @@ LineContainer.prototype.updateNodes = function() {
 
     // todo: better scale
     // var radius_scale = d3.scale.pow().exponent(0.5).domain([0, max_amount]).range([1, 2]);
-    var linear_radius_scale = d3.scale.linear().domain([0, max_amount]).range([5, 25]);
-    var log_radius_scale = d3.scale.log().clamp(true).domain([1, max_amount]).range([5, 25]);
+    var linear_radius_scale = d3.scale.linear().domain([0, max_amount]).range([2, 25]);
+    var log_radius_scale = d3.scale.log().clamp(true).domain([1, max_amount]).range([2, 25]);
 
     var nodeGroup = svg.selectAll("." + this.options.uniqueNodeGroupClass) // todo: use options.className
         .data(this.nodes, function (d) {
@@ -180,56 +183,6 @@ LineContainer.prototype.updateNodes = function() {
     // exit selection
     nodeGroup.exit().remove()
 
-
-    // var node = svg.selectAll("." + this.options.uniqueNodeGroupClass) // todo: use options.className
-    //     .data(this.nodes, function (d) {
-    //         return d.id;
-    //     })
-
-
-    // // update
-    // node
-    //     .transition()
-    //     .attr("transform", function(d) {
-    //         return "translate(" + d.x + "," + d.y + ")";
-    //     })
-    //     .attr("r", function(d) {
-    //         return radius_scale(numLinks(d.id))
-    //     })
-
-    // // add new
-    // node.enter()
-    //     .append("g")
-    //     .append("circle")
-    //     // .attr("r", 20)
-    //     .attr("transform", function(d) {
-    //         return "translate(" + d.x + "," + d.y + ")";
-    //     })
-    //     .attr("class", "node " + this.options.uniqueNodeGroupClass) // todo: add as html5 data- attribute to identify
-    //     .on("mouseover", function(d) {
-    //         if (!focusLock) {
-    //             var intermediateConnections = fade(d.id, 0.1);
-
-    //             // get links
-    //             var sources = sourceDict[d.id];
-    //             var targets = targetDict[d.id];
-
-    //             tip.show(sources, targets, intermediateConnections, d);
-    //         }
-    //     })
-    //     .on("click", function(d) {
-    //         focusLock = true;
-    //         d3.event.stopPropagation();
-    //     })
-    //     .on("mouseout", function(d) {
-    //         if (!focusLock) {
-    //             svg.selectAll('.node, .link').style("opacity", 1);
-    //             tip.hide(d);
-    //         }
-    //     })
-
-    // remove old elements
-    // node.exit().remove();
 }
 
 LineContainer.prototype.deleteNode = function(node) {
@@ -465,7 +418,7 @@ var focusLock = false; // focusLock for tooltip
 
 // zoom behaviour
 var zoom = d3.behavior.zoom()
-    .scaleExtent([0.5, 10])
+    .scaleExtent([0.2, 10])
     .on('zoom', function() {
         svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); 
     })
@@ -491,6 +444,7 @@ var svg = d3.select("body")
     })
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
+    .attr("overflow", "visible")
     .call(zoom) // zoom behaviour on parent container
     .append('g')
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
@@ -810,5 +764,3 @@ _.forEach(groups, function(group) {
 })
 
 updateLinks();
-
-
