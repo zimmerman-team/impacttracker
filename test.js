@@ -500,6 +500,10 @@ var depthChanged = function() {
     // if (direct && !indirect)
 }
 
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
+
 
 // todo: remove this dependency or rewrite to d3 select notation
 var tip = d3.tip()
@@ -549,6 +553,38 @@ var tip = d3.tip()
 
     html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Direct")
     html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Indirect")
+	
+	var uniqueTargets = ntargets.filter( onlyUnique );
+	var directTargetsReachedByNode = uniqueTargets.length;
+	var indirectTargetsReachedByNode = 0;
+	
+	if(layerDict[d.id] === "sources") {
+		var uniqueIndirectTargets = nintermediateconnections.filter( onlyUnique );
+		_.forEach(uniqueIndirectTargets, function(source) {
+			if(!_.contains(uniqueTargets, source.id)) {
+				uniqueTargets.push(source.id);
+			}
+        })
+		
+		indirectTargetsReachedByNode = uniqueIndirectTargets.length;
+	}
+	
+	var targetsReachedByNode = uniqueTargets.length;
+	
+	var nodeSuccessRate = targetsReachedByNode / totalNumberOfTargets * 100;
+	nodeSuccessRate = nodeSuccessRate.toFixed(2);
+	
+	var nodeDirectSuccessRate = directTargetsReachedByNode / totalNumberOfTargets * 100;
+	nodeDirectSuccessRate = nodeDirectSuccessRate.toFixed(2);
+	
+	var nodeIndirectSuccessRate = indirectTargetsReachedByNode / totalNumberOfTargets * 100;
+	nodeIndirectSuccessRate = nodeIndirectSuccessRate.toFixed(2);
+	console.log(ntargets);
+	console.log(totalNumberOfTargets);
+	
+	html +=("<b>Success Rate of Node " + nodeSuccessRate + "%</b><br />")
+	html +=("<b>Direct Success Rate of Node " + nodeDirectSuccessRate + "%</b><br />")
+	html +=("<b>Indirect Success Rate of Node " + nodeIndirectSuccessRate + "%</b><br />")
 
     // d3.select("input[name=''').on("change", function() {
     //     if (this.checked) {
@@ -561,22 +597,25 @@ var tip = d3.tip()
     // });
 
 
-    if (ntargets.length) {
+    if (uniqueTargets.length) {
         html += "<ul>"
         html += ("<b>Targets</b> <br><ul class='tip-targets'>")
-        _.forEach(ntargets, function(source) {
+        _.forEach(uniqueTargets, function(source) {
             html += ("<li>" + source + "</li>")
         })
         html += ("</ul>")
     }
 
     if (nintermediateconnections.length) {
-        html += "<ul>"
-        html += ("<b>Indirect " + (layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
-        _.forEach(nintermediateconnections, function(source) {
-            html += ("<li>" + source.id + "</li>")
-        })
-        html += ("</ul>")
+		if(layerDict[d.id] !== "sources") {
+			html += "<ul>"
+			html += ("<b>Indirect " + "sources" + "</b> <br><ul class='tip-targets'>")
+			_.forEach(nintermediateconnections, function(source) {
+				html += ("<li>" + source.id + "</li>")
+			})
+			html += ("</ul>")
+		}
+       
     }
 
     if (nsources.length) {
@@ -717,6 +756,13 @@ var intermediaries = nodes.filter(function(node) {
     return layerMapping[node.LayerNo] === "intermediaries"
 })
 
+var targetNodes = nodes.filter(function(node) {
+    return layerMapping[node.LayerNo] === "targets"
+})
+var sourceNodes = nodes.filter(function(node) {
+    return layerMapping[node.LayerNo] === "sources"
+})
+
 var rest = nodes.filter(function(node) {
     return layerMapping[node.LayerNo] !== "intermediaries"
 })
@@ -732,6 +778,18 @@ _.forEach(rest, function(node) {
     layerDict[node.id] = layer;
         
 });
+
+var totalNumberOfNodes = nodes.length;
+var totalNumberOfNonSourceNodes = totalNumberOfNodes-sourceNodes.length;
+var totalNumberOfTargets = targetNodes.length;
+var precisionRate = totalNumberOfTargets/totalNumberOfNonSourceNodes*100;
+precisionRate = precisionRate.toFixed(2);
+
+var element = document.getElementById("info-box");
+var precisionDiv = document.createElement("div");
+precisionDiv.innerHTML = "Precision Rate (Targets reached / Accounts Reached): " + precisionRate + "%";
+element.appendChild(precisionDiv);
+
 
 _.forEach(intermediaries, function(node) {
     var match = _.some(links, function(link) {
