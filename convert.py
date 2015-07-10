@@ -1,40 +1,149 @@
-#!/usr/bin/env python
+mapping = {
+    "Civil Society": {
+        "Amnesty International": {},
+        "Committee to Protect Journalists": {},
+        "RJDHRCA": {},
+        "Doctors without Borders": {},
+        "Responsibility to Protect": {},
+        "Enough Project": {},
+        "Mines Action Canada": {},
+        "Miscellaneous": {}
+    },
+    "International Organizations": {
+        "European Union": {},
+        "NATO": {},
+        "OSCE": {},
+        "United Nations": {
+            "General": {},
+            "UNICEF": {},
+            "UNHCR": {},
+            "OCHA": {},
+            "World Food Programme": {},
+            "UNDP": {},
+            "FAO": {},
+            "Other": {}
+        }
+    },
 
-import sys
-import argparse
-import networkx as nx
-import community
-from networkx.readwrite import json_graph
+    "Journalism": {
+        "AFP": {},
+        "al Jazeera": {},
+        "BBC": {},
+        "Bloomberg News": {},
+        "CNN": {},
+        "New York Times": {},
+        "Thomson Reuters": {},
+        "Wall Street Journal": {},
+        "Miscellaneous": {},
+        "Independent journalist": {}
+    },
+    "Public Authorities": {
+        "Governments": {},
+        "Politicians": {}
+    },
+    "Research": {
+        "Academic": {},
+        "Other (incl. Think Tank, Consultancy)": {}
+    },
+    "Miscellaneous": {}
+}
+
+reversemapping = {
+        "Amnesty International": ["Civil Society"],
+        "Committee to Protect Journalists": ["Civil Society"],
+        "RJDHRCA": ["Civil Society"],
+        "Doctors without Borders": ["Civil Society"],
+        "Responsibility to Protect": ["Civil Society"],
+        "Enough Project": ["Civil Society"],
+        "Mines Action Canada": ["Civil Society"],
+        "Miscellaneous": ["Civil Society"],
+
+        "European Union": ["International Organizations"],
+        "NATO": ["International Organizations"],
+        "OSCE": ["International Organizations"], 
+        "General": ["International Organizations", "United Nations"],
+        "UNICEF": ["International Organizations", "United Nations"],
+        "UNHCR": ["International Organizations", "United Nations"],
+        "OCHA": ["International Organizations", "United Nations"],
+        "World Food Programme": ["International Organizations", "United Nations"],
+        "UNDP": ["International Organizations", "United Nations"],
+        "FAO": ["International Organizations", "United Nations"],
+        "Other": ["International Organizations", "United Nations"],
+
+        "AFP": ["Journalism"],
+        "al Jazeera": ["Journalism"],
+        "BBC": ["Journalism"],
+        "Bloomberg News": ["Journalism"],
+        "CNN": ["Journalism"],
+        "New York Times": ["Journalism"],
+        "Thomson Reuters": ["Journalism"],
+        "Wall Street Journal": ["Journalism"],
+        "Miscellaneous": ["Journalism"],
+        "Independent journalist": ["Journalism"],
+
+        "Governments": ["Public Authorities"],
+        "Politicians": ["Public Authorities"],
+
+        "Academic": ["Research"],
+        "Other (incl. Think Tank, Consultancy)": ["Research"],
+
+        "Miscellaneous": [],
+
+        "Human Rights Watch": []
+}
+
+twitter_category_mapping = {}
+
+import csv
+with open('ImpactTrackertargets.csv') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        name = row['twitter_screen_name']
+        group = row['Affiliation']
+
+        categories = []
+
+        # print(row)
+        for key, value in row.iteritems():
+            if value == "1" and not (key in ('tweets_by_target', 'nr_friends', '',)):
+                categories.append(key)
+
+        # if len(categories) > 1: 
+        #     print("NOOOOOOOOO")
+        #     print(key)
+        #     print(categories)
+        #     exit(1)
+        if len(categories) > 0:
+            category = categories[0]
+
+            # twitter_category_mapping[name] = ",".join(categories)
+            try:
+                nested_categories = reversemapping[category] + [category]
+            except Exception, e:
+                print(repr(e))
+
+            if nested_categories:
+                twitter_category_mapping[name] = nested_categories
 
 
-def graphmltojson(graphfile, outfile):
-	"""
-	Converts GraphML file to json while adding communities/modularity groups
-	using python-louvain. JSON output is usable with D3 force layout.
-	Usage:
-	>>> python convert.py -i mygraph.graphml -o outfile.json
-	"""
-	
-	G = nx.read_graphml(graphfile)	
+        # category_map[name]
 
-	#finds best community using louvain
-	partition = community.best_partition(G)
+# print twitter_category_mapping
 
-	#adds partition/community number as attribute named 'modularitygroup'
-	for n,d in G.nodes_iter(data=True):
-		d['modularitygroup'] = partition[n]
+import json
 
-	node_link = json_graph.node_link_data(G)
-	json = json_graph.dumps(node_link)
-	
-	# Write to file
-	fo = open(outfile, "w")
-	fo.write(json);
-	fo.close()
+filename = 'CARcrisis_json_0.2.json'
+outfilename = 'CARcrisis_json_0.3.json'
 
-if __name__ == '__main__':
-	parser = argparse.ArgumentParser(description='Convert from GraphML to json. ')
-	parser.add_argument('-i','--input', help='Input file name (graphml)',required=True)
-	parser.add_argument('-o','--output', help='Output file name/path',required=True)
-	args = parser.parse_args()
-	graphmltojson(args.input, args.output)
+with open(filename) as data_file:
+    data = json.load(data_file)
+
+for item in data['nodes']:
+    item["categories"] = twitter_category_mapping.get(item["id"], [])
+
+    # if len(item["categories"]):
+    #     print(item)
+
+with open(outfilename, 'w') as outfile:
+    json.dump(data, outfile)
+
