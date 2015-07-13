@@ -36,12 +36,7 @@ LineContainer.prototype.getCoords = function(i) {
     // console.log((this.y2 / this.nodes.length))
 
     if ((this.y2 / this.nodes.length) < 10) {
-        // console.log(this.y2 / this.nodes.length)
-        // console.log(((this.y2 - this.y1)))
-        console.log("a: " + this.y1)
-        console.log("b: " + ((this.y2 - this.y1) / 4))
         this.y1 -= ((this.y2 - this.y1) / 4)   
-        console.log("c: " + this.y1)
         this.y2 += ((this.y2 - this.y1) / 4)   
         // console.log(this.y2 / this.nodes.length)
     }
@@ -87,11 +82,15 @@ LineContainer.prototype.findNode = function(id) {
     }
 }
 
-LineContainer.prototype.updateNodes = function() {
+LineContainer.prototype.updateNodes = function(cb) {
     var self = this;
 
     _.forEach(this.nodes, function(node, i) {
         var coords = self.getCoords(i);
+
+        if(node.id === "PRLTUN")
+            console.log(coords)
+
         node.x = coords.x;
         node.y = coords.y;
         node.fixed = true;
@@ -118,6 +117,7 @@ LineContainer.prototype.updateNodes = function() {
         
     nodeGroupEnter.append("circle")
     nodeGroupEnter.append("text")
+
 
 
     // update selection
@@ -180,9 +180,10 @@ LineContainer.prototype.updateNodes = function() {
             return "translate(" + d.x + "," + d.y + ")";
         })
 
-
     // exit selection
     nodeGroup.exit().remove()
+
+    if (cb) cb();
 
 }
 
@@ -366,6 +367,8 @@ var updateLinks = function() {
 
     var diagonal = d3.svg.diagonal()
         .source(function(d) {
+            if(d.target.id === "PRLTUN")
+                console.log(d.target.y)
             return {"x": d.source.y, "y": d.source.x };
         })
         .target(function(d) {
@@ -376,10 +379,10 @@ var updateLinks = function() {
         })
 
     // todo: nodes in same group: curved line
-    var line = d3.svg.line()
-        .x(function(d) { return d.x })
-        .y(function(d) { return d.y })
-        .interpolate("linear")
+    // var line = d3.svg.line()
+    //     .x(function(d) { console.log(d); return d.x })
+    //     .y(function(d) { return d.y })
+    //     .interpolate("linear")
 
     //update
     link
@@ -872,6 +875,8 @@ _.forEach(links, function(link) {
 
     var sourceLayer = layerDict[source];
     var targetLayer = layerDict[target];
+    if(link.source === "PRLTUN" || link.target === "PRLTUN")
+        console.log(link)
 
     addLink(sourceLayer + ":" + source, targetLayer + ":" + target, false);
 })
@@ -881,3 +886,12 @@ _.forEach(groups, function(group) {
 })
 
 updateLinks();
+updateLinks();
+
+
+// async.each(groups, function(group, cb) {
+//     group.updateNodes(cb);
+// }, function(err) {
+//     updateLinks();
+//     updateLinks();
+// })
