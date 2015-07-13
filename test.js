@@ -496,9 +496,8 @@ var selectedIntermediateConnections;
 var depthChanged = function() {
     var selection = d3.selectAll('.node-depth-selection')
 
-    var direct = selection[0][0].checked
+    var indirect = selection[0][0].checked
     var id = selection[0][0].attributes["data-id"].value;
-    var indirect = selection[0][1].checked
 	if(indirect) {
 		showIndirect = "checked";
 	} else {
@@ -529,12 +528,6 @@ var tip = d3.tip()
   .offset([-10, 0])
   .html(function(sources, targets, intermediateConnections, d) {
     console.log(sources);
-	var checkboxChanged = "checked";
-	if(typeof d3.event!== null) {
-		selectedEvent = d3.event;
-	} else { //if the tip is reloaded by unchecking the indirect checkbox
-		d3.event = selectedEvent;
-	}
 	selectedNode = d;
     var sources = sources.slice(1);
     var targets = targets.slice(1);
@@ -575,7 +568,6 @@ var tip = d3.tip()
     var html = ""
 
     html +=("<b><a href=\"" + "https://twitter.com/"+d.id + "\">" + d.id + "</a>"  + "</b><br />")
-    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Direct")
     html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" "+ showIndirect + "> Indirect")
 	
 	var uniqueDirectTargets = ntargets.filter( onlyUnique );
@@ -634,8 +626,8 @@ var tip = d3.tip()
     // });
 	
 	var selection = d3.selectAll('.node-depth-selection')
-	if (typeof selection[0][1] !== "undefined") {
-		var indirect = selection[0][1].checked;
+	if (typeof selection[0][0] !== "undefined") {
+		var indirect = selection[0][0].checked;
 	} else {
 		var indirect = true;
 	}
