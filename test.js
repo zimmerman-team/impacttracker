@@ -139,6 +139,7 @@ LineContainer.prototype.updateNodes = function() {
         .on("mouseover", function(d) {
             if (!focusLock) {
                 var intermediateConnections = fade(d.id, 0.1);
+				selectedIntermediateConnections = intermediateConnections;
 
                 // get links
                 var sources = sourceDict[d.id];
@@ -148,7 +149,7 @@ LineContainer.prototype.updateNodes = function() {
                 d3.selectAll('.node-depth-selection').on("change", function() {
                     console.log(this);
                 })
-
+				showIndirect = "checked";
                 return tip.show(sources, targets, intermediateConnections, d);
             }
         })
@@ -484,6 +485,10 @@ d3.selectAll('input[name="scale"]').on("change", function() {
     })
 })
 
+var selectedNode;
+var selectedEvent;
+var showIndirect;
+var selectedIntermediateConnections;
 // todo: bad method, change this
 var depthChanged = function() {
     var selection = d3.selectAll('.node-depth-selection')
@@ -491,9 +496,19 @@ var depthChanged = function() {
     var direct = selection[0][0].checked
     var id = selection[0][0].attributes["data-id"].value;
     var indirect = selection[0][1].checked
-
+	if(indirect) {
+		showIndirect = "checked";
+	} else {
+		showIndirect = "";
+	}
     console.log(selection[0][0].attributes["data-id"].value)
     fade(id, 0.1, indirect)
+	// get links
+	var sources = sourceDict[id];
+	var targets = targetDict[id];
+	var test = "testt";
+	console.log(test);
+	tip.show(sources, targets, selectedIntermediateConnections, selectedNode);
 
 
 
@@ -510,7 +525,14 @@ var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
   .html(function(sources, targets, intermediateConnections, d) {
-
+    console.log(sources);
+	var checkboxChanged = "checked";
+	if(typeof d3.event!== null) {
+		selectedEvent = d3.event;
+	} else { //if the tip is reloaded by unchecking the indirect checkbox
+		d3.event = selectedEvent;
+	}
+	selectedNode = d;
     var sources = sources.slice(1);
     var targets = targets.slice(1);
 
@@ -550,13 +572,15 @@ var tip = d3.tip()
     var html = ""
 
     html +=("<b><a href=\"" + "https://twitter.com/"+d.id + "\">" + d.id + "</a>"  + "</b><br />")
-
     html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Direct")
-    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Indirect")
+    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" "+ showIndirect + "> Indirect")
 	
+	var uniqueDirectTargets = ntargets.filter( onlyUnique );
 	var uniqueTargets = ntargets.filter( onlyUnique );
-	var directTargetsReachedByNode = uniqueTargets.length;
+	var directTargetsReachedByNode = uniqueDirectTargets.length;
 	var indirectTargetsReachedByNode = 0;
+		
+
 	
 	if(layerDict[d.id] === "sources") {
 		var uniqueIndirectTargets = nintermediateconnections.filter( onlyUnique );
@@ -569,6 +593,17 @@ var tip = d3.tip()
 		indirectTargetsReachedByNode = uniqueIndirectTargets.length;
 	}
 	
+	var uniqueDirectSources = nsources.filter( onlyUnique );
+	var uniqueSources = nsources.filter( onlyUnique );
+	if(layerDict[d.id] !== "sources") {
+		var uniqueIndirectSources = nintermediateconnections.filter( onlyUnique );
+		_.forEach(uniqueIndirectSources, function(source) {
+			if(!_.contains(uniqueSources, source.id)) {
+				uniqueSources.push(source.id);
+			}
+        })
+	}
+	
 	var targetsReachedByNode = uniqueTargets.length;
 	
 	var nodeSuccessRate = targetsReachedByNode / totalNumberOfTargets * 100;
@@ -579,12 +614,11 @@ var tip = d3.tip()
 	
 	var nodeIndirectSuccessRate = indirectTargetsReachedByNode / totalNumberOfTargets * 100;
 	nodeIndirectSuccessRate = nodeIndirectSuccessRate.toFixed(2);
-	console.log(ntargets);
-	console.log(totalNumberOfTargets);
+
 	
-	html +=("<b>Success Rate of Node " + nodeSuccessRate + "%</b><br />")
-	html +=("<b>Direct Success Rate of Node " + nodeDirectSuccessRate + "%</b><br />")
-	html +=("<b>Indirect Success Rate of Node " + nodeIndirectSuccessRate + "%</b><br />")
+	html +=("<b>Total Target Reach: " + nodeSuccessRate + "%</b><br />")
+	html +=("<b>Direct Target Reach: " + nodeDirectSuccessRate + "%</b><br />")
+	html +=("<b>Indirect Target Reach: " + nodeIndirectSuccessRate + "%</b><br />")
 
     // d3.select("input[name=''').on("change", function() {
     //     if (this.checked) {
@@ -595,9 +629,23 @@ var tip = d3.tip()
     //         textToggle = false;
     //     }
     // });
-
-
+	
+	var selection = d3.selectAll('.node-depth-selection')
+	if (typeof selection[0][1] !== "undefined") {
+		var indirect = selection[0][1].checked;
+	} else {
+		var indirect = true;
+	}
+	
+	if(!indirect) {
+	
+		uniqueTargets = uniqueDirectTargets;
+	}
     if (uniqueTargets.length) {
+		console.log(uniqueTargets);
+		uniqueTargets.sort(function (a, b) {
+			return a.toLowerCase().localeCompare(b.toLowerCase());
+		});
         html += "<ul>"
         html += ("<b>Targets</b> <br><ul class='tip-targets'>")
         _.forEach(uniqueTargets, function(source) {
@@ -606,40 +654,42 @@ var tip = d3.tip()
         html += ("</ul>")
     }
 
-    if (nintermediateconnections.length) {
-		if(layerDict[d.id] !== "sources") {
-			html += "<ul>"
-			html += ("<b>Indirect " + "sources" + "</b> <br><ul class='tip-targets'>")
-			_.forEach(nintermediateconnections, function(source) {
-				html += ("<li>" + source.id + "</li>")
-			})
-			html += ("</ul>")
+		if(!indirect) {
+			uniqueSources = uniqueDirectSources;
 		}
-       
-    }
-
-    if (nsources.length) {
+    if (uniqueSources.length) {
+		uniqueSources.sort(function (a, b) {
+			return a.toLowerCase().localeCompare(b.toLowerCase());
+		});
         html += "<ul>"
         html += ("<b>Sources</b> <br><ul class='tip-sources'>")
-        _.forEach(nsources, function(source) {
+        _.forEach(uniqueSources, function(source) {
             html += ("<li>" + source + "</li>")
         })
         html += ("</ul>")
     }
 
     if (nintermediaries.length) {
+		var uniqueIntermediaries = nintermediaries.filter( onlyUnique );
+		uniqueIntermediaries.sort(function (a, b) {
+			return a.toLowerCase().localeCompare(b.toLowerCase());
+		});
         html += "<ul>"
         html += ("<b>Intermediaries</b> <br><ul class='tip-intermediaries'>")
-        _.forEach(nintermediaries, function(source) {
+        _.forEach(uniqueIntermediaries, function(source) {
             html += ("<li>" + source + "</li>")
         })
         html += ("</ul>")
     }
 
     if (nunrelated.length) {
+		var uniqueUnrelated = nunrelated.filter( onlyUnique );
+		uniqueUnrelated.sort(function (a, b) {
+			return a.toLowerCase().localeCompare(b.toLowerCase());
+		});
         html += "<ul>"
         html += ("<b>Unrelated</b> <br><ul class='tip-unrelated'>")
-        _.forEach(nunrelated, function(source) {
+        _.forEach(uniqueUnrelated, function(source) {
             html += ("<li>" + source + "</li>")
         })
         html += ("</ul>")
@@ -785,11 +835,20 @@ var totalNumberOfTargets = targetNodes.length;
 var precisionRate = totalNumberOfTargets/totalNumberOfNonSourceNodes*100;
 precisionRate = precisionRate.toFixed(2);
 
-var element = document.getElementById("info-box");
+var element = document.getElementById("info-box2");
+
+var successRate = "--"; //TODO calculate real successRate
+var successDiv = document.createElement("div");
+successDiv.innerHTML = "Success Rate<a href=\"#\" data-toggle=\"tooltip\" title=\"Targets reached divided by total targets\">(?)</a>: " + successRate + "%";
+element.appendChild(successDiv);
+
 var precisionDiv = document.createElement("div");
-precisionDiv.innerHTML = "Precision Rate (Targets reached / Accounts Reached): " + precisionRate + "%";
+precisionDiv.innerHTML = "Precision Rate<a href=\"#\" data-toggle=\"tooltip\" title=\"Targets reached divided by total accounts reached\">(?)</a>: " + precisionRate + "%";
 element.appendChild(precisionDiv);
 
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();   
+});
 
 _.forEach(intermediaries, function(node) {
     var match = _.some(links, function(link) {
