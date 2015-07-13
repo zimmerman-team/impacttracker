@@ -31,6 +31,8 @@ LineContainer.prototype.draw = function(parent) {
 
 }
 
+
+
 LineContainer.prototype.getCoords = function(i) {
     var min_y_space = 10; // minimal space between nodes
     // console.log((this.y2 / this.nodes.length))
@@ -91,7 +93,7 @@ LineContainer.prototype.updateNodes = function(cb) {
         if(node.id === "PRLTUN")
             console.log(coords)
 
-        node.x = coords.x;
+        node.x = coords.x* 1 / Math.sqrt(Math.sqrt(zoom.scale()));
         node.y = coords.y;
         node.fixed = true;
     });
@@ -893,6 +895,10 @@ function zoomed() {
         "translate(" + zoom.translate() + ")" +
         "scale(" + zoom.scale() + ")"
     );
+		_.forEach(groups, function(group) {
+        group.updateNodes();
+    })
+	updateLinks();
 }
 
 function interpolateZoom (translate, scale) {
@@ -935,6 +941,15 @@ function zoomClick() {
     view.y += center[1] - l[1];
 
     interpolateZoom([view.x, view.y], view.k);
+
 }
+
+zoom.on("zoomstart", function(){
+
+	_.forEach(groups, function(group) {
+        group.updateNodes();
+    })
+	updateLinks();
+})
 
 d3.selectAll('button').on('click', zoomClick);

@@ -4,6 +4,9 @@
         <title>Test</title>
         <link href='http://fonts.googleapis.com/css?family=Sintony:400,700' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" type="text/css" href="main.css"></style>
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     </head>
     <body>
         <div id="info-box">
@@ -24,9 +27,19 @@
             <br />
 
             Node size scale:
-            <input type="radio" name="scale" value="linear" checked> Linear
+			<input type="radio" name="scale" value="linear" checked> Linear
             <input type="radio" name="scale" value="log"> Log (base 10)
         </div>
+		
+		<div id="info-box2">
+			<h4>Stats</h4>
+           
+			
+        </div>
+		<div id="zoom-buttons">
+			<button id="zoom_in" class="zoom-button">+</button>
+			<button id="zoom_out" class="zoom-button">-</button>
+		</div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.0/lodash.js"></script>
