@@ -945,7 +945,7 @@ function zoomClick() {
 
 }
 
-zoom.on("zoomstart", function(){
+zoom.on("zoomend", function(){
 
 	_.forEach(groups, function(group) {
         group.updateNodes();
