@@ -768,6 +768,7 @@ _.forEach(groups, function(group) {
     group.updateNodes();
 })
 
+// todo: make sure calling twice isnt nescessary
 updateLinks();
 updateLinks();
 
