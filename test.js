@@ -569,7 +569,7 @@ var tip = d3.tip()
     var html = ""
 
     html +=("<b><a href=\"" + "https://twitter.com/"+d.id + "\">" + d.id + "</a>"  + "</b><br />")
-    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" "+ showIndirect + "> Indirect")
+    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" "+ showIndirect + "> 2nd Degree Relations")
 	
 	var uniqueDirectTargets = ntargets.filter( onlyUnique );
 	var uniqueTargets = ntargets.filter( onlyUnique );
