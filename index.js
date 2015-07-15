@@ -1,0 +1,4 @@
+/*
+    
+*/
+require("./server/app.js");
