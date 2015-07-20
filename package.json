@@ -18,7 +18,10 @@
     "object-assign": "~3.0.0",
     "react-router": "~0.13.3",
     "react-cookie": "~0.2.5",
-    "gridfs-stream": "~1.1.1"
+    "gridfs-stream": "~1.1.1",
+    "twitter": "~1.2.5",
+    "lodash": "~3.10.0",
+    "async": "~1.4.0"
   },
   "devDependencies": {
     "browserify": "~10.2.6",
@@ -53,7 +56,7 @@
     "serve": "http-server -p 2000 public/ -c-1",
     "runserver": "NODE_ENV=development nodejs server/app.js",
     "watch:client": "fsmonitor -s -d client/app !.* npm run build:dev",
-    "watch:server": "NODE_ENV=development nodemon --watch server server/app.js",
+    "watch:server": "NODE_ENV=development nodemon --harmony --watch server server/app.js",
     "dev": "parallelshell 'npm run livereload' 'npm run watch:client' 'npm run watch:server' 'npm run open:dev'",
     "dev:no-open": "parallelshell 'npm run livereload' 'npm run watch:client' 'npm run watch:server'"
   },

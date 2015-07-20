@@ -2,11 +2,11 @@ var mongoose = require("mongoose"),
     Schema = mongoose.Schema
 
 
-var SourceTarget = new Schema({
-    type: String,
+var Target = new Schema({
     author: { type: Schema.Types.ObjectId, ref: 'Account' },
-    name: String,
+    user_id: String,
+    screen_name: String,
     categories: [String]
 })
 
-module.exports = mongoose.model('SourceTarget', SourceTarget)
+module.exports = mongoose.model('Target', Target)

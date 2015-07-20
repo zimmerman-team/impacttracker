@@ -1,4 +1,5 @@
 var path = require("path");
+var fs = require("fs")
 var config = require("./config/config.js");
 var express = require("express");
 var bodyParser = require('body-parser')
@@ -7,9 +8,14 @@ var server = require('http').Server(app);
 var io               = require("socket.io")(server);
 var passportSocketIo = require("passport.socketio");
 var session = require('express-session');
-var mongoose = require("mongoose");
 var passport = require("passport")
 var LocalStrategy = require('passport-local').Strategy;
+
+var mongoose = require("mongoose");
+var Grid = require('gridfs-stream')
+Grid.mongo = mongoose.mongo;
+
+var DatabaseContainer = require('./utils/DatabaseContainer')
 
 if (config.env === "development") {
     app.use(express.static(config.static_root))
@@ -86,17 +92,25 @@ io.on('connection', function(socket) {
 
     // Twitter campaigns
     socket.on('Campaign.get', Campaign.get.bind(null, user));
-    socket.on('Campaign.getAll', Campaign.getAll);
+    socket.on('Campaign.getAll', Campaign.getAll.bind(null, user));
     socket.on('Campaign.create', Campaign.create.bind(null, user));
-    socket.on('Campaign.update', Campaign.update);
-    socket.on('Campaign.remove', Campaign.remove);
-
+    socket.on('Campaign.update', Campaign.update.bind(null, user));
+    socket.on('Campaign.remove', Campaign.remove.bind(null, user));
 
 })
 
-
 mongoose.connect(config.database.url)
+var connection = mongoose.connection;
 
-require('./routes')(app);
+connection.once('open', function() {
+    var gridfs = Grid(connection.db)
 
-server.listen(2000)
+    DatabaseContainer.setDb(connection.db);
+    DatabaseContainer.setGrid(gridfs);
+
+    require('./routes')(app);
+
+    server.listen(2000)
+})
+
+

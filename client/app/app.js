@@ -8,11 +8,6 @@ var Home = require('./components/Home.react.jsx');
 var RouterContainer = require('./util/RouterContainer')
 var cookie = require('react-cookie')
 
-var jwt = localStorage.getItem('jwt');
-if (jwt) {
-    LoginActions.loginUser(jwt);
-}
-
 var App = React.createClass({
 
     componentDidMount: function() {
@@ -21,11 +16,23 @@ var App = React.createClass({
 
     listen: function() {
         this.socket = socketio();
-        this.socket.emit('Campaign.create', {
+        var campaign = {
             name: "new campaign",
-            // author: "test",
-            handle: "#wr",
+            // sources: [
+            //     { screen_name: "hrw" }
+            // ],
+            // targets: [
+            //     { screen_name: "noradio" }
+            // ],
+            sources: ["55accd789ec8d4b14e7b2397"],
+            targets: ["55acd1c63d969369d9ea52a3"],
+
+            handle: "wr",
             description: "description"
+        }
+
+        this.socket.emit('Campaign.create', campaign, function(data) {
+            console.log(data);
         });
 
     },
