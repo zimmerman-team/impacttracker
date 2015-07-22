@@ -1,6 +1,7 @@
 var _ = require('lodash')
 var TwitterStream = require('../campaign/TwitterStream')
 var TwitterRest = require('../campaign/TwitterRest')
+var CampaignResults = require('../campaign/CampaignResults')
 
 var Campaign = require('../models/campaign');
 var Source = require('../models/source')
@@ -46,7 +47,7 @@ var CampaignApi = {
         // console.log(targetIds)
 
         campaign.save(function(error) {
-            if (error) res(error);
+            if (error) return res(null, error);
 
             Campaign.populate(campaign, [{path: "sources"}, {path: "targets"}], 
                 function(error, doc) {
@@ -54,10 +55,18 @@ var CampaignApi = {
 
                     // todo: cron-like scheduler / job-queue like celery or kue
                     twitterStream = new TwitterStream(doc); 
-                    // twitterStream.track()
+                    twitterStream.track()
 
                     twitterRest = new TwitterRest(doc);
                     twitterRest.start() 
+
+                    campaignResults = new CampaignResults(doc)
+                    
+                    twitterRest.on("completed", function() {
+                        console.log("twitter rest was completed")
+                        campaignResults.start()
+                    })
+
                 })
         });
 

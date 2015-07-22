@@ -16,6 +16,10 @@ module.exports = {
         "url": "mongodb://localhost:27017/impacttracker-dev"
     },
 
+    "redis": {
+        "db": 0
+    },
+
     "twitter": {
         consumer_key: '1XVhobp0z3j769iCZKAIiKQ5l',
         consumer_secret: 'Z4RknHUl7LObheyXvGA4RjBBk0zPnlPQuyqHCMB5qotcoKj2YV',

@@ -21,7 +21,9 @@
     "gridfs-stream": "~1.1.1",
     "twitter": "~1.2.5",
     "lodash": "~3.10.0",
-    "async": "~1.4.0"
+    "async": "~1.4.0",
+    "redis": "~0.12.1",
+    "q": "~1.4.1"
   },
   "devDependencies": {
     "browserify": "~10.2.6",

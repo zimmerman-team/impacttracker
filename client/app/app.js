@@ -16,24 +16,38 @@ var App = React.createClass({
 
     listen: function() {
         this.socket = socketio();
-        var campaign = {
-            name: "new campaign",
-            // sources: [
-            //     { screen_name: "hrw" }
-            // ],
-            // targets: [
-            //     { screen_name: "noradio" }
-            // ],
-            sources: ["55accd789ec8d4b14e7b2397"],
-            targets: ["55acd1c63d969369d9ea52a3"],
 
-            handle: "wr",
-            description: "description"
-        }
+        this.socket.emit("Source.create", {
+            screen_name: "hrw",
+            user_id: 14700316
+        }, (error, source) => {
 
-        this.socket.emit('Campaign.create', campaign, function(data) {
-            console.log(data);
-        });
+            this.socket.emit("Target.create", {
+                screen_name: "ggreenwald",
+                user_id: 16076032
+            }, (error, target) => {
+                var campaign = {
+                    name: "new campaign",
+                    // sources: [
+                    //     { screen_name: "hrw" }
+                    // ],
+                    // targets: [
+                    //     { screen_name: "noradio" }
+                    // ],
+                    sources: [source._id],
+                    targets: [target._id],
+
+                    handle: "hrw",
+                    description: "description"
+                }
+
+                this.socket.emit('Campaign.create', campaign, function(error, data) {
+                    console.log(data);
+                });
+            
+            });
+        })
+
 
     },
 

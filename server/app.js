@@ -11,6 +11,7 @@ var session = require('express-session');
 var passport = require("passport")
 var LocalStrategy = require('passport-local').Strategy;
 
+var redis = require('redis');
 var mongoose = require("mongoose");
 var Grid = require('gridfs-stream')
 Grid.mongo = mongoose.mongo;
@@ -85,6 +86,8 @@ function ensureAuthenticated(req, res, next) {
 }
 
 var Campaign = require('./api/Campaign')
+var Source = require('./api/Source')
+var Target = require('./api/Target')
 
 io.on('connection', function(socket) {
 
@@ -97,20 +100,30 @@ io.on('connection', function(socket) {
     socket.on('Campaign.update', Campaign.update.bind(null, user));
     socket.on('Campaign.remove', Campaign.remove.bind(null, user));
 
+    socket.on('Source.create', Source.create.bind(null, user));
+    socket.on('Target.create', Target.create.bind(null, user));
 })
 
 mongoose.connect(config.database.url)
 var connection = mongoose.connection;
 
-connection.once('open', function() {
-    var gridfs = Grid(connection.db)
+redisClient = redis.createClient();
 
-    DatabaseContainer.setDb(connection.db);
-    DatabaseContainer.setGrid(gridfs);
+redisClient.select(config.redis.db, function(error, res) {
+    if (error) throw error;
 
-    require('./routes')(app);
+    connection.once('open', function() {
+        var gridfs = Grid(connection.db)
 
-    server.listen(2000)
+        DatabaseContainer.setDb(connection.db);
+        DatabaseContainer.setGrid(gridfs);
+        DatabaseContainer.setRedis(redisClient);
+
+        require('./routes')(app);
+
+        server.listen(2000)
+    })
 })
+
 
 
