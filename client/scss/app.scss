@@ -1,0 +1,97 @@
+@import "settings";
+@import "foundation";
+@import url(//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css);
+
+// Or selectively include components
+// @import
+//   "foundation/components/accordion",
+//   "foundation/components/alert-boxes",
+//   "foundation/components/block-grid",
+//   "foundation/components/breadcrumbs",
+//   "foundation/components/button-groups",
+//   "foundation/components/buttons",
+//   "foundation/components/clearing",
+//   "foundation/components/dropdown",
+//   "foundation/components/dropdown-buttons",
+//   "foundation/components/flex-video",
+//   "foundation/components/forms",
+//   "foundation/components/grid",
+//   "foundation/components/inline-lists",
+//   "foundation/components/joyride",
+//   "foundation/components/keystrokes",
+//   "foundation/components/labels",
+//   "foundation/components/magellan",
+//   "foundation/components/orbit",
+//   "foundation/components/pagination",
+//   "foundation/components/panels",
+//   "foundation/components/pricing-tables",
+//   "foundation/components/progress-bars",
+//   "foundation/components/reveal",
+//   "foundation/components/side-nav",
+//   "foundation/components/split-buttons",
+//   "foundation/components/sub-nav",
+//   "foundation/components/switches",
+//   "foundation/components/tables",
+//   "foundation/components/tabs",
+//   "foundation/components/thumbs",
+//   "foundation/components/tooltips",
+//   "foundation/components/top-bar",
+//   "foundation/components/type",
+//   "foundation/components/offcanvas",
+//   "foundation/components/visibility";
+
+body {
+	&.graph {
+		background:$oil;
+	}
+}
+
+nav {
+	background:$oil;
+	line-height:0;
+}
+
+.middle {
+	padding-top:2rem;
+	padding-bottom:.75rem;
+	background:$white;
+	.panel {
+		h3 {
+			margin-bottom: 1.5rem;
+		}
+		input[type=text],input[type=password], .button.postfix, .postfix {
+			height:3rem;
+			line-height: 3rem;
+		}
+		select {
+			height: 3rem;
+		}
+		.postfix {
+			border:0;
+		}
+		input[type=checkbox] {
+			margin-bottom: 0;
+		}
+		.panel-header {
+			button,input {
+				margin-bottom: 0;
+			}
+		}
+		.panel-content {
+			margin-top:2rem;
+		}
+		input[type="checkbox"] + label, input[type="radio"] + label {
+			font-size:1rem;
+		}
+		.check {
+			margin-bottom: .2rem;
+			&.last, &:last-of-type {
+				margin-bottom: 1rem;
+			}
+		}
+	}
+}
+
+.panel-content {
+	display:none;
+}

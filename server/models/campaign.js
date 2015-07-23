@@ -26,9 +26,9 @@ var campaignSchema = new Schema({
     // }
 })
 
-// campaignSchema.methods.save = function() {
-
-// }
+campaignSchema.statics.findByUser = function(query, userId, cb) {
+    return this.find({author: userId}, cb)
+}
 
 var Campaign = mongoose.model('Campaign', campaignSchema);
 

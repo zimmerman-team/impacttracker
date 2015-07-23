@@ -2,6 +2,8 @@ var config = require("../config/config")
 var redis = require('redis')
 var Q = require('q');
 var _ = require('lodash');
+var EventEmitter = require('events').EventEmitter;
+var objectAssign = require('object-assign');
 
 function CampaignResults(campaign) {
     this.campaign = campaign;
@@ -20,7 +22,9 @@ function CampaignResults(campaign) {
     };
 }
 
-CampaignResults.prototype = {
+// CampaignResults.prototype = {
+CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmitter.prototype, {
+
     start: function(handle) {
 
         this.redisClient.select(config.redis.db, function(error, res) {
@@ -39,20 +43,27 @@ CampaignResults.prototype = {
     },
 
     addNode: function(user, type) {
-        console.log("adding node")
-        this.graph.nodes.push({
+
+        var node = {
             id: user.id_str,
             label: user.screen_name,
             type: type,
             data: {
                 user: user
             }
-        })
+        }
+
+        console.log(node);
+        console.log(this.graph.nodes);
+
+        this.graph.nodes.push(node);
+
+        return node;
     },
 
     addLink: function(tweet, sourceId, targetId) {
         console.log("adding link")
-        this.graph.edges.push({
+        var link = {
             source: sourceId,
             target: targetId,
             directed: true,
@@ -60,7 +71,11 @@ CampaignResults.prototype = {
             data: {
                 tweet: tweet
             }
-        })
+        }
+
+        this.graph.edges.push(link);
+
+        return link;
     },
 
     handleTweet: function() {
@@ -111,7 +126,6 @@ CampaignResults.prototype = {
                     // console.log(sourceTweet.text)
 
 
-
                     var sourceTweetUser = sourceTweet.user;
                     var sourceTweetIsSource = this.isSource(sourceTweetUser.id_str);
                     var sourceTweetIsTarget = this.isTarget(sourceTweetUser.id_str);
@@ -124,36 +138,45 @@ CampaignResults.prototype = {
                         console.log(isTarget);
                         console.log(targets);
 
+                        var links = [];
+                        var nodes = [];
+
 
                         if (isSource) { // source -> source link
                             console.log('called source')
-                            this.addLink(tweet, sourceTweetUser.id, userId);
+                            this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
+
                             return this.handleTweet();
                         }
 
                         if (isTarget) { // source -> target
                             console.log('called target')
-                            this.addLink(tweet, sourceTweetUser.id, userId);
+                            this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
 
                             return this.handleTweet();
                         }
 
-                        if (targets.length > 0) { // retweet user followed by target
+                        if (sources.length && targets.length) { // intermediate user
+                        // if (targets.length > 0) { // retweet user followed by target
                             console.log('called targets')
-                            this.addNode(user, "intermediate")
-                            this.addLink(tweet, sourceTweetUser.id, userId);
+                            this.emit("new-node", this.addNode(user, "intermediate"));
+                            this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
 
                             _.forEach(targets, function(target) {
-                                this.addLink(null, userId, target);
+                                this.emit("new-link", this.addLink(null, userId, target));
                             })
                          
                             return this.handleTweet();
                         } 
 
+
                         // otherwise, unrelated user
-                        this.addNode(user, "unrelated");
-                        this.addLink(tweet, sourceTweetUser.id, userId);
-                  
+                        console.log('before node')
+                        this.emit("new-node", this.addNode(user, "unrelated"));
+                        console.log('after node')
+                        this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
+                        console.log('after link')
+
                         return this.handleTweet();
                     }
 
@@ -182,6 +205,6 @@ CampaignResults.prototype = {
 
         }.bind(this))
     }
-}
+});
 
 module.exports = CampaignResults; 

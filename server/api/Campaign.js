@@ -12,11 +12,22 @@ var CampaignApi = {
 
     },
 
-    getAll: function(data, res) {
+    getAll: function(user, res) {
+        
+        Campaign.find({}, function(error, doc) {
+            if (error) return res(error);
 
+            return res(null, doc)
+        })
+
+        // Campaign.findByUser({}, {user._id}, function(error, doc) {
+        //     if (error) return res(error);
+
+        //     return res(null, doc)
+        // })
     },
 
-    create: function(user, data, res) {
+    create: function(socket, user, data, res) {
         var campaign = new Campaign(data);
 
         // var sourceIds = [];
@@ -61,7 +72,10 @@ var CampaignApi = {
                     twitterRest.start() 
 
                     campaignResults = new CampaignResults(doc)
-                    
+
+                    campaignResults.on("new-node", socket.emit);
+                    campaignResults.on("new-link", socket.emit);
+
                     twitterRest.on("completed", function() {
                         console.log("twitter rest was completed")
                         campaignResults.start()
