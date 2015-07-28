@@ -8,10 +8,18 @@ var targetApi = {
     },
 
     getAll: function(data, res) {
+        Target.find({}, function(error, doc) {
+            console.log(doc)
+
+            if (error) return res(error);
+
+            return res(null, doc)
+        })
 
     },
 
     create: function(user, data, res) {
+        console.log(data)
         var target = new Target(data);
 
         target.save(function(error) {

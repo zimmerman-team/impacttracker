@@ -96,12 +96,15 @@ io.on('connection', function(socket) {
     // Twitter campaigns
     // socket.on('Campaign.get', Campaign.get.bind(null, user));
     socket.on('Campaign.getAll', Campaign.getAll.bind(null, user));
-    // socket.on('Campaign.create', Campaign.create.bind(null, socket, user));
-    // socket.on('Campaign.update', Campaign.update.bind(null, user));
+    socket.on('Campaign.create', Campaign.create.bind(null, socket, user));
+    socket.on('Campaign.update', Campaign.update.bind(null, user));
     // socket.on('Campaign.remove', Campaign.remove.bind(null, user));
 
-    // socket.on('Source.create', Source.create.bind(null, user));
-    // socket.on('Target.create', Target.create.bind(null, user));
+    socket.on('Source.create', Source.create.bind(null, user));
+    socket.on('Source.getAll', Source.getAll.bind(null, user));
+    
+    socket.on('Target.create', Target.create.bind(null, user));
+    socket.on('Target.getAll', Target.getAll.bind(null, user));
 })
 
 mongoose.connect(config.database.url)

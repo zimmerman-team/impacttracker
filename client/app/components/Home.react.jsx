@@ -5,6 +5,14 @@ var socketio = require("socket.io-client");
 var Authenticated = require("./Authenticated.react.jsx");
 var ApiService = require("../services/ApiService.js");
 
+var Navbar = require('react-bootstrap').Navbar;
+var Nav = require('react-bootstrap').Nav;
+var NavItem = require('react-bootstrap').NavItem;
+var DropdownButton = require('react-bootstrap').DropdownButton;
+var MenuItem = require('react-bootstrap').MenuItem;
+
+var RouterContainer = require('../util/RouterContainer')
+
 var Home = Authenticated(React.createClass({
     componentWillMount: function() {
         ApiService.init(socketio());
@@ -49,33 +57,23 @@ var Home = Authenticated(React.createClass({
 
     render: function() {
         return (
-        <div class="project">
-            <nav>
-              <div className="row">
-                <div className="large-12 columns">
-                  <div className="icon-bar three-up">
-                    <a href="visualize.html" className="item">
-                      <i className="fa fa-tachometer" />
-                      <label>Visualize</label>
-                    </a>
-                    <a href="project.html" className="item active">
-                      <i className="fa fa-cogs" />
-                      <label>Project editor</label>
-                    </a>
-                    <a href="login.html" className="item">
-                      <i className="fa fa-unlock" />
-                      <label>Log out</label>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </nav>
-
-            <h1>Hello {this.props.user.username}</h1>
+            <div class="project">
+              <Navbar brand='Impact Tracker'>
+                <Nav>
+                  <NavItem eventKey={1} href='#/home'>Home</NavItem>
+                  <NavItem eventKey={2} href='#/home/campaign'>Campaigns</NavItem>
+                  <DropdownButton eventKey={3} title='Dropdown'>
+                    <MenuItem eventKey='1'>Action</MenuItem>
+                    <MenuItem eventKey='2'>Another action</MenuItem>
+                    <MenuItem eventKey='3'>Something else here</MenuItem>
+                    <MenuItem divider />
+                    <MenuItem eventKey='4'>Separated link</MenuItem>
+                  </DropdownButton>
+                </Nav>
+              </Navbar>
 
             <Router.RouteHandler/>
-
-        </div>
+            </div>
         )
     }
 }))

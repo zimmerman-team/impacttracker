@@ -28,7 +28,10 @@ var CampaignApi = {
     },
 
     create: function(socket, user, data, res) {
+        console.log(data)
         var campaign = new Campaign(data);
+
+        
 
         // var sourceIds = [];
         // var targetIds = [];
@@ -62,7 +65,8 @@ var CampaignApi = {
 
             Campaign.populate(campaign, [{path: "sources"}, {path: "targets"}], 
                 function(error, doc) {
-                    // console.log(doc)
+                    console.log(doc)
+
 
                     // todo: cron-like scheduler / job-queue like celery or kue
                     twitterStream = new TwitterStream(doc); 
@@ -83,11 +87,6 @@ var CampaignApi = {
 
                 })
         });
-
-        // console.log(campaign)
-
-
-
     },
 
     update: function(data, res) {

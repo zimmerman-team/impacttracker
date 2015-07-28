@@ -12,23 +12,33 @@ var App = React.createClass({
     render: function() {
         return (
             <div>
-                <h1>sadasd</h1>
                 <Router.RouteHandler/>
             </div>
         )   
     }
 })
 
-var Login = require('./components/Login.react.jsx');
-var Home = require('./components/Home.react.jsx');
-var Campaign = require('./components/Campaign.react.jsx');
+var Login = require('./components/Login.react');
+var Home = require('./components/Home.react');
+var Campaign = require('./components/Campaign.react');
+var CampaignDetail = require('./components/CampaignDetail.react');
+
+var NotFound = React.createClass({
+    render: function() {
+        return (
+        <h1>Not found!</h1>
+        )
+    }
+})
 
 var routes = (
     <Router.Route path="/" handler={App}>
         <Router.Route path="login" handler={Login}/>
         <Router.Route path="home" handler={Home}>
             <Router.Route path="campaign" handler={Campaign} />
+            <Router.Route path="campaign/:id" handler={CampaignDetail} />
         </Router.Route>
+        <Router.NotFoundRoute handler={NotFound} />
     </Router.Route>
 )
 

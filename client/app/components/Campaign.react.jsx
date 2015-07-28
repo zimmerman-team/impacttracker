@@ -1,10 +1,15 @@
 var React = require('react')
+var Router = require('react-router');
 var _ = require('lodash')
 var Authenticated = require("./Authenticated.react.jsx");
 var CampaignStore = require("../stores/CampaignStore")
 
-// var Accordion = require('react-foundation-apps/lib/accordion');
-var ActionSheet = require('react-foundation-apps/lib/action-sheet');
+var Table = require('react-bootstrap').Table;
+var SplitButton = require('react-bootstrap').SplitButton;
+var MenuItem = require('react-bootstrap').MenuItem;
+var Button = require('react-bootstrap').Button;
+
+var RouterContainer = require('../util/RouterContainer')
 
 function getCampaignState() {
     return {
@@ -21,21 +26,10 @@ var Campaign = React.createClass({
     render: function() {
 
         return (
-        <div className="project">
-            <section className="middle">
-                <div className="row">
-                    <div className="large-12 columns">
-                        <button className="btn addnew">Add a new campaign</button>
-                    </div>
-                </div>
-            </section>
-
-            <div className="row">
-                <div className="large-12 columns">
-                    <CampaignTable campaigns={this.state.campaigns}/>
-                </div>
+            <div>
+                <Button onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/new")} bsStyle="primary" bsSize="large">New campaign</Button>
+                <CampaignTable campaigns={this.state.campaigns}/>
             </div>
-        </div>
         )
     },
 
@@ -63,7 +57,7 @@ var CampaignTable = React.createClass({
         })
 
         return (
-           <table>
+           <Table striped bordered condensed hover>
                <thead>
                     <tr>
                         <th>Campaign</th>
@@ -77,40 +71,27 @@ var CampaignTable = React.createClass({
                <tbody>
                     {rows}      
                </tbody>
-           </table>
+           </Table>
         )
     }
 })
 
-var CampaignRow = React.createClass({
+var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https://github.com/rackt/react-router/issues/83
     render: function() {
         var campaign = this.props.campaign;
         return (
             <tr>
                 <td>{campaign.name}</td>
                 <td>{campaign.handle}</td>
-                <td>{campaign.author}</td>
-                <td>{campaign.completed}</td>
+                <td>{campaign.author || "-"}</td>
+                <td>{campaign.completed || false}</td>
                 <td>{campaign.runAt || "-"}</td>
                 <td>
-                    <ActionSheet>
-                        <ActionSheet.Button title="Action Sheet" />
-                        <ActionSheet.Content>
-                            <p>Tap to share</p>
-                            <ul>
-                                <li><a href="#">Twitter</a></li>
-                                <li><a href="#">Facebook</a></li>
-                                <li><a href="#">Mail</a></li>
-                            </ul>
-                        </ActionSheet.Content>
-                    </ActionSheet>
-
-                    <button className="button dropdown" aria-expanded="false" aria-controls="drop1" data-dropdown="drop1" href="#">Dropdown Button</button><br />
-                    <ul aria-hidden="true" className="f-dropdown" data-dropdown-content id="drop1">
-                        <li><a href="#">This is a link</a></li>
-                        <li><a href="#">This is another</a></li>
-                        <li><a href="#">Yet another</a></li>
-                    </ul>
+                    <SplitButton bsStyle="Default" title="Edit">
+                      <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}>Edit</MenuItem>
+                      <MenuItem divider />
+                      <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}>Delete</MenuItem>
+                    </SplitButton>
                 </td>
             </tr>
         )

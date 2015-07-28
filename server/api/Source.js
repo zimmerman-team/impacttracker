@@ -8,10 +8,15 @@ var SourceApi = {
     },
 
     getAll: function(data, res) {
+        Source.find({}, function(error, doc) {
+            if (error) return res(error);
 
+            return res(null, doc)
+        })
     },
 
     create: function(user, data, res) {
+        console.log(data)
         var source = new Source(data);
 
         source.save(function(error) {
