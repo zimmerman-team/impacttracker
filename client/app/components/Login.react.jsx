@@ -1,5 +1,7 @@
 var React = require('react');
-var AuthService = require('../services/AuthService')
+var AuthService = require('../services/AuthService');
+var Input = require('react-bootstrap').Input;
+var ButtonInput = require('react-bootstrap').ButtonInput;
 
 var Login = React.createClass({
     getInitialState: function() {
@@ -30,15 +32,15 @@ var Login = React.createClass({
         //         <input type="submit" value="Post" />
         //     </div>
         // </form>
-          <section className="middle">
+          <section className="login">
             <div className="row">
-              <div className="large-6 columns small-centered text-center">
-                <div className="panel">
-                  <h3>Log in</h3>
+              <div className="col-lg-4 col-lg-offset-4">
+                <div className="panel panel-default">
+                  <h1>Log in</h1>
                   <form onsubmit="{this.login}">
-                    <input type="text" defaultValue="test" ref="username" placeholder="Username" />
-                    <input type="password" defaultValue="test" ref="password" placeholder="Password" />
-                    <input className="button" type="submit" defaultValue="Post" />
+                    <Input type="text" defaultValue="test" ref="username" placeholder="Username" />
+                    <Input type="password" defaultValue="test" ref="password" placeholder="Password" />
+                    <ButtonInput type='submit' bsStyle="primary" defaultValue="Log in" />
                   </form>
                 </div>
               </div>

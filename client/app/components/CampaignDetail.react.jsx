@@ -132,72 +132,72 @@ var CampaignDetail = React.createClass({
         return (
             <div className="container campaigndetail">
                 <h1>Campaign editor</h1>
-                <form ref="form" onSubmit={this.updateCampaign}>
 
-                    <fieldset>
+                <div className="panel panel-default">
+                    <div className="panel-content">
+                        <form ref="form" onSubmit={this.updateCampaign}>
 
-                    <div className="row">
-                    <div className="col-lg-3">
-                    <label for="name">Campaign name</label>
-                    <Input name="name" type="text" value={this.state.campaign.name} placeholder="Campaign Name"/>
-                    </div>
-                    </div>  
+                            <div className="row">
+                            <div className="col-lg-3">
+                            <label for="name">Campaign name</label>
+                            <Input name="name" type="text" value={this.state.campaign.name} placeholder="Campaign Name"/>
+                            </div>
+                            </div>  
 
-                    <div className="row">
-                    <div className="col-lg-6">
-                    <label for="keywords">Campaign keywords (hashtags)</label>
-                    <Input name="keywords" type="text" value={this.state.campaign.handle} placeholder="Enter keywords, seperated by commas"/>  
-                    </div>
-                    </div>
+                            <div className="row">
+                            <div className="col-lg-6">
+                            <label for="keywords">Campaign keywords (hashtags)</label>
+                            <Input name="keywords" type="text" value={this.state.campaign.handle} placeholder="Enter keywords, seperated by commas"/>  
+                            </div>
+                            </div>
 
-                    <div className="row">
-                    <div className="col-lg-12">
-                    <label for="startDate">Date range</label>
-                    </div>
-                    <div className="col-lg-3 daterange">
-                        <DatePicker
-                            key="example4"
-                            name="startDate"
-                            selected={this.state.campaign.start_date}
-                            onChange={this.handleBoundDateChange}
-                            placeholderText="Start date"/>
-                    </div>
-                    <div className="col-lg-3 daterange">
-                        <DatePicker
-                            key="example5"
-                            name="endDate"
-                            selected={this.state.campaign.end_date}
-                            onChange={this.handleBoundDateChange2}
-                            placeholderText="End date"/>
-                    </div>
-                    </div> 
-                    
-                    <div className="row">
-                    <div className="col-lg-4 cb">
-                    <label for="sourceInput">Sources</label>
-                    {sourceChecks}
-                    <Input type="text" ref="sourceInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddSourceClick} value="Add source" placeholder="Add a new source"/>} />  
-                    </div>
-                    </div>
+                            <div className="row">
+                            <div className="col-lg-12">
+                            <label for="startDate">Date range</label>
+                            </div>
+                            <div className="col-lg-3 daterange">
+                                <DatePicker
+                                    key="example4"
+                                    name="startDate"
+                                    selected={this.state.campaign.start_date}
+                                    onChange={this.handleBoundDateChange}
+                                    placeholderText="Start date"/>
+                            </div>
+                            <div className="col-lg-3 daterange">
+                                <DatePicker
+                                    key="example5"
+                                    name="endDate"
+                                    selected={this.state.campaign.end_date}
+                                    onChange={this.handleBoundDateChange2}
+                                    placeholderText="End date"/>
+                            </div>
+                            </div> 
+                            
+                            <div className="row">
+                            <div className="col-lg-4 cb">
+                            <label for="sourceInput">Sources</label>
+                            {sourceChecks}
+                            <Input type="text" ref="sourceInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddSourceClick} value="Add source" placeholder="Add a new source"/>} />  
+                            </div>
+                            </div>
 
-                    <div className="row">
-                    <div className="col-lg-4 cb">
-                    <label for="targetInput">Targets</label>
-                    {targetChecks}
-                    <Input type="text" ref="targetInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddTargetClick} value="Add target" placeholder="Add a new target" />} />  
-                    <buttonInput value="Add target" />
-                    </div>
-                    </div>
+                            <div className="row">
+                            <div className="col-lg-4 cb">
+                            <label for="targetInput">Targets</label>
+                            {targetChecks}
+                            <Input type="text" ref="targetInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddTargetClick} value="Add target" placeholder="Add a new target" />} />  
+                            <buttonInput value="Add target" />
+                            </div>
+                            </div>
 
-                    <div className="row">
-                    <div className="col-lg-3">
-                    <ButtonInput type='submit' bsStyle="primary" value={this.state.campaign._id ? 'Update' : 'Create'} />
+                            <div className="row">
+                            <div className="col-lg-3">
+                            <ButtonInput type='submit' bsStyle="primary" value={this.state.campaign._id ? 'Update' : 'Create'} />
+                            </div>
+                            </div>
+                        </form>
                     </div>
-                    </div>
-
-                    </fieldset>
-
-                </form>
+                </div>
             </div>
         )
     },

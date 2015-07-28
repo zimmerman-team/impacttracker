@@ -329,7 +329,7 @@ $input-height-base:              ($line-height-computed + ($padding-base-vertica
 // //** Number of columns in the grid.
 // $grid-columns:              12 !default;
 // //** Padding between columns. Gets divided in half for the left and right.
-// $grid-gutter-width:         30px !default;
+$grid-gutter-width:         30px;
 // // Navbar collapse
 // //** Point at which the navbar becomes uncollapsed.
 // $grid-float-breakpoint:     $screen-sm-min !default;
@@ -352,7 +352,7 @@ $input-height-base:              ($line-height-computed + ($padding-base-vertica
 // $container-md:                 $container-desktop !default;
 
 // // Large screen / wide desktop
-// $container-large-desktop:      (1140px + $grid-gutter-width) !default;
+$container-large-desktop:      (1340px + $grid-gutter-width);
 // //** For `$screen-lg-min` and up.
 // $container-lg:                 $container-large-desktop !default;
 

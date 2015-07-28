@@ -1,4 +1,5 @@
 @import "variables_override";
+// @import "animate";
 @import "bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
 
 @font-face {
@@ -11,20 +12,52 @@
 	     url(../fonts/bootstrap/glyphicons-halflings-regular.svg#) format('svg');
 }
 
+.login {
+	margin-top:25px;
+	h1 {
+		margin-bottom: 25px;
+	}
+	.panel {
+		background:$gray-lighter;
+		text-align:center;
+		padding:20px 25px;
+	}
+	input {
+		height: ($line-height-computed + ($padding-base-vertical * 2) + 10);
+	}
+}
+
 //campaign overview page
 .campaignview {
 	.panel {
 		background:$gray-lighter;
-		padding:20px 25px;
 		text-align:center;
-		> span {
-			display: block;
-			margin-bottom: 10px;
+		.panel-heading {
+			&.running {
+				background:$brand-success;
+				color:#fff;
+			}
+			&.completed {
+				background:$gray-darker;
+				color:#fff;
+			}
+			&.planned {
+				
+			}
 		}
-		.actions {
-			margin-top:20px;
-			button {
-				margin:0 5px;
+		.panel-content {
+			> span {
+				display: block;
+				margin-bottom: 20px;
+			}
+			label {
+				display: block;
+			}
+			.actions {
+				margin-top:20px;
+				button {
+					margin:0 5px;
+				}
 			}
 		}
 	}
@@ -34,10 +67,11 @@
 }
 
 .campaigndetail {
-	fieldset {
-		padding:20px 25px;
-		border:1px solid #e7e7e7;
-		background:#f8f8f8;
+	.panel {
+		background:$gray-lighter;
+		.panel-content {
+			padding:20px 25px;
+		}
 		.row {
 			margin-bottom: 10px;
 		}

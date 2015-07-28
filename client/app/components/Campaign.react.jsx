@@ -74,17 +74,21 @@ var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https
         var campaign = this.props.campaign;
         return (
             <div className="col-lg-4">
-                <div className="panel">
-                    <h1>{campaign.name}</h1>
-                    <span className="subjects"><label>Subjects used</label>{campaign.handle}</span>
-                    <span className="author"><label>Author</label>{campaign.author || "-"}</span>
-                    <span className="completed">{campaign.completed || false}</span>
-                    <span className="date"><label>Runs</label>{campaign.runAt || "-"}</span>
-                    <span className="actions">
-                        <Button bsStyle='success' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}><Glyphicon glyph='stats' /> View</Button>
-                        <Button bsStyle='primary' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}><Glyphicon glyph='edit' /> Edit</Button>
-                        <Button bsStyle='danger' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}><Glyphicon glyph='trash' /> Delete</Button>
-                    </span>
+                <div className="panel panel-default">
+                    <div className="panel-heading running {campaign.completed}">
+                        Running{campaign.completed || false}
+                    </div>
+                    <div className="panel-content">
+                        <h1>{campaign.name}</h1>
+                        <span className="date"><label>Starts on</label>{campaign.runAt || "-"}</span>
+                        <span className="subjects"><label>Keywords used</label>{campaign.handle}</span>
+                        <span className="author"><label>Author</label>{campaign.author || "-"}</span>
+                        <span className="actions">
+                            <Button bsSize="large" bsStyle='success' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}><Glyphicon glyph='stats' /> View</Button>
+                            <Button bsSize="large" bsStyle='primary' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}><Glyphicon glyph='edit' /> Edit</Button>
+                            <Button bsSize="large" bsStyle='danger' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}><Glyphicon glyph='trash' /> Delete</Button>
+                        </span>
+                    </div>
                 </div>
             </div>
         )
