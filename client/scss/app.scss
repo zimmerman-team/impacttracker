@@ -1,1 +1,69 @@
-// placeholder
+@import "variables_override";
+@import "bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
+
+//campaign overview page
+.campaignview {
+	.panel {
+		background:$gray-lighter;
+		padding:20px 25px;
+		text-align:center;
+		span {
+			display: block;
+			margin-bottom: 10px;
+		}
+		.actions {
+			margin-top:20px;
+			button {
+				margin:0 5px;
+			}
+		}
+	}
+	.new-campaign {
+		margin-bottom: 20px;
+	}
+}
+
+.campaigndetail {
+	fieldset {
+		padding:20px 25px;
+		border:1px solid #e7e7e7;
+		background:#f8f8f8;
+		.row {
+			margin-bottom: 10px;
+		}
+		input.btn {
+			height: ($line-height-computed + ($padding-base-vertical * 2) + 10);
+		}
+		.checkbox {
+			margin:0;
+		}
+		.cb {
+			margin-bottom: 15px;
+			.form-group {
+				margin:0;
+			}
+			> .form-group {
+				&:last-of-type {
+					margin-top:10px;
+				}
+			}
+		}
+		.daterange {
+			margin-bottom: 15px;
+			div {
+				width: 100%;
+			}
+			.datepicker__input {
+				border-radius:0;
+				height:($line-height-computed + ($padding-base-vertical * 2) + 10);
+				width: 100%;
+			    padding: 6px 12px;
+			    font-size: 18px;
+			    line-height: 1.42857;
+			    color: #555555;
+			    background-color: #fff;
+			    border: 1px solid #ccc;
+			}
+		}
+	}
+}

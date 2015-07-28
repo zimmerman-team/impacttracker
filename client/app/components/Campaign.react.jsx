@@ -26,8 +26,12 @@ var Campaign = React.createClass({
     render: function() {
 
         return (
-            <div>
-                <Button onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/new")} bsStyle="primary" bsSize="large">New campaign</Button>
+            <div className="container campaignview">
+                <div className="row">
+                    <div className="col-lg-4 col-lg-offset-8">
+                       <Button className="pull-right new-campaign" onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/new")} bsStyle="primary" bsSize="large">New campaign</Button>
+                    </div>
+                </div>
                 <CampaignTable campaigns={this.state.campaigns}/>
             </div>
         )
@@ -57,21 +61,9 @@ var CampaignTable = React.createClass({
         })
 
         return (
-           <Table striped bordered condensed hover>
-               <thead>
-                    <tr>
-                        <th>Campaign</th>
-                        <th>Subject(s)</th>
-                        <th>Author</th>
-                        <th>Completed</th>
-                        <th>Planned date</th>
-                        <th>Actions</th>
-                    </tr>
-               </thead>
-               <tbody>
-                    {rows}      
-               </tbody>
-           </Table>
+           <div className="row">
+                {rows}      
+           </div>
         )
     }
 })
@@ -80,20 +72,20 @@ var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https
     render: function() {
         var campaign = this.props.campaign;
         return (
-            <tr>
-                <td>{campaign.name}</td>
-                <td>{campaign.handle}</td>
-                <td>{campaign.author || "-"}</td>
-                <td>{campaign.completed || false}</td>
-                <td>{campaign.runAt || "-"}</td>
-                <td>
-                    <SplitButton bsStyle="Default" title="Edit">
-                      <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}>Edit</MenuItem>
-                      <MenuItem divider />
-                      <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}>Delete</MenuItem>
-                    </SplitButton>
-                </td>
-            </tr>
+            <div className="col-lg-4">
+                <div className="panel">
+                    <h1>{campaign.name}</h1>
+                    <span className="subjects"><label>Subjects used</label>{campaign.handle}</span>
+                    <span className="author"><label>Author</label>{campaign.author || "-"}</span>
+                    <span className="completed">{campaign.completed || false}</span>
+                    <span className="date"><label>Runs</label>{campaign.runAt || "-"}</span>
+                    <span className="actions">
+                        <Button bsSize='large' bsStyle='success' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}>View</Button>
+                        <Button bsSize='large' bsStyle='primary' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}>Edit</Button>
+                        <Button bsSize='large' bsStyle='danger' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}>Delete</Button>
+                    </span>
+                </div>
+            </div>
         )
     }
 })
