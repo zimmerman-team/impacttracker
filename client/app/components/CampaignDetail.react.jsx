@@ -173,7 +173,7 @@ var CampaignDetail = React.createClass({
                     </div> 
                     
                     <div className="row">
-                    <div className="col-lg-3 cb">
+                    <div className="col-lg-4 cb">
                     <label for="sourceInput">Sources</label>
                     {sourceChecks}
                     <Input type="text" ref="sourceInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddSourceClick} value="Add source" placeholder="Add a new source"/>} />  
@@ -181,7 +181,7 @@ var CampaignDetail = React.createClass({
                     </div>
 
                     <div className="row">
-                    <div className="col-lg-3 cb">
+                    <div className="col-lg-4 cb">
                     <label for="targetInput">Targets</label>
                     {targetChecks}
                     <Input type="text" ref="targetInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddTargetClick} value="Add target" placeholder="Add a new target" />} />  

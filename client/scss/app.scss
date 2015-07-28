@@ -1,13 +1,23 @@
 @import "variables_override";
 @import "bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
 
+@font-face {
+	font-family: 'Glyphicons Halflings';
+	src: url(../fonts/bootstrap/glyphicons-halflings-regular.eot);
+	src: url(../fonts/bootstrap/glyphicons-halflings-regular.eot?#iefix) format('embedded-opentype'),
+	     url(../fonts/bootstrap/glyphicons-halflings-regular.woff2) format('woff2'),
+	     url(../fonts/bootstrap/glyphicons-halflings-regular.woff) format('woff'),
+	     url(../fonts/bootstrap/glyphicons-halflings-regular.ttf) format('truetype'),
+	     url(../fonts/bootstrap/glyphicons-halflings-regular.svg#) format('svg');
+}
+
 //campaign overview page
 .campaignview {
 	.panel {
 		background:$gray-lighter;
 		padding:20px 25px;
 		text-align:center;
-		span {
+		> span {
 			display: block;
 			margin-bottom: 10px;
 		}
