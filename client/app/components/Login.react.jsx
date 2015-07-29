@@ -1,5 +1,7 @@
 var React = require('react');
-var AuthService = require('../services/AuthService')
+var AuthService = require('../services/AuthService');
+var Input = require('react-bootstrap').Input;
+var ButtonInput = require('react-bootstrap').ButtonInput;
 
 var Login = React.createClass({
     getInitialState: function() {
@@ -12,8 +14,8 @@ var Login = React.createClass({
     login: function(e) {
         // e.preventDefault();
 
-        var username = React.findDOMNode(this.refs.username).value.trim();
-        var password = React.findDOMNode(this.refs.password).value.trim();
+        var username = (this.refs.username).getInputDOMNode().value.trim();
+        var password = (this.refs.password).getInputDOMNode().value.trim();
 
         AuthService.login(username, password)
             .catch(function(error) {
@@ -23,36 +25,52 @@ var Login = React.createClass({
 
     render: function() {
         return (
-        // <form role="form" onSubmit={this.login}>
-        //     <div className="form-group">
-        //         <input type="text" placeholder="Username" ref="username" value="test"/>
-        //         <input type="password" placeholder="Password" ref="password" value="test"/>
-        //         <input type="submit" value="Post" />
-        //     </div>
-        // </form>
-          <section className="middle">
+        <div>
+            <nav id="navi" className="navbar navbar-inverse">
+            <div className="container">
+              {/* Brand and toggle get grouped for better mobile display */}
+              <div className="navbar-header">
+                <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#nav-collapse" aria-expanded="false">
+                  <span className="sr-only">Toggle navigation</span>
+                  <span className="icon-bar" />
+                  <span className="icon-bar" />
+                  <span className="icon-bar" />
+                </button>
+                <a className="navbar-brand" href="/frontpage.html">
+                  <span><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span> Impact Tracker</span>
+                </a>
+              </div>
+              {/* Collect the nav links, forms, and other content for toggling */}
+              <div className="collapse navbar-collapse " id="nav-collapse">
+                <ul className="nav navbar-nav">
+                  <li><a href="/frontpage.html#signup">Sign up</a></li>
+                  <li><a href="/frontpage.html#about">About</a></li>
+                  <li><a href="/frontpage.html#contact">Contact</a></li>
+                </ul>
+                <ul className="nav navbar-nav navbar-right">
+                  <li className="active"><a href="/#/login">Log in</a></li>
+                </ul>
+              </div>{/* /.navbar-collapse */}
+            </div>{/* /.container-fluid */}
+          </nav>
+          <div className="container login middle">
             <div className="row">
-              <div className="large-6 columns small-centered text-center">
-                <div className="panel">
-                  <h3>Log in</h3>
+              <div className="col-lg-4 col-lg-offset-4">
+                <div className="panel panel-default">
+                  <h1>Log in</h1>
                   <form onsubmit="{this.login}">
-                    <input type="text" defaultValue="test" ref="username" placeholder="Username" />
-                    <input type="password" defaultValue="test" ref="password" placeholder="Password" />
-                    <input className="button" type="submit" defaultValue="Post" />
+                    <Input type="text" defaultValue="test" ref="username" placeholder="Username" />
+                    <Input type="password" defaultValue="test" ref="password" placeholder="Password" />
+                    <ButtonInput type='submit' bsStyle="primary" defaultValue="Log in" />
                   </form>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </div>
 
         );
     },
-    
-//     <script src="bower_components/jquery/dist/jquery.min.js"></script>
-//     <script src="bower_components/foundation/js/foundation.min.js"></script>
-//     <script src="js/app.js"></script>
-//   </body>
-// </html>
 
 
     componentDidMount: function() {

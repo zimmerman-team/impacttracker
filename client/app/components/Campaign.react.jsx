@@ -8,6 +8,9 @@ var Table = require('react-bootstrap').Table;
 var SplitButton = require('react-bootstrap').SplitButton;
 var MenuItem = require('react-bootstrap').MenuItem;
 var Button = require('react-bootstrap').Button;
+var Glyphicon = require('react-bootstrap').Glyphicon;
+var Input = require('react-bootstrap').Input;
+
 
 var RouterContainer = require('../util/RouterContainer')
 
@@ -26,8 +29,24 @@ var Campaign = React.createClass({
     render: function() {
 
         return (
-            <div>
-                <Button onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/new")} bsStyle="primary" bsSize="large">New campaign</Button>
+            <div className="container campaignview">
+                <div className="row">
+                    <div className="col-lg-4">
+                       <Button className="new-campaign" onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/new")} bsStyle="primary" bsSize="large"><Glyphicon glyph='plus' /> New campaign</Button>
+                    </div>
+                    <div className="col-lg-6">
+                        <span className="toggle-tag">Toggle visible campaigns</span>
+                        <a id="toggle-planned" className="legend planned">Planned</a>
+                        <a id="toggle-running" className="legend running disabled">Started</a>
+                        <a id="toggle-completed" className="legend completed">Completed</a>
+                    </div>
+                    <div className="col-lg-2">
+                        <Input type='select' placeholder='Sort by...'>
+                          <option value='date'>Date</option>
+                          <option value='other'>...</option>
+                        </Input>
+                    </div>
+                </div>
                 <CampaignTable campaigns={this.state.campaigns}/>
             </div>
         )
@@ -53,25 +72,21 @@ var CampaignTable = React.createClass({
         var rows = [];
 
         _.forEach(this.props.campaigns, function(campaign) {
+            console.log(campaign)
             rows.push(<CampaignRow campaign={campaign}/>)
         })
 
+        var samplecampaign = {
+            name: "kaaskop",
+            state: "running"
+        }
+
+
+
         return (
-           <Table striped bordered condensed hover>
-               <thead>
-                    <tr>
-                        <th>Campaign</th>
-                        <th>Subject(s)</th>
-                        <th>Author</th>
-                        <th>Completed</th>
-                        <th>Planned date</th>
-                        <th>Actions</th>
-                    </tr>
-               </thead>
-               <tbody>
-                    {rows}      
-               </tbody>
-           </Table>
+           <div className="row">
+                {rows}
+           </div>
         )
     }
 })
@@ -80,21 +95,20 @@ var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https
     render: function() {
         var campaign = this.props.campaign;
         return (
-            <tr>
-                <td>{campaign.name}</td>
-                <td>{campaign.handle}</td>
-                <td>{campaign.author || "-"}</td>
-                <td>{campaign.completed || false}</td>
-                <td>{campaign.runAt || "-"}</td>
-                <td>
-                    <SplitButton bsStyle="Default" title="Edit">
-                      <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}>Edit</MenuItem>
-                      <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/view/" + campaign._id)}>View</MenuItem>
-                      <MenuItem divider />
-                      <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}>Delete</MenuItem>
-                    </SplitButton>
-                </td>
-            </tr>
+            <div className="col-lg-4">
+                <div className="panel panel-default running {campaign.completed}">
+                    <Glyphicon glyph='screenshot' /> 
+                    <div className="panel-content">
+                        <h2>{campaign.name}</h2>
+                        <span className="date"><label>Start date:</label> {campaign.startDate}</span>
+                        <span className="actions">
+                            <Button bsStyle='primary' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}><Glyphicon glyph='stats' /> View</Button>
+                            <Button bsStyle='info' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}><Glyphicon glyph='edit' /> Edit</Button>
+                            <Button bsStyle='danger' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}><Glyphicon glyph='trash' /> Delete</Button>
+                        </span>
+                    </div>
+                </div>
+            </div>
         )
     }
 })
