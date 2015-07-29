@@ -102,7 +102,7 @@ var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https
                         <h2>{campaign.name}</h2>
                         <span className="date"><label>Start date:</label> {campaign.startDate}</span>
                         <span className="actions">
-                            <Button bsStyle='primary' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}><Glyphicon glyph='stats' /> View</Button>
+                            <Button bsStyle='primary' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/view/" + campaign._id)}><Glyphicon glyph='stats' /> View</Button>
                             <Button bsStyle='info' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}><Glyphicon glyph='edit' /> Edit</Button>
                             <Button bsStyle='danger' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}><Glyphicon glyph='trash' /> Delete</Button>
                         </span>

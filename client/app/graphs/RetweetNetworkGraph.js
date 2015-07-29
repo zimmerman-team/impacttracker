@@ -56,8 +56,6 @@ LineContainer.prototype.getCoords = function(i) {
 }
 
 LineContainer.prototype.addNode = function(id, data, update) {
-    update = typeof update === "undefined" ? true : false;
-
     this.nodes.push({
         "id": id,
         "data": data
@@ -71,16 +69,6 @@ LineContainer.prototype.addNode = function(id, data, update) {
         this.updateNodes(); // the order here matters
         updateLinks();
     }
-}
-
-LineContainer.prototype.addNodes = function(nodes) {
-    var self = this;
-    _.forEach(nodes, function(node) {
-        self.addNode(node.id, node.data, false)
-    })
-
-    this.updateNodes();
-    updateLinks();
 }
 
 LineContainer.prototype.findNode = function(id) {
@@ -100,7 +88,7 @@ LineContainer.prototype.updateNodes = function() {
     });
 
     var max_amount = d3.max(this.nodes, function(d) {
-        return nodeScale === "log" ? Math.logBase(10, maxLinks) : maxLinks  
+        return _nodeScale === "log" ? Math.logBase(10, maxLinks) : maxLinks  
     })
 
     // todo: better scale
@@ -133,13 +121,13 @@ LineContainer.prototype.updateNodes = function() {
             // console.log(Math.logBase(10, thisLinks))
             // console.log(radius_scale(Math.logBase(10, thisLinks)))
 
-            return nodeScale === "log" ? log_radius_scale(Math.logBase(10, thisLinks)) : linear_radius_scale(thisLinks)
+            return _nodeScale === "log" ? log_radius_scale(Math.logBase(10, thisLinks)) : linear_radius_scale(thisLinks)
         })
         .attr("transform", function(d) {
             return "translate(" + d.x + "," + d.y + ")";
         })
         .on("mouseover", function(d) {
-            if (!focusLock) {
+            if (!_focusLock) {
                 var intermediateConnections = fade(d.id, 0.1);
 
                 // get links
@@ -155,13 +143,13 @@ LineContainer.prototype.updateNodes = function() {
             }
         })
         .on("click", function(d) {
-            focusLock = true;
+            _focusLock = true;
             d3.event.stopPropagation();
         })
         .on("mouseout", function(d) {
-            if (!focusLock) {
+            if (!_focusLock) {
                 _svg.selectAll('.nodeGroup, .link').style("opacity", 1);
-                if (!textToggle) _svg.selectAll('.nodeText').style("opacity", 0);
+                if (!_textToggle) _svg.selectAll('.nodeText').style("opacity", 0);
                 tip.hide(d);
             }
         })
@@ -170,7 +158,7 @@ LineContainer.prototype.updateNodes = function() {
         .attr("class", "nodeText")
         .attr("dx", function(d) {
             // todo: get radius directly from circle
-            return nodeScale === "log" ? log_radius_scale(Math.logBase(10, numLinks(d.id))) + 5 : linear_radius_scale(numLinks(d.id)) + 5
+            return _nodeScale === "log" ? log_radius_scale(Math.logBase(10, numLinks(d.id))) + 5 : linear_radius_scale(numLinks(d.id)) + 5
         })
         .attr("dy", ".35em")
         .attr("opacity", 0)
@@ -256,7 +244,7 @@ var fade = function(id, opacity, indirect, turnOff, groupToFade) {
 
     var sources = sourceDict[id];
     var targets = targetDict[id];
-    var group = layerDict[id]; // first item is the group name...
+    var group = _layerDict[id]; // first item is the group name...
 
     // for now, no difference between source -> target and target -> source
     var combined = _.union(sources.slice(1), targets.slice(1), [id]);
@@ -264,12 +252,12 @@ var fade = function(id, opacity, indirect, turnOff, groupToFade) {
     if (groupToFade) {
         var nodeFilter = function(d) {
             return _.includes(combined, d.id)
-                && layerDict[d.id] === groupToFade
+                && _layerDict[d.id] === groupToFade
         };
 
         var linkFilter = function(d) {
             return (d.source.id === id || d.target.id === id)
-                && (layerDict[d.source.id] === groupToFade || layerDict[d.target.id] === groupToFade);
+                && (_layerDict[d.source.id] === groupToFade || _layerDict[d.target.id] === groupToFade);
         };
     } else {
         var nodeFilter = function(d) {
@@ -295,7 +283,7 @@ var fade = function(id, opacity, indirect, turnOff, groupToFade) {
 
     if (indirect && group !== "intermediaries") {
         _.forEach(combined, function(id) {
-            if (layerDict[id] === "intermediaries") {
+            if (_layerDict[id] === "intermediaries") {
                 var groupToFade = group === "sources" ? "targets" : "sources";
                 intermediateNodes.push(fade(id, opacity, true, false, groupToFade)) // also fade-in intermediate nodes and link connections
             }
@@ -315,8 +303,6 @@ var getLinks = function(id) {
 
 // Links are global
 var addLink = function(source, target, update) {
-    update = typeof update === "undefined" ? true : false;
-
     var source = source.split(":");
     var target = target.split(":");
 
@@ -400,19 +386,14 @@ var updateLinks = function() {
 
 }
 
-
-var focusLock = false; // focusLock for tooltip
-var textToggle = false;
-var nodeScale = "linear" // default node scale
-
 // toggle node text
 d3.select("input").on("change", function() {
     if (this.checked) {
         _svg.selectAll(".nodeText").style("opacity", 1);
-        textToggle = true;
+        _textToggle = true;
     } else {
         _svg.selectAll(".nodeText").style("opacity", 0);
-        textToggle = false;
+        _textToggle = false;
     }
 });
 
@@ -420,10 +401,10 @@ d3.select("input").on("change", function() {
 d3.selectAll('input[name="scale"]').on("change", function() {
     switch(this.value) {
         case "linear":
-            nodeScale = "linear";
+            _nodeScale = "linear";
             break;
         case "log":
-            nodeScale = "log";
+            _nodeScale = "log";
             break;
     }
 
@@ -481,9 +462,9 @@ var tip = d3.tip()
         }
     });
 
-    // if (layerDict[d.id] === "sources") {
+    // if (_layerDict[d.id] === "sources") {
     //     ntargets = _.union(ntargets, _.map(nintermediateconnections, function(i) { return i.id }))
-    // } else if (layerDict[d.id] === "targets"){
+    // } else if (_layerDict[d.id] === "targets"){
     //     nsources = _.union(nsources, _.map(nintermediateconnections, function(i) { return i.id }))
     // }
 
@@ -497,10 +478,10 @@ var tip = d3.tip()
     // d3.select("input[name=''').on("change", function() {
     //     if (this.checked) {
     //         _svg.selectAll(".nodeText").style("opacity", 1);
-    //         textToggle = true;
+    //         _textToggle = true;
     //     } else {
     //         _svg.selectAll(".nodeText").style("opacity", 0);
-    //         textToggle = false;
+    //         _textToggle = false;
     //     }
     // });
 
@@ -516,7 +497,7 @@ var tip = d3.tip()
 
     if (nintermediateconnections.length) {
         html += "<ul>"
-        html += ("<b>Indirect " + (layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
+        html += ("<b>Indirect " + (_layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
         _.forEach(nintermediateconnections, function(source) {
             html += ("<li>" + source.id + "</li>")
         })
@@ -555,7 +536,12 @@ var tip = d3.tip()
 
 var _svg = null;
 
-var layerDict = {}; // keep track of what layer the node with id x is in
+var _focusLock = false; // _focusLock for tooltip
+var _textToggle = false;
+var _nodeScale = "linear" // default node scale
+
+
+var _layerDict = {}; // keep track of what layer the node with id x is in
 var _groups = {}; // layer to container dict
 
 var RetweetNetworkGraph = {
@@ -588,11 +574,11 @@ var RetweetNetworkGraph = {
             .on("click", function() {
                 if (d3.event.defaultPrevented) return;
 
-                focusLock = false;
+                _focusLock = false;
                 tip.hide();
                 _svg.selectAll('.nodeGroup, .link').style("opacity", 1);
                 
-                if (!textToggle) {
+                if (!_textToggle) {
                     _svg.selectAll('.nodeText').style("opacity", 0);
                 }
             })
@@ -651,14 +637,25 @@ var RetweetNetworkGraph = {
 
     },
 
+    destroy: function() {
+        // some cleanup
+        _layerDict = {};
+        _groups = {};
+        _svg.remove();
+        _svg = null;        
+        
+    },
+
     resize: function() {
         // todo: resize windows appropriately
 
     },
 
     addNode: function(node, redraw=false) {
+        console.log(redraw)
+        console.log(node)
         _groups[node.layer].addNode(node.id, node.data, redraw);
-        layerDict[node.id] = node.layer;
+        _layerDict[node.id] = node.layer;
 
     },
 
@@ -666,8 +663,8 @@ var RetweetNetworkGraph = {
             var source = link.source;
             var target = link.target;
 
-            var sourceLayer = layerDict[source];
-            var targetLayer = layerDict[target];  
+            var sourceLayer = _layerDict[source];
+            var targetLayer = _layerDict[target];  
 
             console.log(source)
             console.log(target)

@@ -76,11 +76,11 @@ var CampaignApi = {
                     campaignResults = new CampaignResults(doc)
 
                     campaignResults.on("new-node", function(node) {
-                        socket.emit(doc._id + ":new-node", node)
+                        socket.broadcast.emit(doc._id + ":new-node", node)
                     }.bind(this));
 
                     campaignResults.on("new-link", function(link) {
-                        socket.emit(doc._id + ":new-link", link)
+                        socket.broadcast.emit(doc._id + ":new-link", link)
                     }.bind(this));
                     
                     socket.on("new-graph", function(data, res) {

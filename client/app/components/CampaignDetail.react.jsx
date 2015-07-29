@@ -159,20 +159,16 @@ var CampaignDetail = React.createClass({
                             <label for="startDate">Date range</label>
                             </div>
                             <div className="col-lg-3 daterange">
-                                <DatePicker
-                                    key="example4"
-                                    name="startDate"
-                                    selected={this.state.campaign.start_date}
-                                    onChange={this.handleBoundDateChange}
-                                    placeholderText="Start date"/>
+                                <DateTimeField 
+                                    inputProps={{name: "startDate"}} 
+                                    dateTime={moment(this.state.campaign.startDate).format('x')} 
+                                    defaultText="select campaign start date" />
                             </div>
                             <div className="col-lg-3 daterange">
-                                <DatePicker
-                                    key="example5"
-                                    name="endDate"
-                                    selected={this.state.campaign.end_date}
-                                    onChange={this.handleBoundDateChange2}
-                                    placeholderText="End date"/>
+                                <DateTimeField 
+                                    inputProps={{name: "endDate"}} 
+                                    dateTime={moment(this.state.campaign.endDate).format('x')} 
+                                    defaultText="select campaign end date" />
                             </div>
                             </div> 
                             
