@@ -10,6 +10,7 @@ var Nav = require('react-bootstrap').Nav;
 var NavItem = require('react-bootstrap').NavItem;
 var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
+var Glyphicon = require('react-bootstrap').Glyphicon;
 
 var RouterContainer = require('../util/RouterContainer')
 
@@ -58,17 +59,17 @@ var Home = Authenticated(React.createClass({
     render: function() {
         return (
             <div class="project">
-              <Navbar brand='Impact Tracker'>
-                <Nav>
-                  <NavItem eventKey={1} href='#/home'>Home</NavItem>
-                  <NavItem eventKey={2} href='#/home/campaign'>Campaigns</NavItem>
-                  <DropdownButton eventKey={3} title='Dropdown'>
-                    <MenuItem eventKey='1'>Action</MenuItem>
-                    <MenuItem eventKey='2'>Another action</MenuItem>
-                    <MenuItem eventKey='3'>Something else here</MenuItem>
-                    <MenuItem divider />
-                    <MenuItem eventKey='4'>Separated link</MenuItem>
-                  </DropdownButton>
+              <Navbar inverse>
+                <a className="navbar-brand">
+                    <span><Glyphicon glyph='screenshot' /> Impact Tracker</span>
+                </a>
+                <Nav navbar>
+                  <NavItem eventKey={2} href='#/home/campaign'><Glyphicon glyph='th-large' /> Campaigns</NavItem>
+                  <NavItem eventKey={3} href='#/home'><Glyphicon glyph='user' /> User profile</NavItem>
+                  <NavItem eventKey={4} href='#/home'><Glyphicon glyph='info-sign' /> Support</NavItem>
+                </Nav>
+                <Nav navbar right>
+                  <NavItem eventKey={5} href='#/home'><Glyphicon glyph='lock' /> Log out</NavItem>
                 </Nav>
               </Navbar>
 
