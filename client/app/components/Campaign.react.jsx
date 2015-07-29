@@ -89,6 +89,7 @@ var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https
                 <td>
                     <SplitButton bsStyle="Default" title="Edit">
                       <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id)}>Edit</MenuItem>
+                      <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/view/" + campaign._id)}>View</MenuItem>
                       <MenuItem divider />
                       <MenuItem onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/" + campaign._id + "/delete")}>Delete</MenuItem>
                     </SplitButton>

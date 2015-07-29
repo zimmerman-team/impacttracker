@@ -22,6 +22,7 @@ var Login = require('./components/Login.react');
 var Home = require('./components/Home.react');
 var Campaign = require('./components/Campaign.react');
 var CampaignDetail = require('./components/CampaignDetail.react');
+var CampaignView = require('./components/CampaignView.react');
 
 var NotFound = React.createClass({
     render: function() {
@@ -37,6 +38,7 @@ var routes = (
         <Router.Route path="home" handler={Home}>
             <Router.Route path="campaign" handler={Campaign} />
             <Router.Route path="campaign/:id" handler={CampaignDetail} />
+            <Router.Route path="campaign/view/:id" handler={CampaignView} />
         </Router.Route>
         <Router.NotFoundRoute handler={NotFound} />
     </Router.Route>

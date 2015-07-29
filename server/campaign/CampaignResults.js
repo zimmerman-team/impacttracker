@@ -27,6 +27,15 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
     start: function(handle) {
 
+        // initialize source and target nodes
+        _.forEach(this.campaign.sources, function(source) {
+            this.addNode(source, "source")
+        }.bind(this))
+
+        _.forEach(this.campaign.targets, function(target) {
+            this.addNode(target, "target")
+        }.bind(this))
+
         this.redisClient.select(config.redis.db, function(error, res) {
             if (error) throw error;
 
@@ -42,19 +51,20 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         return _.some(this.campaign.targets, {'user_id': userId})
     },
 
-    addNode: function(user, type) {
+    getGraph: function(cb) {
+        return this.graph;
+    },
+
+    addNode: function(user, layer) {
 
         var node = {
-            id: user.id_str,
+            id: user.id_str || user.user_id, // todo: change all to id_str
             label: user.screen_name,
-            type: type,
+            layer: layer,
             data: {
                 user: user
             }
         }
-
-        console.log(node);
-        console.log(this.graph.nodes);
 
         this.graph.nodes.push(node);
 
@@ -76,6 +86,10 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         this.graph.edges.push(link);
 
         return link;
+    },
+
+    writeGraphRedis: function() { // write graph to redis for real-time results
+        this.redisClient.set(this.campaign._id + ":graph", JSON.stringify(this.graph))
     },
 
     handleTweet: function() {
@@ -131,6 +145,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                     var sourceTweetIsTarget = this.isTarget(sourceTweetUser.id_str);
 
                     console.log(sourceTweet.user.screen_name)
+                    console.log(sourceTweet.user.id_str)
                     console.log(sourceTweetIsSource)
 
                     if (sourceTweetIsSource) {
@@ -177,6 +192,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                         this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
                         console.log('after link')
 
+                        this.writeGraphRedis();
                         return this.handleTweet();
                     }
 

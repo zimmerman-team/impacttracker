@@ -6,6 +6,8 @@ var EventEmitter = require('events').EventEmitter
 var objectAssign = require('object-assign')
 var DatabaseContainer = require('../utils/DatabaseContainer')
 
+var Source = require('../models/source')
+var Target = require('../models/target')
 
 function TwitterRest(campaign) {
     this.campaign = campaign;
@@ -33,6 +35,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
         this.getLimits(function() {
             async.parallel([
+                this.getSourcesAndFollowers.bind(this, sources, targets),
                 this.getSources.bind(this, sources),
                 this.getTargets.bind(this, targets)
                 ], function(error) {
@@ -40,26 +43,65 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                     this.emit("completed")
                 }.bind(this));
         }.bind(this))
-},
+    },
+
+    getSourcesAndFollowers: function(sources, targets, done) {
+        var sourceScreenNames = _.pluck(sources, "screen_name").join();
+        var targetScreenNames = _.pluck(targets, "screen_name").join();
+
+        var getSources = function(cb) {
+            this.client.get('/users/lookup', {
+                screen_name: sourceScreenNames
+            }, function(error, sources, response) {
+                _.forEach(sources, function(source) {
+                    Source.update({screen_name: source.screen_name }, { user_id: source.id_str }, function(error, doc) {
+                        console.log(doc)
+                    });
+                })
+                cb();
+            })                
+        }
+
+        var getTargets = function(cb) {
+            this.client.get('/users/lookup', {
+                screen_name: targetScreenNames
+            }, function(error, targets, response) {
+                _.forEach(targets, function(target) {
+                    Target.update({screen_name: target.screen_name }, { user_id: target.id_str });
+                })
+                cb();
+            });
+        }
+
+        async.parallel([
+                getSources.bind(this),
+                getTargets.bind(this),
+            ], function(error) {
+                if (error) throw error;
+                done();
+            })
+    },
+
+
+    getLimits: function(cb) {
+        this.client.get('application/rate_limit_status', {
+            resources: 'followers,friends,users'
+        }, function(error, limits, res) {
+            if (error) throw error;
+
+            this.limits["/followers/ids"] = limits.resources.followers["/followers/ids"];
+            this.limits["/friends/ids"] = limits.resources.friends["/friends/ids"];
+            this.limits["/users/lookup"] = limits.resources.users["/users/lookup"];
+
+             if (cb) cb();        
+         }.bind(this));
+    },
 
     getSources: function(sources, cb) {
         async.each(sources, this.getSourceFollowers.bind(this), function(error) {
             console.log('sources done!')
             cb(error);
         })
-    },
-
-    getLimits: function(cb) {
-        this.client.get('application/rate_limit_status', {
-            resources: 'followers,friends'
-        }, function(error, limits, res) {
-            if (error) throw error;
-
-            this.limits["/followers/ids"] = limits.resources.followers["/followers/ids"];
-            this.limits["/friends/ids"] = limits.resources.friends["/friends/ids"];
-
-             if (cb) cb();        
-         }.bind(this));
     },
 
     // resetLimits: function() {
@@ -86,10 +128,12 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             return cursor !== 0 && count++ < 1;
         }.bind(this), function(cb) {
             if (this.limits['/followers/ids'].remaining === 0) {
-                var timeout = limit.reset - Math.floor(Date.now() / 1000);
+                var timeout = this.limits['/followers/ids'].reset - Math.floor(Date.now() / 1000);
 
-                setTimeout(getLimits, timeout); // get new limits
-                return setTimeout(cb, timeout);
+                console.log('called')
+                console.log(timeout)
+                return setTimeout(this.getLimits.bind(this, cb), timeout * 1000); // get new limits
+                // return setTimeout(cb, timeout);
             }
 
             this.limits['/followers/ids'].remaining -= 1;
@@ -159,7 +203,8 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         }.bind(this), function(cb) {
             if (this.limits['/friends/ids'].remaining === 0) {
                 var timeout = limit.reset - Math.floor(Date.now() / 1000);
-                return setTimeout(cb, timeout);
+
+                return setTimeout(this.getLimits.bind(this, cb), timeout * 1000); // get new limits
             }
 
             this.limits['/friends/ids'].remaining -= 1;

@@ -6,6 +6,19 @@ var _socket = null;
 
 var ApiService = {
 
+
+    socketOn: function(event, cb) {
+        _socket.on(event, cb)
+    },
+
+    socketOff: function(event, cb) {
+        _socket.removeListener(event, cb)
+    },
+
+    getSocket: function() {
+        return _socket;
+    },
+
     setSocket: function(socket) {
         _socket = socket;
     },

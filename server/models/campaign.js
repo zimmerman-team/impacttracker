@@ -11,10 +11,10 @@ var campaignSchema = new Schema({
     description: String,
     author: { type: Schema.Types.ObjectId, ref: 'Account' },
     handle: String,
-    creationDate: { type: Date },
+    creationDate: { type: Date, default: Date.now },
 
-    startDate: { type: Date, max: Date('2020-10-10') },
-    endDate: { type: Date, max: Date('2020-10-10') },
+    startDate: { type: Date },
+    endDate: { type: Date },
 
     completed: Boolean,
     running: Boolean,

@@ -16,6 +16,8 @@ var moment = require('moment');
 
 var RouterContainer = require('../util/RouterContainer')
 
+var DateTimeField = require('react-bootstrap-datetimepicker');
+
 function getCampaignState(id) {
     console.log('called get state!')
     return {
@@ -56,8 +58,8 @@ var CampaignDetail = React.createClass({
 
         var campaign = {
             // _id: this.state.campaign._id,
-            startDate: startDate,
-            endDate: endDate,
+            startDate: moment(new Date(startDate)).format('x'),
+            endDate: moment(new Date(endDate)).format('x'),
             handle: keywords,
             name: name,
             sources: sources,
@@ -93,7 +95,7 @@ var CampaignDetail = React.createClass({
     },
 
     _onTargetChange: function(targetId, event) {
-        var checked = event.target.checked;
+        // var checked = event.target.checked;
     },
 
     getInitialState: function() {
@@ -112,6 +114,7 @@ var CampaignDetail = React.createClass({
         var sourceChecks = [];
         var targetChecks = [];
 
+
         _.forEach(sources, function(source) {
             if (_.find(sourceCampaigns, {_id: source._id})) {
                 sourceChecks.push(<Input type='checkbox' value={source._id} name="source" onChange={this._onSourceChange.bind(null, source._id)} label={source.screen_name} checked />)
@@ -120,7 +123,7 @@ var CampaignDetail = React.createClass({
             }
         }.bind(this))
 
-        _.forEach(targets, function(target) {
+        _.forEach(targets, function(target){
             if (_.find(targetCampaigns, {_id: target._id})) {
                 targetChecks.push(<Input type='checkbox' value={target._id} name="target" onChange={this._onTargetChange.bind(null, target._id)} label={target.screen_name} checked />)
             } else {
@@ -136,18 +139,9 @@ var CampaignDetail = React.createClass({
             <h2>Campaign keywords (hashtags)</h2>
             <Input name="keywords" type="text" value={this.state.campaign.handle}/>  
             <h2>Date range</h2>
-            <DatePicker
-              key="example4"
-              name="startDate"
-              selected={this.state.campaign.start_date}
-              onChange={this.handleBoundDateChange}
-              placeholderText="Starting date"/>
-            <DatePicker
-              key="example5"
-              name="endDate"
-              selected={this.state.campaign.end_date}
-              onChange={this.handleBoundDateChange2}
-              placeholderText="Ending date"/>
+            <DateTimeField inputProps={{name: "startDate"}} dateTime={moment(this.state.campaign.startDate).format('x')} defaultText="select campaign start date" />
+            <DateTimeField inputProps={{name: "endDate"}} dateTime={moment(this.state.campaign.endDate).format('x')} defaultText="select campaign end date" />
+
             <h2>Sources</h2>
             {sourceChecks}
             <Input type="text" ref="sourceInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddSourceClick} value="Add source" />} />  

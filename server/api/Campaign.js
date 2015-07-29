@@ -7,6 +7,8 @@ var Campaign = require('../models/campaign');
 var Source = require('../models/source')
 var Target = require('../models/target')
 
+var DatabaseContainer = require('../utils/DatabaseContainer')
+
 var CampaignApi = {
     get: function(data, res) {
 
@@ -56,10 +58,6 @@ var CampaignApi = {
         // data.sources = sourceIds,
         // data.targets = targetIds;
 
-        // console.log(data)
-        // console.log(sourceIds)
-        // console.log(targetIds)
-
         campaign.save(function(error) {
             if (error) return res(null, error);
 
@@ -77,8 +75,21 @@ var CampaignApi = {
 
                     campaignResults = new CampaignResults(doc)
 
-                    campaignResults.on("new-node", socket.emit);
-                    campaignResults.on("new-link", socket.emit);
+                    campaignResults.on("new-node", function(node) {
+                        socket.emit(doc._id + ":new-node", node)
+                    }.bind(this));
+
+                    campaignResults.on("new-link", function(link) {
+                        socket.emit(doc._id + ":new-link", link)
+                    }.bind(this));
+                    
+                    socket.on("new-graph", function(data, res) {
+                        console.log("got a graph request")
+                        res(campaignResults.getGraph)
+                    }.bind(this));
+
+                    // campaignResults.on("new-node", socket.emit.bind(this, "new-node"));
+                    // campaignResults.on("new-link", socket.emit.bind(this, "new-link"));
 
                     twitterRest.on("completed", function() {
                         console.log("twitter rest was completed")
@@ -95,6 +106,15 @@ var CampaignApi = {
 
     remove: function(data, res) {
 
+    },
+
+    getGraph: function(id, res) {
+        var redisClient = DatabaseContainer.getRedis();      
+
+        var key = id + ":graph";
+        console.log(key)
+
+        redisClient.get(id + ":graph", res);
     }
 }
 
