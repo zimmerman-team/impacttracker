@@ -88,8 +88,23 @@ var NetworkGraph = React.createClass({
 
     render: function() {
         return (
-            <div className="retweetNetworkChart" ></div>
+            <div>
+                <InfoBox 
+                    subject={this.props.campaign.handle}
+                    toggleLabels={this._toggleLabels}
+                    setScale={this._setScale} />      
+                <div className="retweetNetworkChart" ></div>
+            </div>
         )
+    },
+
+    _toggleLabels: function(event) {
+        RetweetNetworkGraph.toggleLabels(event.target.checked)
+    },
+
+    _setScale: function(event) {
+        console.log(event.target.value)
+        RetweetNetworkGraph.setScale(event.target.value)
     }
 })
 
@@ -99,5 +114,38 @@ var LineGraph = React.createClass({
     }
 })
 
+var InfoBox = React.createClass({
+    getDefaultProps: function() {
+        return {
+            nodeSizeScale: "log",
+            showAllLabels: false,
+            description: "Placeholder description",
+            subject: "campaign"
+        }
+    },
+
+    render: function() {
+        return ( 
+        <div id="info-box">
+          <h3 className="hashtag">#{this.props.subject}</h3>
+          <p>
+            {this.props.description}
+          </p>
+          <p>
+            <b>Legends</b><br />
+          </p><div className="legend-icon unrelated-color" />Unrelated<br />
+          <div className="legend-icon sources-color" />Sources<br />
+          <div className="legend-icon intermediaries-color" />Intermediaries<br />
+          <div className="legend-icon targets-color" />Targets<br />
+          <p />
+          <input type="checkbox" onChange={this.props.toggleLabels}/> Show all labels
+          <br />
+          Node size scale:
+          <input type="radio" name="scale" defaultValue="linear" onChange={this.props.setScale} defaultChecked /> Linear
+          <input type="radio" name="scale" defaultValue="log" onChange={this.props.setScale} /> Log (base 10)
+        </div>
+        )
+    }
+})
 
 module.exports = CampaignView;

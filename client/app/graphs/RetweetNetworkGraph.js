@@ -6,8 +6,6 @@ var d3 = require("d3");
 var tip = require("d3-tip")(d3);
 var _ = require("lodash")
 
-console.log(tip)
-
 Math.logBase = function(base, n) {
     return Math.log(n) / Math.log(base);
 }
@@ -41,10 +39,7 @@ LineContainer.prototype.getCoords = function(i) {
     var min_y_space = 10; // minimal space between nodes
 
     if ((this.y2 / this.nodes.length) < 10) {
-        console.log("a: " + this.y1)
-        console.log("b: " + ((this.y2 - this.y1) / 4))
         this.y1 -= ((this.y2 - this.y1) / 4)   
-        console.log("c: " + this.y1)
         this.y2 += ((this.y2 - this.y1) / 4)   
     }
 
@@ -62,8 +57,8 @@ LineContainer.prototype.addNode = function(id, data, update) {
     });
 
     // initialize source and target dict
-    if (!sourceDict.hasOwnProperty(id)) sourceDict[id] = [this.options.nodeGroup]; // check probaply not nescessary
-    if (!targetDict.hasOwnProperty(id)) targetDict[id] = [this.options.nodeGroup]; // by convention, first item in dict is the group it belongs to, should change this
+    _sourceDict[id] = [];
+    _targetDict[id] = []; 
 
     if (update) {
         this.updateNodes(); // the order here matters
@@ -109,11 +104,8 @@ LineContainer.prototype.updateNodes = function() {
     nodeGroupEnter.append("circle")
     nodeGroupEnter.append("text")
 
-
     // update selection
     nodeGroup.select("circle")
-        // .append("g")
-        // .append("circle")
         .attr("class", "node") // todo: add as html5 data- attribute to identify
         .attr("r", function(d) {
             var thisLinks = numLinks(d.id);
@@ -131,12 +123,11 @@ LineContainer.prototype.updateNodes = function() {
                 var intermediateConnections = fade(d.id, 0.1);
 
                 // get links
-                var sources = sourceDict[d.id];
-                var targets = targetDict[d.id];
-
+                var sources = _sourceDict[d.id];
+                var targets = _targetDict[d.id];
 
                 d3.selectAll('.node-depth-selection').on("change", function() {
-                    console.log(this);
+                    // console.log(this);
                 })
 
                 return tip.show(sources, targets, intermediateConnections, d);
@@ -163,7 +154,7 @@ LineContainer.prototype.updateNodes = function() {
         .attr("dy", ".35em")
         .attr("opacity", 0)
         .text(function(d) {
-            return d.id;
+            return d.data.user.screen_name;
         })
         .attr("transform", function(d) {
             return "translate(" + d.x + "," + d.y + ")";
@@ -218,17 +209,6 @@ CircleContainer.prototype.getCoords = function(i) {
         }
 }
 
-// need to know which node is in which layer, to avoid having to search through all layers
-var nodeDict = {};
-
-
-var maxLinks = 0; // the biggest node size
-var links = [];
-
-// var linkDict = {"source": {}, "target": {}}; // maps nodes to links for fading
-var sourceDict = {}
-var targetDict = {}
-
 
 var fade = function(id, opacity, indirect, turnOff, groupToFade) {
     var indirect = typeof indirect === "undefined" ? true : indirect;
@@ -242,12 +222,12 @@ var fade = function(id, opacity, indirect, turnOff, groupToFade) {
         var intermediateNodes = []; 
     }
 
-    var sources = sourceDict[id];
-    var targets = targetDict[id];
+    var sources = _sourceDict[id];
+    var targets = _targetDict[id];
     var group = _layerDict[id]; // first item is the group name...
 
     // for now, no difference between source -> target and target -> source
-    var combined = _.union(sources.slice(1), targets.slice(1), [id]);
+    var combined = _.union(sources, targets, [id]);
 
     if (groupToFade) {
         var nodeFilter = function(d) {
@@ -294,11 +274,11 @@ var fade = function(id, opacity, indirect, turnOff, groupToFade) {
 }
 
 var numLinks = function(id) {
-    return sourceDict[id].length + targetDict[id].length
+    return _sourceDict[id].length + _targetDict[id].length
 }
 
 var getLinks = function(id) {
-    return _.union(sourceDict[id].slice(1), targetDict[id].slice(1));
+    return _.union(_sourceDict[id], _targetDict[id]);
 }
 
 // Links are global
@@ -321,9 +301,9 @@ var addLink = function(source, target, update) {
 
     // update linkDict
     // source -> target
-    sourceDict[sourceId].push(targetId);
+    _sourceDict[sourceId].push(targetId);
     // target -> source
-    targetDict[targetId].push(sourceId)
+    _targetDict[targetId].push(sourceId)
 
 
     links.push({
@@ -386,36 +366,9 @@ var updateLinks = function() {
 
 }
 
-// toggle node text
-d3.select("input").on("change", function() {
-    if (this.checked) {
-        _svg.selectAll(".nodeText").style("opacity", 1);
-        _textToggle = true;
-    } else {
-        _svg.selectAll(".nodeText").style("opacity", 0);
-        _textToggle = false;
-    }
-});
 
-// toggle scale
-d3.selectAll('input[name="scale"]').on("change", function() {
-    switch(this.value) {
-        case "linear":
-            _nodeScale = "linear";
-            break;
-        case "log":
-            _nodeScale = "log";
-            break;
-    }
-
-    _.forEach(_groups, function(group) {
-        group.updateNodes();
-    })
-})
-
-// todo: bad method, change this
-// 
-var depthChanged = function() {
+// todo: bad method, change this -> not on window
+Window.depthChanged = function() {
     var selection = d3.selectAll('.node-depth-selection')
 
     var direct = selection[0][0].checked
@@ -425,35 +378,50 @@ var depthChanged = function() {
     fade(id, 0.1, indirect)
 }
 
+// var CustomToolTip = {
+//     init: function() {
+//         d3.select("#tooltip")
+//             .append("div")
+//             .class("d3-tip")
+//             .style("opacity", 0)
 
-// todo: remove this dependency or rewrite to d3 select notation
+//     }
+
+//     show: function(sources, targets, intermediateConnections, d) {
+//         d3.select("#tooltip")
+//             .html()
+
+//     },
+
+//     hide: function() {
+
+//     }
+// }
+
+// todo: remove this dependency, rewrite to d3 select notation -> no direct html
+// also, this is not really a tooltip kind of functionality
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
   .html(function(sources, targets, intermediateConnections, d) {
 
-    var sources = sources.slice(1);
-    var targets = targets.slice(1);
-
     var sourcetargets = _.union(sources, targets);
 
     var nsources = [];
     var ntargets = [];
-
-    var nintermediateconnections = intermediateConnections;
-
     var nintermediaries = [];
+    var nintermediateconnections = intermediateConnections;
     var nunrelated = [];
 
     _.forEach(sourcetargets, function(item) {
-        switch(sourceDict[item][0]) {
-            case "sources":
+        switch(_layerDict[item]) {
+            case "source":
                 nsources.push(item)
                 break;
-            case "targets":
+            case "target":
                 ntargets.push(item)
                 break;
-            case "intermediaries":
+            case "intermediary":
                 nintermediaries.push(item)
                 break;
             case "unrelated":
@@ -470,10 +438,10 @@ var tip = d3.tip()
 
     var html = ""
 
-    html +=("<b><a href=\"" + "https://twitter.com/"+d.id + "\">" + d.id + "</a>"  + "</b><br />")
+    html +=("<b><a href=\"" + "https://twitter.com/"+ d.data.user.screen_name + "\">" + d.data.user.screen_name + "</a>"  + "</b><br />")
 
-    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Direct")
-    html += ("<input onchange=\"depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Indirect")
+    html += ("<input onchange=\"Window.depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Direct")
+    html += ("<input onchange=\"Window.depthChanged()\" class=\"node-depth-selection\" type=\"checkbox\" data-id=\"" + d.id + "\" checked> Indirect")
 
     // d3.select("input[name=''').on("change", function() {
     //     if (this.checked) {
@@ -490,7 +458,7 @@ var tip = d3.tip()
         html += "<ul>"
         html += ("<b>Targets</b> <br><ul class='tip-targets'>")
         _.forEach(ntargets, function(source) {
-            html += ("<li>" + source + "</li>")
+            html += ("<li>" + _nodeDict[source].data.user.screen_name + "</li>")
         })
         html += ("</ul>")
     }
@@ -499,7 +467,7 @@ var tip = d3.tip()
         html += "<ul>"
         html += ("<b>Indirect " + (_layerDict[d.id] === "sources" ? "targets" : "sources") + "</b> <br><ul class='tip-targets'>")
         _.forEach(nintermediateconnections, function(source) {
-            html += ("<li>" + source.id + "</li>")
+            html += ("<li>" + source.data.user.screen_name + "</li>")
         })
         html += ("</ul>")
     }
@@ -508,7 +476,7 @@ var tip = d3.tip()
         html += "<ul>"
         html += ("<b>Sources</b> <br><ul class='tip-sources'>")
         _.forEach(nsources, function(source) {
-            html += ("<li>" + source + "</li>")
+            html += ("<li>" + _nodeDict[source].data.user.screen_name + "</li>")
         })
         html += ("</ul>")
     }
@@ -517,7 +485,7 @@ var tip = d3.tip()
         html += "<ul>"
         html += ("<b>Intermediaries</b> <br><ul class='tip-intermediaries'>")
         _.forEach(nintermediaries, function(source) {
-            html += ("<li>" + source + "</li>")
+            html += ("<li>" + _nodeDict[source].data.user.screen_name + "</li>")
         })
         html += ("</ul>")
     }
@@ -526,7 +494,7 @@ var tip = d3.tip()
         html += "<ul>"
         html += ("<b>Unrelated</b> <br><ul class='tip-unrelated'>")
         _.forEach(nunrelated, function(source) {
-            html += ("<li>" + source + "</li>")
+            html += ("<li>" + _nodeDict[source].data.user.screen_name + "</li>")
         })
         html += ("</ul>")
     }
@@ -536,13 +504,19 @@ var tip = d3.tip()
 
 var _svg = null;
 
+var maxLinks = 0; // the biggest node size
+var links = [];
+
+var _nodeDict = {}; // id -> node lookup
+var _sourceDict = {}; // keep track of source -> targets links
+var _targetDict = {}; // keep of track of sources <- target links
+var _layerDict = {}; // keep track of what layer the node with id x is in
+var _groups = {}; // layer to container dict
+
 var _focusLock = false; // _focusLock for tooltip
 var _textToggle = false;
 var _nodeScale = "linear" // default node scale
 
-
-var _layerDict = {}; // keep track of what layer the node with id x is in
-var _groups = {}; // layer to container dict
 
 var RetweetNetworkGraph = {
     create: function(el, props, state) {
@@ -652,11 +626,10 @@ var RetweetNetworkGraph = {
     },
 
     addNode: function(node, redraw=false) {
-        console.log(redraw)
-        console.log(node)
         _groups[node.layer].addNode(node.id, node.data, redraw);
-        _layerDict[node.id] = node.layer;
 
+        _layerDict[node.id] = node.layer;
+        _nodeDict[node.id] = node;
     },
 
     addLink: function(link, redraw=false) {
@@ -666,11 +639,11 @@ var RetweetNetworkGraph = {
             var sourceLayer = _layerDict[source];
             var targetLayer = _layerDict[target];  
 
-            console.log(source)
-            console.log(target)
+            // console.log(source)
+            // console.log(target)
 
-            console.log("sourceLayer: " + sourceLayer)
-            console.log("targetLayer: " + targetLayer)
+            // console.log("sourceLayer: " + sourceLayer)
+            // console.log("targetLayer: " + targetLayer)
 
             addLink(sourceLayer + ":" + source, targetLayer + ":" + target, redraw);
     },
@@ -680,10 +653,6 @@ var RetweetNetworkGraph = {
         var nodes = json.nodes;
         var links = json.edges;
 
-
-        console.log(json)
-        // console.log(links)
-
         _.forEach(nodes, RetweetNetworkGraph.addNode);
         _.forEach(links, RetweetNetworkGraph.addLink);
 
@@ -691,7 +660,23 @@ var RetweetNetworkGraph = {
             group.updateNodes();
         })
         updateLinks();
+    },
+
+    toggleLabels: function(toggle) {
+        var opacity = toggle ? 1 : 0;
+
+        _svg.selectAll(".nodeText").style("opacity", opacity);
+        _textToggle = toggle;
+    },
+
+    setScale: function(scale) {
+        _nodeScale = scale;
+
+        _.forEach(_groups, function(group) {
+            group.updateNodes();
+        })
     }
+
 }
 
 module.exports = RetweetNetworkGraph;
