@@ -13,6 +13,8 @@ function create(id, campaign) {
 }
 
 function update(id, campaign) {
+    console.log("updateing campaign...")
+    console.log(campaign)
     _campaigns[id] = campaign;
 }
 

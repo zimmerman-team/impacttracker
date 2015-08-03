@@ -69,11 +69,13 @@ var CampaignDetail = React.createClass({
         console.log(campaign)
 
         if (this.state.campaign._id) {
-            ApiService.updateCampaign(this.state.campaign.id, campaign);          
+            ApiService.updateCampaign(this.state.campaign.id, campaign);      
+            // RouterContainer.get().transitionTo('/home/campaign');
         } else {
             // change this to work with flux
             ApiService.createCampaign(campaign, function(id) {
-                RouterContainer.get().transitionTo('/home/campaign/' + id);
+                console.log("transitioning")
+                RouterContainer.get().transitionTo('/home/campaign');
             });
             
         }
@@ -154,17 +156,17 @@ var CampaignDetail = React.createClass({
                             </div>
                             </div>
 
-                            <div className="row">
+                            <div style={{display: "none"}} className="row">
                             <div className="col-lg-12">
                             <label for="startDate">Date range</label>
                             </div>
-                            <div className="col-lg-3 daterange">
+                            <div className="col-lg-3 daterange" style={{display: "none"}}>
                                 <DateTimeField 
                                     inputProps={{name: "startDate"}} 
                                     dateTime={moment(this.state.campaign.startDate).format('x')} 
                                     defaultText="select campaign start date" />
                             </div>
-                            <div className="col-lg-3 daterange">
+                            <div className="col-lg-3 daterange" style={{display: "none"}}>
                                 <DateTimeField 
                                     inputProps={{name: "endDate"}} 
                                     dateTime={moment(this.state.campaign.endDate).format('x')} 

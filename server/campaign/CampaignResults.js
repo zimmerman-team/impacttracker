@@ -5,12 +5,16 @@ var _ = require('lodash');
 var EventEmitter = require('events').EventEmitter;
 var objectAssign = require('object-assign');
 
+var DatabaseContainer = require('../utils/DatabaseContainer')
+var Campaign = require('../api/Campaign')
+
 function CampaignResults(campaign) {
     this.campaign = campaign;
 
     this.ttl = 60 * 10;
 
     this.redisClient = redis.createClient();
+    this.database = DatabaseContainer.getDb()
 
     this.tweetList = campaign._id + ":tweets";
 
@@ -20,6 +24,10 @@ function CampaignResults(campaign) {
         nodes: [],
         edges: []
     };
+
+    this.lineGraph = [];
+
+    this.stopped = false;
 }
 
 // CampaignResults.prototype = {
@@ -41,6 +49,11 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
             this.handleTweet(); 
         }.bind(this))
+
+        this.once("stop", function() {
+            this.redisClient.lpush(this.tweetList, "stop");
+        }.bind(this))
+
     },
 
     isSource: function(userId) {
@@ -88,14 +101,35 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         return link;
     },
 
+    addTweet: function(tweet, layer) {
+        var item = {
+            tweet: tweet,
+            layer: layer
+        }
+
+        this.lineGraph.push(item);
+
+        return item;
+    },
+
     writeGraphRedis: function() { // write graph to redis for real-time results
         this.redisClient.set(this.campaign._id + ":graph", JSON.stringify(this.graph))
     },
 
+    writeDb: function() {
+        Campaign.findByIdAndUpdate(this.campaign._id, {
+            networkGraph: this.graph,
+            lineGraph: this.lineGraph
+        })
+    },
+
     handleTweet: function() {
         this.redisClient.brpop([this.tweetList, 0], function(list, tweet) {
-
             console.log(this.graph)
+
+            if (tweet === "stop") {
+                return this.writeDb(); // finish
+            }
 
             try {
                 var tweet = JSON.parse(tweet[1])
@@ -160,6 +194,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                         if (isSource) { // source -> source link
                             console.log('called source')
                             this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
+                            this.emit("new-tweet", this.addTweet(tweet, "source"));
 
                             return this.handleTweet();
                         }
@@ -167,6 +202,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                         if (isTarget) { // source -> target
                             console.log('called target')
                             this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
+                            this.emit("new-tweet", this.addTweet(tweet, "target"));
 
                             return this.handleTweet();
                         }
@@ -180,17 +216,19 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                             _.forEach(targets, function(target) {
                                 this.emit("new-link", this.addLink(null, userId, target));
                             })
+
+                            this.emit("new-tweet", this.addTweet(tweet, "intermediate"));
                          
                             return this.handleTweet();
                         } 
 
 
                         // otherwise, unrelated user
-                        console.log('before node')
                         this.emit("new-node", this.addNode(user, "unrelated"));
-                        console.log('after node')
                         this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
-                        console.log('after link')
+
+                        this.emit("new-tweet", this.addTweet(tweet, "unrelated"));
+
 
                         this.writeGraphRedis();
                         return this.handleTweet();

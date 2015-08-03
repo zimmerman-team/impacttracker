@@ -21,6 +21,8 @@ var Login = React.createClass({
             .catch(function(error) {
                 console.log("error logging in", error)
             })
+
+        // AuthService.twitterAuth();
     },
 
     render: function() {

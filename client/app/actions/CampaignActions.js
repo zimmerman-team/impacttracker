@@ -12,11 +12,28 @@ var CampaignActions = {
         })
     },
 
+    update: function(id, campaign) {
+        AppDispatcher.dispatch({
+            actionType: ApiConstants.UPDATE_CAMPAIGN,
+            id: id,
+            campaign: campaign
+        })
+    },
+
     receiveAll: function(campaigns) {
         AppDispatcher.dispatch({
             actionType: ApiConstants.RECEIVE_ALL_CAMPAIGN,
             campaigns: campaigns
         })
+    },
+
+    delete: function(id) {
+        console.log(id)
+        console.log('called')
+        AppDispatcher.dispatch({
+            actionType: ApiConstants.DESTROY_CAMPAIGN,
+            id: id
+        })        
     },
 
     receiveAllSources: function(sources) {

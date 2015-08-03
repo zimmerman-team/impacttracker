@@ -32,18 +32,14 @@ var ApiService = {
     },
 
     createCampaign: function(campaign, cb) {
-        console.log(campaign)
         _socket.emit('Campaign.create', campaign, function(error, data) {
+            console.log("got campaign response")
             console.log(data)
             if (error) throw error;
             ApiActions.create(data._id, data);
 
             if (cb) cb(data._id);
         })
-    },
-
-    getCampaign: function() {
-    
     },
 
     getCampaigns: function() {
@@ -67,6 +63,23 @@ var ApiService = {
             ApiActions.update(data)
 
             if (cb) cb(data._id);
+        })
+    },
+
+    deleteCampaign: function(id) {
+        _socket.emit('Campaign.destroy', {_id: id}, function(error, data) {
+            if (error) throw error;
+
+            ApiActions.delete(id);
+        })
+    },
+
+    stopCampaign: function(id) {
+        _socket.emit('Campaign.stop', {_id: id}, function(error, data) {
+            if (error) throw error;
+
+            console.log(data);
+            ApiActions.update(data._id, data);
         })
     },
 

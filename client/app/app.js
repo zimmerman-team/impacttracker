@@ -6,9 +6,16 @@ var Router = require('react-router');
 var RouterContainer = require('./util/RouterContainer')
 var cookie = require('react-cookie')
 
+var LoginActions = require("./actions/LoginActions")
+
+// var loggedIn = localStorage.getItem('logged_in')
+// if (loggedIn) {
+//   LoginActions.loginUser(loggedIn)
+// }
+
+// console.log(loggedIn)
 
 var App = React.createClass({
-
     render: function() {
         return (
             <div>

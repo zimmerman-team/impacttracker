@@ -1,4 +1,6 @@
 var _ = require('lodash')
+var EventEmitter = require('events').EventEmitter;
+var objectAssign = require('object-assign');
 var TwitterStream = require('../campaign/TwitterStream')
 var TwitterRest = require('../campaign/TwitterRest')
 var CampaignResults = require('../campaign/CampaignResults')
@@ -9,7 +11,7 @@ var Target = require('../models/target')
 
 var DatabaseContainer = require('../utils/DatabaseContainer')
 
-var CampaignApi = {
+var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     get: function(data, res) {
 
     },
@@ -20,7 +22,7 @@ var CampaignApi = {
             if (error) return res(error);
 
             return res(null, doc)
-        })
+        });
 
         // Campaign.findByUser({}, {user._id}, function(error, doc) {
         //     if (error) return res(error);
@@ -30,10 +32,7 @@ var CampaignApi = {
     },
 
     create: function(socket, user, data, res) {
-        console.log(data)
         var campaign = new Campaign(data);
-
-        
 
         // var sourceIds = [];
         // var targetIds = [];
@@ -58,8 +57,14 @@ var CampaignApi = {
         // data.sources = sourceIds,
         // data.targets = targetIds;
 
+        campaign.state = "running"
+
         campaign.save(function(error) {
-            if (error) return res(null, error);
+            if (error) return res(error, null);
+
+            res(null, campaign)
+
+            console.log(campaign)
 
             Campaign.populate(campaign, [{path: "sources"}, {path: "targets"}], 
                 function(error, doc) {
@@ -73,7 +78,7 @@ var CampaignApi = {
                     twitterRest = new TwitterRest(doc);
                     twitterRest.start() 
 
-                    campaignResults = new CampaignResults(doc)
+                    campaignResults = new CampaignResults(doc);
 
                     campaignResults.on("new-node", function(node) {
                         socket.broadcast.emit(doc._id + ":new-node", node)
@@ -82,7 +87,11 @@ var CampaignApi = {
                     campaignResults.on("new-link", function(link) {
                         socket.broadcast.emit(doc._id + ":new-link", link)
                     }.bind(this));
-                    
+
+                    campaignResults.on("new-tweet", function(link) {
+                        socket.broadcast.emit(doc._id + ":new-tweet", link)
+                    }.bind(this));                    
+
                     socket.on("new-graph", function(data, res) {
                         console.log("got a graph request")
                         res(campaignResults.getGraph)
@@ -94,6 +103,20 @@ var CampaignApi = {
                     twitterRest.on("completed", function() {
                         console.log("twitter rest was completed")
                         campaignResults.start()
+                    });
+
+                    function stopCampaign() { // emitting stop initiates clean-up
+                        twitterStream.emit("stop");
+                        twitterRest.emit("stop");
+                        campaignResults.emit("stop");
+                    }
+
+                    CampaignApi.once("stop", function(id) {
+                        console.log("received stop event")
+                        if (id == doc._id) {
+                            console.log("stopping campaign...")
+                            stopCampaign();
+                        }
                     })
 
                 })
@@ -104,18 +127,25 @@ var CampaignApi = {
 
     },
 
-    remove: function(data, res) {
+    destroy: function(user, data, res) {
+        console.log(data);
+        Campaign.remove({_id: data._id}, res)
+    },
 
+    stop: function(user, data, res) {
+        // Campaign.update({_id: data._id}, {state: "completed"}, res);
+
+        Campaign.findByIdAndUpdate(data._id, {state: "completed"}, {"new": true}, res)
+        CampaignApi.emit("stop", data._id)
     },
 
     getGraph: function(id, res) {
         var redisClient = DatabaseContainer.getRedis();      
 
         var key = id + ":graph";
-        console.log(key)
 
         redisClient.get(id + ":graph", res);
     }
-}
+})
 
 module.exports = CampaignApi;

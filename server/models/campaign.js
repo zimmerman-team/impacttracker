@@ -16,6 +16,7 @@ var campaignSchema = new Schema({
     startDate: { type: Date },
     endDate: { type: Date },
 
+    state: { type: String, default: "planned" },
     completed: Boolean,
     running: Boolean,
 
@@ -26,7 +27,10 @@ var campaignSchema = new Schema({
 
     tweets: Schema.Types.ObjectId,
     followers: Schema.Types.ObjectId,
-    network: Schema.Types.ObjectId
+    network: Schema.Types.ObjectId,
+
+    networkGraph: Schema.Types.Mixed,
+    lineGraph: Schema.Types.Mixed
     // results: {
     //     graph: 
     // }

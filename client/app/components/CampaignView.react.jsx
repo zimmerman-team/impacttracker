@@ -108,12 +108,6 @@ var NetworkGraph = React.createClass({
     }
 })
 
-var LineGraph = React.createClass({
-    render: function() {
-        return <h1>Linegraph</h1>
-    }
-})
-
 var InfoBox = React.createClass({
     getDefaultProps: function() {
         return {
@@ -147,5 +141,12 @@ var InfoBox = React.createClass({
         )
     }
 })
+
+var LineGraph = React.createClass({
+    render: function() {
+        return <h1></h1>
+    }
+})
+
 
 module.exports = CampaignView;
