@@ -4,6 +4,7 @@ var socketio = require("socket.io-client");
 
 var Authenticated = require("./Authenticated.react.jsx");
 var ApiService = require("../services/ApiService.js");
+var AuthService = require('../services/AuthService');
 
 var Navbar = require('react-bootstrap').Navbar;
 var Nav = require('react-bootstrap').Nav;
@@ -56,6 +57,10 @@ var Home = Authenticated(React.createClass({
     //     })
     // },
 
+    _onLogoutClick: function() {
+        AuthService.logout();
+    },
+
     render: function() {
         return (
             <div class="project">
@@ -69,7 +74,7 @@ var Home = Authenticated(React.createClass({
                   <NavItem style={{display: "none"}} eventKey={4} href='#/home'><Glyphicon glyph='info-sign' /> Support</NavItem>
                 </Nav>
                 <Nav navbar right>
-                  <NavItem eventKey={5} href='#/home'><Glyphicon glyph='lock' /> Log out</NavItem>
+                  <NavItem eventKey={5} onClick={this._onLogoutClick}><Glyphicon glyph='lock' /> Log out</NavItem>
                 </Nav>
               </Navbar>
 

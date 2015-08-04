@@ -4,6 +4,7 @@ var Q = require('q');
 var _ = require('lodash');
 var EventEmitter = require('events').EventEmitter;
 var objectAssign = require('object-assign');
+var moment = require("moment")
 
 var DatabaseContainer = require('../utils/DatabaseContainer')
 var Campaign = require('../api/Campaign')
@@ -25,7 +26,7 @@ function CampaignResults(campaign) {
         edges: []
     };
 
-    this.lineGraph = [];
+    this.lineGraph = {};
 
     this.stopped = false;
 }
@@ -47,6 +48,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         this.redisClient.select(config.redis.db, function(error, res) {
             if (error) throw error;
 
+            this.writeGraphRedis();
             this.handleTweet(); 
         }.bind(this))
 
@@ -102,18 +104,27 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
     },
 
     addTweet: function(tweet, layer) {
+        var date = moment(Date(tweet.created_at)).startOf('minute').format('x');
+
         var item = {
+            date: date,
             tweet: tweet,
             layer: layer
         }
 
-        this.lineGraph.push(item);
+        this.lineGraph[date] = this.lineGraph[date] || {};
+        this.lineGraph[date][layer] = this.lineGraph[date][layer] || [];
+        this.lineGraph[date][layer].push(tweet);
+
+
 
         return item;
     },
 
     writeGraphRedis: function() { // write graph to redis for real-time results
+        console.log(this.lineGraph)
         this.redisClient.set(this.campaign._id + ":graph", JSON.stringify(this.graph))
+        this.redisClient.set(this.campaign._id + ":linegraph", JSON.stringify(this.lineGraph))
     },
 
     writeDb: function() {
@@ -167,12 +178,15 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                 console.log(sources);
                 console.log(targets);
 
+                // this.emit("new-tweet", this.addTweet(tweet, "source"));
+                // this.writeGraphRedis();
+
+                return this.handleTweet();
 
                 if (sourceTweet) {
                     console.log("tweet is a retweet!")
                     // console.log(tweet.text)
                     // console.log(sourceTweet.text)
-
 
                     var sourceTweetUser = sourceTweet.user;
                     var sourceTweetIsSource = this.isSource(sourceTweetUser.id_str);
@@ -196,6 +210,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                             this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
                             this.emit("new-tweet", this.addTweet(tweet, "source"));
 
+                            this.writeGraphRedis();
                             return this.handleTweet();
                         }
 
@@ -204,6 +219,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                             this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
                             this.emit("new-tweet", this.addTweet(tweet, "target"));
 
+                            this.writeGraphRedis();
                             return this.handleTweet();
                         }
 
@@ -219,6 +235,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
                             this.emit("new-tweet", this.addTweet(tweet, "intermediate"));
                          
+                            this.writeGraphRedis();
                             return this.handleTweet();
                         } 
 

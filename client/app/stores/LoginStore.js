@@ -14,6 +14,12 @@ var LoginStore = objectAssign({}, BaseStore, {
 
                 LoginStore.emitChange();
                 break;
+
+            case AuthConstants.LOGOUT_USER:
+                _user = null;
+
+                LoginStore.emitChange();
+                break;
         }
     }),
 

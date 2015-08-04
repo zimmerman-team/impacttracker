@@ -88,8 +88,8 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
                         socket.broadcast.emit(doc._id + ":new-link", link)
                     }.bind(this));
 
-                    campaignResults.on("new-tweet", function(link) {
-                        socket.broadcast.emit(doc._id + ":new-tweet", link)
+                    campaignResults.on("new-tweet", function(tweet) {
+                        socket.broadcast.emit(doc._id + ":new-tweet", tweet)
                     }.bind(this));                    
 
                     socket.on("new-graph", function(data, res) {
@@ -144,7 +144,15 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
 
         var key = id + ":graph";
 
-        redisClient.get(id + ":graph", res);
+        redisClient.get(key, res);
+    },
+
+    getLineGraph: function(id, res) {
+        var redisClient = DatabaseContainer.getRedis();      
+
+        var key = id + ":linegraph";
+
+        redisClient.get(key, res);
     }
 })
 

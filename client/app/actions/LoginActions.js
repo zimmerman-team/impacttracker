@@ -13,6 +13,14 @@ var LoginActions = {
             actionType: AuthConstants.LOGIN_USER,
             user: user
         })
+    },
+
+    logoutUser: function() {
+        RouterContainer.get().transitionTo('/login');
+
+        AppDispatcher.dispatch({
+            actionType: AuthConstants.LOGOUT_USER
+        })
     }
 }
 

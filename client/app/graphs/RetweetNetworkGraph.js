@@ -544,6 +544,7 @@ var RetweetNetworkGraph = {
 
         _svg = d3.select(el)
             .append("svg")
+            .attr("class", "retweetNetworkChart") // todo: remove this, instead append to child of el
             .call(drag)
             .on("click", function() {
                 if (d3.event.defaultPrevented) return;

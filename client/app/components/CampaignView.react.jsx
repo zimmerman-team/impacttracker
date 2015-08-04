@@ -1,6 +1,7 @@
 var React = require('react')
 var Router = require('react-router');
 var _ = require('lodash')
+var moment = require("moment");
 var CampaignStore = require("../stores/CampaignStore")
 
 var TabbedArea = require('react-bootstrap').TabbedArea;
@@ -24,9 +25,9 @@ var CampaignView = React.createClass({
     render: function() {
         return (
           <TabbedArea defaultActiveKey={2}>
-            <TabPane eventKey={1} tab='Campaign'>this.state.campaign</TabPane>
+            { /*<TabPane eventKey={1} tab='Campaign'>this.state.campaign</TabPane>*/ }
             <TabPane eventKey={2} tab='Retweet network graph'><NetworkGraph campaign={this.state.campaign}/></TabPane>
-            <TabPane eventKey={3} tab='Line graphs'><LineGraph /></TabPane>
+            <TabPane eventKey={3} tab='Retweet line graph'><LineGraph campaign={this.state.campaign}/></TabPane>
           </TabbedArea>
         )
     },
@@ -82,6 +83,7 @@ var NetworkGraph = React.createClass({
         var el = this.getDOMNode();
         RetweetNetworkGraph.destroy();
 
+        // todo: remove listeners properly
         ApiService.socketOff('new-node', RetweetNetworkGraph.addNode);
         ApiService.socketOff('new-link', RetweetNetworkGraph.addLink);
     },
@@ -142,9 +144,77 @@ var InfoBox = React.createClass({
     }
 })
 
+var RetweetLineGraph = require('../graphs/RetweetLineGraph');
+
+
+var _preparedGraph = [];
+
+var prepareData = function(graph) {
+    var renderedGraph = _.mapValues(graph, function(item) {
+        return _.mapValues(item, function(value) {
+            return value.length
+        })
+    });
+
+    // todo: improve performance by removing this iteration (and maybe all iterations)
+    _preparedGraph = _.map(renderedGraph, function(value, key) {
+        value.date = new Date(parseInt(key));
+
+        return value
+    });
+
+    return _preparedGraph;
+}
+
+
 var LineGraph = React.createClass({
+
+    componentDidMount: function() {
+        var el = this.getDOMNode();
+        RetweetLineGraph.create(el);
+
+        var socket = ApiService.getSocket();
+
+        console.log("component mounted")
+
+        // gets initial graph
+        socket.emit("Campaign.getLineGraph", this.props.campaign._id, function(error, graph) {
+            if (error) throw error;
+
+            RetweetLineGraph.load(prepareData(JSON.parse(graph)))
+        })
+
+        // todo: real-time updating of the graph
+        // ApiService.socketOn(this.props.campaign._id + ':new-tweet', function(tweet) {
+        //     console.log(tweet)
+
+        //     var date = tweet.date;
+        //     var layer = tweet.layer;
+        //     var tweet = tweet.tweet;
+
+        //     _preparedGraph[date] = _preparedGraph[date] || {};
+        //     _preparedGraph[date][layer] = _preparedGraph[date][layer] || 0;
+        //     _preparedGraph[date][layer] += 1;
+
+        //     RetweetLineGraph.load(_preparedGraph, true);   
+        // });
+
+    },
+
+    componentWillUnmount: function() {
+        RetweetLineGraph.destroy();
+        _preparedGraph = [];
+ 
+        // todo: properly unbind events
+        ApiService.socketOff('new-tweet', RetweetNetworkGraph.addLink);
+    },
+
     render: function() {
-        return <h1></h1>
+        return (
+            <div className="time-graph">
+
+            </div>
+        )
     }
 })
 

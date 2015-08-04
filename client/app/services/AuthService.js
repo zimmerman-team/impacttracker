@@ -54,7 +54,15 @@ var AuthService = {
     },
 
     logout: function() {
-
+        return new Promise((resolve, reject) => {
+            request
+                .get('/logout')
+                .end(function(error, res) {
+                    error ? reject(error) : resolve(res);
+                })
+        }).then(function(res) {
+            LoginActions.logoutUser();
+        })   
     }
 }
 

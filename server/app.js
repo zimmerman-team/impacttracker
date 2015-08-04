@@ -100,6 +100,7 @@ io.on('connection', function(socket) {
 
     socket.on("Campaign.stop", Campaign.stop.bind(null, user))
     socket.on("Campaign.getGraph", Campaign.getGraph)
+    socket.on("Campaign.getLineGraph", Campaign.getLineGraph)
 
     socket.on('Source.create', Source.create.bind(null, user));
     socket.on('Source.getAll', Source.getAll.bind(null, user));
@@ -107,9 +108,6 @@ io.on('connection', function(socket) {
     socket.on('Target.create', Target.create.bind(null, user));
     socket.on('Target.getAll', Target.getAll.bind(null, user));
 
-    socket.on('new-graph', function(data, res) {
-      console.log('got graph event')
-    }.bind(this));
 })
 
 mongoose.connect(config.database.url)

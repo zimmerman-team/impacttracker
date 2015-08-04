@@ -1,6 +1,6 @@
 #info-box{
   position: absolute;
-  top: 6%;
+  top: 20%;
   left: 3%;
   background-color: rgba(22,22,22,0.7);
   color: #eee;
@@ -98,7 +98,7 @@
 }
 
 
-svg{
+svg.retweetNetworkChart {
   background-color: #383838;
   height: 100%;
 }
@@ -162,13 +162,13 @@ svg{
 }
 
 .d3-tip {
-  top: 6% !important;
+  top: 20% !important;
   right: 1% !important;
   left: auto !important;
   height: 90% !important;
   width: 200px !important;
   background-color: rgba(22,22,22,0.7);
-  opacity: 1 !important;
+  /*opacity: 1 !important;*/
   line-height: 1;
   font-weight: normal;
   padding: 0 12px 12px;
@@ -236,4 +236,15 @@ svg{
   margin: -1px 0 0 0;
   top: 100%;
   left: 0;
+}
+
+
+
+/* LINE GRAPH */
+.time-graph svg {
+  font: 16px sans-serif;
+}
+
+.time-graph .c3-legend-item {
+  font-size: 16px;
 }

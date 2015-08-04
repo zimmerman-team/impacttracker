@@ -12,7 +12,9 @@ var Login = React.createClass({
     },
 
     login: function(e) {
-        // e.preventDefault();
+        e.preventDefault();
+
+        console.log("called login")
 
         var username = (this.refs.username).getInputDOMNode().value.trim();
         var password = (this.refs.password).getInputDOMNode().value.trim();
@@ -60,7 +62,7 @@ var Login = React.createClass({
               <div className="col-lg-4 col-lg-offset-4">
                 <div className="panel panel-default">
                   <h1>Log in</h1>
-                  <form onsubmit="{this.login}">
+                  <form onSubmit={this.login}>
                     <Input type="text" defaultValue="test" ref="username" placeholder="Username" />
                     <Input type="password" defaultValue="test" ref="password" placeholder="Password" />
                     <ButtonInput type='submit' bsStyle="primary" defaultValue="Log in" />
@@ -76,7 +78,7 @@ var Login = React.createClass({
 
 
     componentDidMount: function() {
-        this.login()
+        // this.login()
     }
 
 })

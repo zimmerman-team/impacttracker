@@ -86,8 +86,10 @@ var CampaignTable = React.createClass({
 var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https://github.com/rackt/react-router/issues/83
     
     _onDeleteCampaignClick: function(id) {
-        console.log(id)
-        ApiService.deleteCampaign(id);
+        var result = confirm("Are you sure you want to delete this campaign? This cannot be undone");
+        if (result) {
+            ApiService.deleteCampaign(id);
+        }
     },
 
     _onStopCampaignClick: function(id) {
