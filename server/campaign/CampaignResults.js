@@ -150,6 +150,11 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
             }
 
             var user = tweet.user;
+
+            if (!user) {
+                return this.handleTweet();
+            }
+
             var userId = user.id_str;
             console.log("got a tweet from the list with userid", userId)
 
@@ -181,7 +186,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                 // this.emit("new-tweet", this.addTweet(tweet, "source"));
                 // this.writeGraphRedis();
 
-                return this.handleTweet();
+                // return this.handleTweet();
 
                 if (sourceTweet) {
                     console.log("tweet is a retweet!")

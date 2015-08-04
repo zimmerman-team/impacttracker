@@ -102,7 +102,18 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
 
                     twitterRest.on("completed", function() {
                         console.log("twitter rest was completed")
-                        campaignResults.start()
+
+
+                        Campaign
+                            .findOne({ _id: this.campaign._id})
+                            .populate([{path: "sources"}, {path: "targets"}])
+                            .exec(function(error, campaign) {
+                                // if (error) throw error;
+
+                                campaignResults.campaign = campaign
+                                campaignResults.start()
+                            }.bind(this))
+                            
                     });
 
                     function stopCampaign() { // emitting stop initiates clean-up

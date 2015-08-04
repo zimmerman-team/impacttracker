@@ -30,7 +30,7 @@ TwitterStream.prototype = objectAssign({}, TwitterStream.prototype, EventEmitter
             stream
                 .on('data', handleTweet.bind(this))
                 .on('error', function(error) {
-                    throw error;
+                    // throw error;
                 })
 
             this.once("stop", function() {
