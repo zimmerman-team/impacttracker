@@ -9,6 +9,8 @@ var DatabaseContainer = require('../utils/DatabaseContainer')
 var Source = require('../models/source')
 var Target = require('../models/target')
 
+var Campaign = require('../models/campaign')
+
 function TwitterRest(campaign) {
     this.campaign = campaign;
     this.client = new Twitter(config.twitter);
@@ -22,6 +24,9 @@ function TwitterRest(campaign) {
     //     content_type: "json"
     // })
 
+    this.sources = [];
+    this.targets = [];
+
     this.redisClient = DatabaseContainer.getRedis();
 
     this.ttl = 60 * 10;
@@ -34,14 +39,20 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         var targets = this.campaign.targets;
 
         this.getLimits(function() {
-            async.parallel([
-                this.getSourcesAndFollowers.bind(this, sources, targets),
-                this.getSources.bind(this, sources),
-                this.getTargets.bind(this, targets)
-                ], function(error) {
-                    if (error) throw error;
-                    this.emit("completed")
-                }.bind(this));
+            this.getSourcesAndFollowers(sources, targets, function(sources, targets) {
+
+                console.log("after sources and followers)")
+
+                async.parallel([
+                    // this.getSourcesAndFollowers.bind(this, sources, targets),
+                    this.getSources.bind(this, sources),
+                    this.getTargets.bind(this, targets)
+                    ], function(error) {
+                        if (error) throw error;
+                        this.emit("completed")
+                    }.bind(this));
+                    
+            }.bind(this))
         }.bind(this))
     },
 
@@ -49,27 +60,48 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         var sourceScreenNames = _.pluck(sources, "screen_name").join();
         var targetScreenNames = _.pluck(targets, "screen_name").join();
 
-        var getSources = function(cb) {
+        console.log("screen names:")
+        console.log(sourceScreenNames)
+        console.log(targetScreenNames)
+
+        var getSources = function(done2) {
             this.client.get('/users/lookup', {
                 screen_name: sourceScreenNames
             }, function(error, sources, response) {
-                _.forEach(sources, function(source) {
+                if (error) return done2();
+
+                async.each(sources, function(source, cb) {
                     Source.update({screen_name: source.screen_name }, { user_id: source.id_str }, function(error, doc) {
-                        console.log(doc)
+                        console.log("updated source")
+                        cb();
                     });
+                }, function(error) {
+                    console.log("updated final source")
+                    done2();
                 })
-                cb();
             })                
         }
 
-        var getTargets = function(cb) {
+        var getTargets = function(done2) {
+            console.log(targetScreenNames)
+            console.log("getting targets...")
             this.client.get('/users/lookup', {
                 screen_name: targetScreenNames
             }, function(error, targets, response) {
-                _.forEach(targets, function(target) {
-                    Target.update({screen_name: target.screen_name }, { user_id: target.id_str });
+
+                if (error) return done2();
+
+                console.log(targets)
+
+                async.each(targets, function(target, cb) {
+                    Target.update({screen_name: target.screen_name }, { user_id: target.id_str }, function(error, doc) {
+                        console.log("updated target")
+                        cb();
+                    });
+                }, function(error) {
+                    console.log("updated final target")
+                    done2();
                 })
-                cb();
             });
         }
 
@@ -77,9 +109,29 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 getSources.bind(this),
                 getTargets.bind(this),
             ], function(error) {
-                if (error) throw error;
-                done();
-            })
+                // if (error) throw error;
+
+                console.log("getting campaign...")
+
+                // todo: remove this, unnescessary
+                Campaign
+                    .findOne({ _id: this.campaign._id})
+                    .populate([{path: "sources"}, {path: "targets"}])
+                    .exec(function(error, campaign) {
+                        // if (error) throw error;
+                        console.log("got campaign")
+
+                        var sources = campaign.sources;
+                        var targets = campaign.targets;
+
+                        console.log(sources)
+                        console.log(targets)
+
+                        done(sources, targets);
+
+                    }.bind(this))
+
+            }.bind(this))
     },
 
 
@@ -120,9 +172,11 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         var cursor = -1;
         var count = 0; 
 
-        function getSourceFollower (cb) {
+        console.log("screen name...")
+        console.log(source.screen_name)
 
-        }
+        // todo: fix this!!! shouldnt happen
+        if (!source.screen_name) return done();
 
         async.whilst(function() {
             return cursor !== 0 && count++ < 1;
@@ -142,9 +196,10 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 screen_name: source.screen_name,
                 count: 5000
             }, function(error, followers, response) {
-                if (error) {
-                    return cb(error);
-                }
+                if (error) return done();
+                // if (error) {
+                //     return cb(error);
+                // }
 
                 this.writeSourceFollowers(followers.ids, source);
 
@@ -197,6 +252,12 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         var cursor = -1;
         var count = 0; 
 
+        console.log("screen name...")
+        console.log(source.screen_name)
+
+        // todo: fix this!!! shouldnt happen
+        if (!source.screen_name) return done();
+
         async.whilst(function() {
             console.log(this.limits)
             return cursor !== 0 && count++ < 1;
@@ -213,10 +274,11 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 screen_name: source.screen_name,
                 count: 5000
             }, function(error, friends, response) {
+                if (error) return done();
 
-                if (error) {
-                    return cb(error);
-                }
+                // if (error) {
+                //     return cb(error);
+                // }
 
                 // console.log('called')
                 // console.log(friends)

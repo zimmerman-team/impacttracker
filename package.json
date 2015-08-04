@@ -74,7 +74,7 @@
     "serve": "http-server -p 2000 public/ -c-1",
     "runserver": "NODE_ENV=development nodejs server/app.js",
     "watch:client": "fsmonitor -s -d client !.* npm run build:dev",
-    "watch:server": "NODE_ENV=development nodemon --harmony --watch server server/app.js",
+    "watch:server": "NODE_ENV=development nodemon --debug --harmony --watch server server/app.js",
     "dev": "parallelshell 'npm run livereload' 'npm run watch:client' 'npm run watch:server' 'npm run open:dev'",
     "dev:no-open": "parallelshell 'npm run livereload' 'npm run watch:client' 'npm run watch:server'"
   },
