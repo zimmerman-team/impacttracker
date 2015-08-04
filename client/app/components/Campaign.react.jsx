@@ -12,6 +12,7 @@ var Button = require('react-bootstrap').Button;
 var Glyphicon = require('react-bootstrap').Glyphicon;
 var Input = require('react-bootstrap').Input;
 
+var moment = require("moment")
 
 var RouterContainer = require('../util/RouterContainer')
 
@@ -111,7 +112,7 @@ var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https
                     <Glyphicon glyph='screenshot' /> 
                     <div className="panel-content">
                         <h2>{campaign.name}</h2>
-                        <span className="date"><label>Start date:</label> {campaign.creationDate}</span>
+                        <span className="date"><label>Start date:</label> {moment(campaign.creationDate).format('MMMM Do YYYY, h:mm:ss a')}</span>
                         <span className="actions">
                             <Button bsStyle='primary' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/view/" + campaign._id)}><Glyphicon glyph='stats' /> View</Button>
                             {stopButton}
