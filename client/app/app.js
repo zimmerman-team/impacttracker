@@ -41,6 +41,9 @@ var NotFound = React.createClass({
 
 var routes = (
     <Router.Route path="/" handler={App}>
+
+        <Router.DefaultRoute handler={Home}/>
+
         <Router.Route path="login" handler={Login}/>
         <Router.Route path="home" handler={Home}>
             <Router.Route path="campaign" handler={Campaign} />
