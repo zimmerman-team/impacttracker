@@ -228,7 +228,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                             return this.handleTweet();
                         }
 
-                        if (sources.length && targets.length) { // intermediate user
+                        if (targets.length) { // intermediate user
                         // if (targets.length > 0) { // retweet user followed by target
                             console.log('called targets')
                             this.emit("new-node", this.addNode(user, "intermediate"));

@@ -12,7 +12,7 @@ var Login = React.createClass({
     },
 
     login: function(e) {
-        e.preventDefault();
+        // e.preventDefault();
 
         console.log("called login")
 
@@ -78,7 +78,7 @@ var Login = React.createClass({
 
 
     componentDidMount: function() {
-        // this.login()
+        this.login()
     }
 
 })

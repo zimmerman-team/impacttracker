@@ -25,10 +25,6 @@ var campaignSchema = new Schema({
     // sources: [Schema.Types.ObjectId],
     // targets: [Schema.Types.ObjectId],
 
-    tweets: Schema.Types.ObjectId,
-    followers: Schema.Types.ObjectId,
-    network: Schema.Types.ObjectId,
-
     networkGraph: Schema.Types.Mixed,
     lineGraph: Schema.Types.Mixed
     // results: {

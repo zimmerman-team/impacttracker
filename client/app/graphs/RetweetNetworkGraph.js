@@ -660,6 +660,7 @@ var RetweetNetworkGraph = {
         _.forEach(_groups, function(group) {
             group.updateNodes();
         })
+        
         updateLinks();
     },
 
