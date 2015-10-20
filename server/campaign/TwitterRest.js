@@ -15,125 +15,40 @@ function TwitterRest(campaign) {
     this.campaign = campaign;
     this.client = new Twitter(config.twitter);
 
-    this.startDate = null;
     this.limits = {};
-
-    // this.grid = DatabaseContainer.getGrid();
-    // this.ws = gfs.createWriteStream({
-    //     filename: "network:" + campaign._id,
-    //     content_type: "json"
-    // })
-
-    this.sources = [];
-    this.targets = [];
 
     this.redisClient = DatabaseContainer.getRedis();
 
+    // ttl for redis keys
     this.ttl = 60 * 10;
 }
 
 TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.prototype, {
 
+    /*
+     * 1. Get API limits from Twitter API
+     * 2. Retreive users profiles for the designated sources, targets from Twitter API
+     * 3. get Sources and followers of the designated sources/targets from Twitter API
+    */
     start: function() {
         var sources = this.campaign.sources;
         var targets = this.campaign.targets;
 
         this.getLimits(function() {
-            this.getSourcesAndFollowers(sources, targets, function(sources, targets) {
-
-                console.log("after sources and followers)")
-
+            this.getSourceTargetUsers(sources, targets, function(sources, targets) {
                 async.parallel([
-                    // this.getSourcesAndFollowers.bind(this, sources, targets),
                     this.getSources.bind(this, sources),
                     this.getTargets.bind(this, targets)
                     ], function(error) {
                         if (error) throw error;
+
+                        // DONE, emit completed
                         this.emit("completed")
+
                     }.bind(this));
-                    
             }.bind(this))
         }.bind(this))
     },
-
-    getSourcesAndFollowers: function(sources, targets, done) {
-        var sourceScreenNames = _.pluck(sources, "screen_name").join();
-        var targetScreenNames = _.pluck(targets, "screen_name").join();
-
-        console.log("screen names:")
-        console.log(sourceScreenNames)
-        console.log(targetScreenNames)
-
-        var getSources = function(done2) {
-            this.client.get('/users/lookup', {
-                screen_name: sourceScreenNames
-            }, function(error, sources, response) {
-                if (error) return done2();
-
-                async.each(sources, function(source, cb) {
-                    Source.update({screen_name: source.screen_name }, { user_id: source.id_str }, function(error, doc) {
-                        console.log("updated source")
-                        cb();
-                    });
-                }, function(error) {
-                    console.log("updated final source")
-                    done2();
-                })
-            })                
-        }
-
-        var getTargets = function(done2) {
-            console.log(targetScreenNames)
-            console.log("getting targets...")
-            this.client.get('/users/lookup', {
-                screen_name: targetScreenNames
-            }, function(error, targets, response) {
-
-                if (error) return done2();
-
-                console.log(targets)
-
-                async.each(targets, function(target, cb) {
-                    Target.update({screen_name: target.screen_name }, { user_id: target.id_str }, function(error, doc) {
-                        console.log("updated target")
-                        cb();
-                    });
-                }, function(error) {
-                    console.log("updated final target")
-                    done2();
-                })
-            });
-        }
-
-        async.parallel([
-                getSources.bind(this),
-                getTargets.bind(this),
-            ], function(error) {
-                // if (error) throw error;
-
-                console.log("getting campaign...")
-
-                // todo: remove this, unnescessary
-                Campaign
-                    .findOne({ _id: this.campaign._id})
-                    .populate([{path: "sources"}, {path: "targets"}])
-                    .exec(function(error, campaign) {
-                        // if (error) throw error;
-                        console.log("got campaign")
-
-                        var sources = campaign.sources;
-                        var targets = campaign.targets;
-
-                        console.log(sources)
-                        console.log(targets)
-
-                        done(sources, targets);
-
-                    }.bind(this))
-
-            }.bind(this))
-    },
-
 
     getLimits: function(cb) {
         this.client.get('application/rate_limit_status', {
@@ -149,6 +64,71 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
          }.bind(this));
     },
 
+    _checkLimits: function(endpoint) {
+        if (this.limits[endpoint].remaining === 0) {
+            var timeout = this.limits[endpoint].reset - Math.floor(Date.now() / 1000) * 1000;
+            this.limits[endpoint].remaining -= 1;
+            return timeout
+        }
+    },
+
+    // given user objects, return full twitter profiles, with twitter API
+    _performUserLookup: function(users, model, cb) {
+
+        limitTimeout = this._checkLimits('/users/lookup')
+        if (limitTimeout > 0)
+                return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
+
+        this.client.get('/users/lookup', {
+            screen_name: targetScreenNames
+        }, function(error, users, response) {
+            if (error) return done2("failed to get users");
+
+            // update model with retreived id
+            async.each(users, function(user, cb) {
+                model.update(
+                    { screen_name: user.screen_name },
+                    { user_id: user.id_str },
+                    function(error, doc) {
+                        cb(error)
+                });
+            }, function(error) {
+                if (error) throw error
+                console.log("done fetching users")
+                done2();
+            })
+        });
+    },
+
+    getSourceTargetUsers: function(sources, targets, done) {
+        var sourceScreenNames = _.pluck(sources, "screen_name").join();
+        var targetScreenNames = _.pluck(targets, "screen_name").join();
+
+        getSources = this._performUserLookup.bind(this, Source, sourceScreenNames);
+        getTargets = this._performUserLookup.bind(this, Target, targetScreenNames);
+
+        async.parallel([
+                getSources.bind(this),
+                getTargets.bind(this),
+            ], function(error) {
+                if (error) throw error;
+
+                console.log("getting campaign...")
+
+                // fetch campaign again, with updated sources, targets
+                Campaign.findOnePopulated({_id: this.campaign._id},
+                    function(error, campaign) {
+                        if (error) console.error(error)
+
+                        done(campaign.sources, campaign.targets);
+
+                    }.bind(this))
+
+            }.bind(this))
+    },
+
+
+
     getSources: function(sources, cb) {
         async.each(sources, this.getSourceFollowers.bind(this), function(error) {
             console.log('sources done!')
@@ -156,50 +136,31 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         })
     },
 
-    // resetLimits: function() {
-    //     this.client.get('application/rate_limit_status', {
-    //         resources: 'followers,friends'
-    //     }, function(error, limits, res) {
-
-    //         _.forEach(limits.resources, function(resource, key) {
-    //             this.limits[key] = resource;
-    //         }.bind(this));
-
-    //     }.bind(this))    
-    // },
-
+    /*
+     * get source's followers from the Twitter API
+    */
     getSourceFollowers: function(source, done) {
-        var cursor = -1;
-        var count = 0; 
 
-        console.log("screen name...")
-        console.log(source.screen_name)
-
-        // todo: fix this!!! shouldnt happen
+        // shouldnt happen, but can't be sure
         if (!source.screen_name) return done();
 
+        var cursor = -1;
+        // var count = 0; 
+
         async.whilst(function() {
-            return cursor !== 0 && count++ < 1;
-        }.bind(this), function(cb) {
-            if (this.limits['/followers/ids'].remaining === 0) {
-                var timeout = this.limits['/followers/ids'].reset - Math.floor(Date.now() / 1000);
+            return cursor !== 0;
+        }, function(cb) {
 
-                console.log('called')
-                console.log(timeout)
-                return setTimeout(this.getLimits.bind(this, cb), timeout * 1000); // get new limits
-                // return setTimeout(cb, timeout);
-            }
+            limitTimeout = this._checkLimits('/followers/ids')
+            if (limitTimeout > 0)
+                return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
-            this.limits['/followers/ids'].remaining -= 1;
-
-            this.client.get('followers/ids', { // https://dev.twitter.com/rest/reference/get/followers/ids
+            // https://dev.twitter.com/rest/reference/get/followers/ids
+            this.client.get('followers/ids', { 
                 screen_name: source.screen_name,
-                count: 5000
+                count: 5000 // this is the maximum per call
             }, function(error, followers, response) {
-                if (error) return done();
-                // if (error) {
-                //     return cb(error);
-                // }
+                if (error) return cb(error);
 
                 this.writeSourceFollowers(followers.ids, source);
 
@@ -208,23 +169,22 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 return cb();
             }.bind(this));
         }.bind(this), function (error) {
-            done(error);
+            if (error) console.error(error)
+            done()
         }.bind(this))
     },
 
-    writeSourceFollowers: function(ids, source) {
-        // var source_name = source.screen_name
-        // var pre = this.campaign._id + ":sourceFollower:"
-        // _.forEach(ids, function(id) {
-        //     var key = pre + id;
-        //     this.redisClient.sadd(key, source_name);
-        //     this.redisClient.expire(key, this.ttl)
-        // }.bind(this))
 
+    /*
+     * Write source followers of {source} to redis.
+     * 1. followers of source to a list
+     * 2. per follower, a set of sources that they follow
+     * CampaignResults uses these to determine relations
+    */
+    writeSourceFollowers: function(ids, source) {
         // friends list
         var listKey = this.campaign._id + ":" + source.screen_name + ":followers";
 
-        // set friend->targets
         var source_name = source.screen_name
         var pre = this.campaign._id + ":sourceFollower:"
 
@@ -241,47 +201,35 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
     getTargets: function(targets, cb) {
         async.each(targets, this.getTargetFriends.bind(this), function(error) {
-            if (error) throw error;
-
             console.log('targets done!')
             cb(error);
         })
     },
 
+    /*
+     * get Target's friends from the Twitter API
+    */
     getTargetFriends: function(source, done) {
-        var cursor = -1;
-        var count = 0; 
-
-        console.log("screen name...")
-        console.log(source.screen_name)
-
-        // todo: fix this!!! shouldnt happen
         if (!source.screen_name) return done();
+
+        var cursor = -1;
+        // var count = 0; 
 
         async.whilst(function() {
             console.log(this.limits)
             return cursor !== 0 && count++ < 1;
         }.bind(this), function(cb) {
-            if (this.limits['/friends/ids'].remaining === 0) {
-                var timeout = limit.reset - Math.floor(Date.now() / 1000);
 
-                return setTimeout(this.getLimits.bind(this, cb), timeout * 1000); // get new limits
-            }
+            limitTimeout = this._checkLimits('/friends/ids')
+            if (limitTimeout > 0)
+                return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
-            this.limits['/friends/ids'].remaining -= 1;
-            
-            this.client.get('friends/ids', { // https://dev.twitter.com/rest/reference/get/followers/ids
+            // https://dev.twitter.com/rest/reference/get/followers/ids
+            this.client.get('friends/ids', { 
                 screen_name: source.screen_name,
                 count: 5000
             }, function(error, friends, response) {
-                if (error) return done();
-
-                // if (error) {
-                //     return cb(error);
-                // }
-
-                // console.log('called')
-                // console.log(friends)
+                if (error) return cb(error)
 
                 this.writeTargetFriends(friends.ids, source);
 
@@ -291,15 +239,20 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             }.bind(this));
         }.bind(this), function (error) {
             done(error);
-        }.bind(this))
+        })
     },
 
+    /*
+     * Write target fiends of {target} to redis.
+     * 1. followers of target to a list
+     * 2. per follower, a set of targets that they follow (once per iteration)
+     * CampaignResults uses these to determine relations
+    */
     writeTargetFriends: function(ids, target) {
 
         // friends list
         var listKey = this.campaign._id + ":" + target.screen_name + ":friends";
 
-        // set friend->targets
         var target_name = target.screen_name
         var pre = this.campaign._id + ":targetFriend:"
 

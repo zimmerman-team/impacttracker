@@ -58,6 +58,7 @@ var Home = Authenticated(React.createClass({
     // },
 
     _onLogoutClick: function() {
+        window.user = undefined;
         AuthService.logout();
     },
 

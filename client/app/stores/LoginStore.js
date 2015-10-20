@@ -2,6 +2,7 @@ var objectAssign = require('object-assign')
 var AuthConstants = require("../constants/AuthConstants")
 var BaseStore = require("./BaseStore")
 var AppDispatcher = require('../dispatcher/AppDispatcher');
+var AuthService = require('../services/AuthService')
 
 var _user = null;
 
@@ -29,6 +30,10 @@ var LoginStore = objectAssign({}, BaseStore, {
 
     isLoggedIn: function() {
         return !!_user;
+    },
+
+    componentDidMount: function() {
+        _user = window.user
     }
 })
 

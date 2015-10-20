@@ -17,6 +17,7 @@
     "jquery": "~2.1.4",
     "foundation": "~5.5.2",
     "react-date-picker": "~0.10.0",
-    "bootstrap-sass": "~3.3.5"
+    "bootstrap-sass": "~3.3.5",
+    "bootstrap-social": "~4.10.1"
   }
 }

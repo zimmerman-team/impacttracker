@@ -38,7 +38,9 @@
     "superagent": "~1.2.0",
     "twitter": "~1.2.5",
     "passport-twitter": "~1.0.3",
-    "c3": "~0.4.10"
+    "c3": "~0.4.10",
+    "watchify": "~3.4.0",
+    "jade": "~1.11.0"
   },
   "devDependencies": {
     "browserify": "~10.2.6",
@@ -73,7 +75,7 @@
     "livereload": "live-reload --port 9091 public/ client/",
     "serve": "http-server -p 2000 public/ -c-1",
     "runserver": "NODE_ENV=development nodejs server/app.js",
-    "watch:client": "fsmonitor -s -d client !.* npm run build:dev",
+    "watch:client": "watchify client/app/app.js --extension=.jsx -o public/bundle.js",
     "watch:server": "NODE_ENV=development nodemon --debug --harmony --watch server server/app.js",
     "dev": "parallelshell 'npm run livereload' 'npm run watch:client' 'npm run watch:server' 'npm run open:dev'",
     "dev:no-open": "parallelshell 'npm run livereload' 'npm run watch:client' 'npm run watch:server'"

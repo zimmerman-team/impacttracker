@@ -87,7 +87,6 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
     },
 
     addLink: function(tweet, sourceId, targetId) {
-        console.log("adding link")
         var link = {
             source: sourceId,
             target: targetId,
@@ -116,8 +115,6 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         this.lineGraph[date][layer] = this.lineGraph[date][layer] || [];
         this.lineGraph[date][layer].push(tweet);
 
-
-
         return item;
     },
 
@@ -134,12 +131,26 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         })
     },
 
+    /*
+     * Updates the graph and emits relevant events
+    */
+    handleNewTweet: function(tweet, original_tweet, category) {
+        this.emit("new-link", this.addLink(tweet, original_tweet.user.id_str, tweet.user.id_str;));
+        this.emit("new-tweet", this.addTweet(tweet, category"));
+
+        this.writeGraphRedis();
+
+    }
+
+    /*
+     * This is a blocking call, waiting for new tweets (blocks redis connection)
+    */
     handleTweet: function() {
         this.redisClient.brpop([this.tweetList, 0], function(list, tweet) {
-            console.log(this.graph)
-
+            
+            // stop event emitted by Campaign, write graphs to database
             if (tweet === "stop") {
-                return this.writeDb(); // finish
+                return this.writeDb(); 
             }
 
             try {
@@ -150,135 +161,76 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
             }
 
             var user = tweet.user;
-
-            if (!user) {
-                return this.handleTweet();
-            }
-
-            var userId = user.id_str;
-            console.log("got a tweet from the list with userid", userId)
-
-            var sourceTweet = tweet.retweeted_status;
-
-            var pre = this.campaign._id + ":targetFriend:"
+            if (!user) { return this.handleTweet(); }
 
             var sourceFollowerKey = this.campaign._id + ":sourceFollower:" + userId;
             var targetFriendKey = this.campaign._id + ":targetFriend:" + userId;
 
-            if (tweet === "done") {
-                console.log("we are done!")
-                return this.handleTweet();
-            } 
+            var userId = user.id_str;
 
+            // the originally retweeted tweet, we are only interested in retweets
+            var original_tweet = tweet.retweeted_status;
+            if (!orignal_tweet) return this.handleTweet()
+
+            var sourceFollowerKey = this.campaign._id + ":sourceFollower:" + userId;
+            var targetFriendKey = this.campaign._id + ":targetFriend:" + userId;
+
+            /*
+             * Check if the source is a follower of a friend and/or a friend of a target
+             * Handle the different cases accordingly
+            */
             Q.all([
                 Q.ninvoke(this.redisClient, 'smembers', sourceFollowerKey),
                 Q.ninvoke(this.redisClient, 'smembers', targetFriendKey)
             ]).then(function(data) {
                 var sources = data[0];
                 var targets = data[1];
+
+                // is the retweeter a source or a target?
                 var isSource = this.isSource(userId);
                 var isTarget = this.isTarget(userId);
 
                 console.log("got sourceFollowers and targetFriends!")
-                console.log(sources);
-                console.log(targets);
 
-                // this.emit("new-tweet", this.addTweet(tweet, "source"));
-                // this.writeGraphRedis();
+                var original_tweet_user = original_tweet.user;
+                var original_tweet_is_source = this.isSource(original_tweet.user.id_str);
+                var original_tweet_is_target = this.isTarget(original_tweet.user.id_str);
 
-                // return this.handleTweet();
+                // we only care when the retweeted tweet is tweeted by a a source
+                if (original_tweet_is_source) {
 
-                if (sourceTweet) {
-                    console.log("tweet is a retweet!")
-                    // console.log(tweet.text)
-                    // console.log(sourceTweet.text)
+                    // source -> source
+                    if (isSource) { 
+                        handleNewTweet(tweet, original_tweet, "source")
+                    }
+                    // source -> target
+                    else if (isTarget) { // source -> target
+                        handleNewTweet(tweet, original_tweet, "target")
+                    }
+                    // source -> intermediate
+                    // intermediate -> target(s)
+                    else if (targets.length) { // intermediate user
+                        this.emit("new-node", this.addNode(user, "intermediate"));
+                        handleNewTweet(tweet, original_tweet, "intermediate")
 
-                    var sourceTweetUser = sourceTweet.user;
-                    var sourceTweetIsSource = this.isSource(sourceTweetUser.id_str);
-                    var sourceTweetIsTarget = this.isTarget(sourceTweetUser.id_str);
-
-                    console.log(sourceTweet.user.screen_name)
-                    console.log(sourceTweet.user.id_str)
-                    console.log(sourceTweetIsSource)
-
-                    if (sourceTweetIsSource) {
-                        console.log(isSource);
-                        console.log(isTarget);
-                        console.log(targets);
-
-                        var links = [];
-                        var nodes = [];
-
-
-                        if (isSource) { // source -> source link
-                            console.log('called source')
-                            this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
-                            this.emit("new-tweet", this.addTweet(tweet, "source"));
-
-                            this.writeGraphRedis();
-                            return this.handleTweet();
-                        }
-
-                        if (isTarget) { // source -> target
-                            console.log('called target')
-                            this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
-                            this.emit("new-tweet", this.addTweet(tweet, "target"));
-
-                            this.writeGraphRedis();
-                            return this.handleTweet();
-                        }
-
-                        if (targets.length) { // intermediate user
-                        // if (targets.length > 0) { // retweet user followed by target
-                            console.log('called targets')
-                            this.emit("new-node", this.addNode(user, "intermediate"));
-                            this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
-
-                            _.forEach(targets, function(target) {
-                                this.emit("new-link", this.addLink(null, userId, target));
-                            })
-
-                            this.emit("new-tweet", this.addTweet(tweet, "intermediate"));
-                         
-                            this.writeGraphRedis();
-                            return this.handleTweet();
-                        } 
-
-
+                        _.forEach(targets, function(target) {
+                            this.emit("new-link", this.addLink(null, userId, target));
+                        })
+                    } 
+                    // source -> unrelated
+                    else {
                         // otherwise, unrelated user
                         this.emit("new-node", this.addNode(user, "unrelated"));
-                        this.emit("new-link", this.addLink(tweet, sourceTweetUser.id, userId));
-
-                        this.emit("new-tweet", this.addTweet(tweet, "unrelated"));
-
-
-                        this.writeGraphRedis();
-                        return this.handleTweet();
+                        handleNewTweet(tweet, original_tweet, "unrelated")
                     }
-
-                    // var mainSourceFollowerKey = this.campaign._id + ":sourceFollower:" + sourceTweetUser.id_str;
-                    // var mainTargetFriendKey = this.campaign._id + ":targetFriend:" + sourceTweetUser.id_str;
-
-                    // Q.all([
-                    //     Q.ninvoke(this.redisClient, 'smember', mainSourceFollowerKey),
-                    //     Q.ninvoke(this.redisClient, 'smember', mainTargetFriendKey)
-                    // ]).then(function(data) {
-                    //     var sourceTweetSources = data[0];
-                    //     var sourceTweetTargets = data[1];
-
-                    // }).catch(function(error) {
-                    //     throw error;
-                    // })                 
                 }
 
-                return this.handleTweet();
+            return this.handleTweet();
 
-            }.bind(this))
-            .catch(function(error) {
-                throw error;
-            }.bind(this))
-
-
+            }
+        }.bind(this))
+        .catch(function(error) {
+            throw error;
         }.bind(this))
     }
 });

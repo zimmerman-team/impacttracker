@@ -20,9 +20,9 @@ var auth = require('./auth')
 if (config.env === "development") {
     app.use(express.static(config.static_root))
 
-    app.get("/", function(req, res) {
-        res.sendFile(path.join(config.static_root + '/index.html'));
-    })
+    // app.get("/", function(req, res) {
+    //     res.sendFile(path.join(config.static_root + '/index.html'));
+    // })
 
     var MongoStore = require("connect-mongo")(session);
     var sessionStore = new MongoStore(config.database)
@@ -31,6 +31,9 @@ if (config.env === "development") {
     var redisStore = require("connect-redis")(session);
     var sessionStore = new redisStore(config.database);
 }
+
+app.set('view engine', 'jade');
+app.set('views', __dirname + '/views')
 
 // passport.serializeUser(Account.serializeUser());
 // passport.deserializeUser(Account.deserializeUser());

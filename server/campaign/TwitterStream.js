@@ -12,8 +12,6 @@ function TwitterStream(campaign) {
     this.redisKey = campaign._id + ":tweets"
 }
 
-var _stopped = false;
-
 TwitterStream.prototype = objectAssign({}, TwitterStream.prototype, EventEmitter.prototype, {
     track: function(handle) {
         var handle = this.campaign.handle;

@@ -1,13 +1,12 @@
 var _ = require('lodash')
 var EventEmitter = require('events').EventEmitter;
 var objectAssign = require('object-assign');
-var TwitterStream = require('../campaign/TwitterStream')
-var TwitterRest = require('../campaign/TwitterRest')
-var CampaignResults = require('../campaign/CampaignResults')
 
 var Campaign = require('../models/campaign');
 var Source = require('../models/source')
 var Target = require('../models/target')
+
+var RunCampaign = require('../campaign/Campaign');
 
 var DatabaseContainer = require('../utils/DatabaseContainer')
 
@@ -17,18 +16,20 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     getAll: function(user, res) {
+        // console.log(user)
         
-        Campaign.find({}, function(error, doc) {
-            if (error) return res(error);
-
-            return res(null, doc)
-        });
-
-        // Campaign.findByUser({}, {user._id}, function(error, doc) {
+        // Campaign.find({}, function(error, doc) {
         //     if (error) return res(error);
 
         //     return res(null, doc)
-        // })
+        // });
+
+        Campaign.findByUser({}, user._id, function(error, doc) {
+            console.log(doc)
+            if (error) return res(error);
+
+            return res(null, doc)
+        })
     },
 
     create: function(socket, user, data, res) {
@@ -57,76 +58,28 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
         // data.sources = sourceIds,
         // data.targets = targetIds;
 
+        campaign.author = user._id
         campaign.state = "running"
 
         campaign.save(function(error) {
             if (error) return res(error, null);
 
-            res(null, campaign)
-
-            console.log(campaign)
-
+            // TODO: do this in model
             Campaign.populate(campaign, [{path: "sources"}, {path: "targets"}], 
-                function(error, doc) {
-                    console.log(doc)
+                function(error, campaign) {
+                    if (error) return res(error, null);
 
+                    res(null, campaign)
+                    
+                    runCampaign = new RunCampaign(campaign)
+                    runCampaign.start(socket)
 
-                    // todo: cron-like scheduler / job-queue like celery or kue
-                    twitterStream = new TwitterStream(doc); 
-                    twitterStream.track()
-
-                    twitterRest = new TwitterRest(doc);
-                    twitterRest.start() 
-
-                    campaignResults = new CampaignResults(doc);
-
-                    campaignResults.on("new-node", function(node) {
-                        socket.broadcast.emit(doc._id + ":new-node", node)
-                    }.bind(this));
-
-                    campaignResults.on("new-link", function(link) {
-                        socket.broadcast.emit(doc._id + ":new-link", link)
-                    }.bind(this));
-
-                    campaignResults.on("new-tweet", function(tweet) {
-                        socket.broadcast.emit(doc._id + ":new-tweet", tweet)
-                    }.bind(this));                    
-
-                    socket.on("new-graph", function(data, res) {
-                        console.log("got a graph request")
-                        res(campaignResults.getGraph)
-                    }.bind(this));
-
-                    // campaignResults.on("new-node", socket.emit.bind(this, "new-node"));
-                    // campaignResults.on("new-link", socket.emit.bind(this, "new-link"));
-
-                    twitterRest.on("completed", function() {
-                        console.log("twitter rest was completed")
-
-
-                        Campaign
-                            .findOne({ _id: this.campaign._id})
-                            .populate([{path: "sources"}, {path: "targets"}])
-                            .exec(function(error, campaign) {
-                                // if (error) throw error;
-
-                                campaignResults.campaign = campaign
-                                campaignResults.start()
-                            }.bind(this))
-                            
-                    });
-
-                    function stopCampaign() { // emitting stop initiates clean-up
-                        twitterStream.emit("stop");
-                        twitterRest.emit("stop");
-                        campaignResults.emit("stop");
-                    }
-
-                    CampaignApi.once("stop", function(id) {
+                    // TODO: for future work, this should be done in a more dynamic way
+                    CampaignApi.on("stop", function(id) {
                         console.log("received stop event")
-                        if (id == doc._id) {
+                        if (id == campaign._id) {
                             console.log("stopping campaign...")
-                            stopCampaign();
+                            runCampaign.stop();
                         }
                     })
 
@@ -151,6 +104,7 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     getGraph: function(id, res) {
+        // TODO: persist the graph
         var redisClient = DatabaseContainer.getRedis();      
 
         var key = id + ":graph";
@@ -159,6 +113,7 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     getLineGraph: function(id, res) {
+        // TODO: persist the graph
         var redisClient = DatabaseContainer.getRedis();      
 
         var key = id + ":linegraph";

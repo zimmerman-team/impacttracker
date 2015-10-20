@@ -44,7 +44,7 @@ var Authenticated = function(ComposedComponent) {
         },
 
         _onChange: function() {
-            // console.log(getLoginState());
+            console.log(getLoginState());
             this.setState(getLoginState());
         }
 

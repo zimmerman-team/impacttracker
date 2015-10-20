@@ -9,4 +9,14 @@ var Source = new Schema({
     categories: [String]
 })
 
+Source.statics.findByUser = function(query, userId, cb) {
+    query = query || {};
+    query.author = userId;
+
+    return this
+        .find(query)
+        .exec(cb)
+}
+
+
 module.exports = mongoose.model('Source', Source)

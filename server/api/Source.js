@@ -7,8 +7,9 @@ var SourceApi = {
 
     },
 
-    getAll: function(data, res) {
-        Source.find({}, function(error, doc) {
+    getAll: function(user, res) {
+        Source.findByUser({}, user._id, function(error, doc) {
+            console.log(doc)
             if (error) return res(error);
 
             return res(null, doc)
@@ -16,12 +17,11 @@ var SourceApi = {
     },
 
     create: function(user, data, res) {
-        console.log(data)
+        data.author = user._id;
         var source = new Source(data);
 
         source.save(function(error) {
             if (error) return res(error);
-
             return res(null, source);
         })
     },

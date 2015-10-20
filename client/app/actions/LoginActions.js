@@ -4,10 +4,11 @@ var RouterContainer = require('../util/RouterContainer')
 
 var LoginActions = {
     loginUser: function(user) {
+        // temporary solution
+        localStorage.setItem('isLoggedIn', true)
+
         RouterContainer.get().transitionTo('/home/campaign');
 
-        // localStorage.setItem('logged_in', true)
-        localStorage.setItem('logged_in', user)
 
         AppDispatcher.dispatch({
             actionType: AuthConstants.LOGIN_USER,
@@ -16,7 +17,10 @@ var LoginActions = {
     },
 
     logoutUser: function() {
+        localStorage.setItem('isLoggedIn', false)
+
         RouterContainer.get().transitionTo('/login');
+
 
         AppDispatcher.dispatch({
             actionType: AuthConstants.LOGOUT_USER

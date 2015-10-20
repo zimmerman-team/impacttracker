@@ -5,8 +5,7 @@ var passport = require('passport')
 var Account = require('./models/account')
 
 // authentication middleware
-function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
+function ensureAuthenticated(req, res, next) { if (req.isAuthenticated()) {
         return next();
     }
 
@@ -16,6 +15,17 @@ function ensureAuthenticated(req, res, next) {
 }
 
 module.exports = function(app) {
+
+    // default route
+    app.get('/', function(req, res) {
+        console.log('called route')
+        res.render("index.jade", {
+            title: "ImpactTracker",
+            user: JSON.stringify(req.user)
+        })
+    })
+
+
     app.post('/register', function(req, res) {
         Account.register(new Account({
             username: req.body.username
@@ -37,15 +47,21 @@ module.exports = function(app) {
         res.send({user: req.user})
     });
 
-    app.post('/login', passport.authenticate('local'), function(req, res) {
-        res.send(req.user);
-        // res.redirect('/app');
-    });
 
     app.get('/logout', function(req, res) {
         req.logout();
         res.send(200);
         // res.redirect('/');
+    });
+
+    // app.get('/isLoggedIn', function(req, res) {
+    //     console.log(req.isAuthenticated())
+    //     res.send(req.isAuthenticated())
+    // })
+
+    app.post('/login', passport.authenticate('local'), function(req, res) {
+        res.send(req.user);
+        // res.redirect('/app');
     });
 
     app.get('/auth/twitter', passport.authenticate('twitter'));

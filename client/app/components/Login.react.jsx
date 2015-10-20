@@ -2,6 +2,9 @@ var React = require('react');
 var AuthService = require('../services/AuthService');
 var Input = require('react-bootstrap').Input;
 var ButtonInput = require('react-bootstrap').ButtonInput;
+var LoginStore = require("../stores/LoginStore")
+var LoginActions = require("../actions/LoginActions")
+var RouterContainer = require('../util/RouterContainer')
 
 var Login = React.createClass({
     getInitialState: function() {
@@ -12,19 +15,17 @@ var Login = React.createClass({
     },
 
     login: function(e) {
-        // e.preventDefault();
+        e.preventDefault();
 
-        console.log("called login")
+        // var username = (this.refs.username).getInputDOMNode().value.trim();
+        // var password = (this.refs.password).getInputDOMNode().value.trim();
 
-        var username = (this.refs.username).getInputDOMNode().value.trim();
-        var password = (this.refs.password).getInputDOMNode().value.trim();
+        // AuthService.login(username, password)
+        //     .catch(function(error) {
+        //         console.log("error logging in", error)
+        //     })
 
-        AuthService.login(username, password)
-            .catch(function(error) {
-                console.log("error logging in", error)
-            })
-
-        // AuthService.twitterAuth();
+        AuthService.twitterAuth();
     },
 
     render: function() {
@@ -61,12 +62,19 @@ var Login = React.createClass({
             <div className="row">
               <div className="col-lg-4 col-lg-offset-4">
                 <div className="panel panel-default">
+                    <a className="btn btn-block btn-social btn-twitter"
+                        onClick={this.login}>
+                        <i className="fa fa-twitter"></i>
+                        Sign in with Twitter
+                    </a>
+                  {/*
                   <h1>Log in</h1>
                   <form onSubmit={this.login}>
                     <Input type="text" defaultValue="test" ref="username" placeholder="Username" />
                     <Input type="password" defaultValue="test" ref="password" placeholder="Password" />
                     <ButtonInput type='submit' bsStyle="primary" defaultValue="Log in" />
-                  </form>
+                </form>
+                */}
                 </div>
               </div>
             </div>
@@ -78,7 +86,10 @@ var Login = React.createClass({
 
 
     componentDidMount: function() {
-        this.login()
+        if (window.user) {
+            LoginActions.loginUser(window.user)
+        }
+            // RouterContainer.get().transitionTo('/home/campaign');
     }
 
 })

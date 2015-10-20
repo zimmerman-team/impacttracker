@@ -32,8 +32,28 @@ var campaignSchema = new Schema({
     // }
 })
 
+campaignSchema.statics.findPopulated = function(query, cb) {
+    return this
+        .find(query)
+        .populate([{path: "sources"}, {path: "targets"}])
+        .exec(cb)
+}
+
+campaignSchema.statics.findOnePopulated = function(query, cb) {
+    return this
+        .findOne(query)
+        .populate([{path: "sources"}, {path: "targets"}])
+        .exec(cb)
+}
+
 campaignSchema.statics.findByUser = function(query, userId, cb) {
-    return this.find({author: userId}, cb)
+    query = query || {};
+    query.author = userId;
+
+    return this
+        .find(query)
+        .populate([{path: "sources"}, {path: "targets"}])
+        .exec(cb)
 }
 
 var Campaign = mongoose.model('Campaign', campaignSchema);

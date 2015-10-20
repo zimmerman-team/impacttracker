@@ -7,8 +7,8 @@ var targetApi = {
 
     },
 
-    getAll: function(data, res) {
-        Target.find({}, function(error, doc) {
+    getAll: function(user, res) {
+        Target.findByUser({}, user._id, function(error, doc) {
             console.log(doc)
 
             if (error) return res(error);
@@ -19,7 +19,7 @@ var targetApi = {
     },
 
     create: function(user, data, res) {
-        console.log(data)
+        data.author = user._id;
         var target = new Target(data);
 
         target.save(function(error) {
