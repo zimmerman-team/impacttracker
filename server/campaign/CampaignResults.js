@@ -103,7 +103,8 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
     },
 
     addTweet: function(tweet, layer) {
-        var date = moment(Date(tweet.created_at)).startOf('minute').format('x');
+        console.log('adding tweet..')
+        var date = moment(new Date(tweet.created_at)).startOf('minute').format('x');
 
         var item = {
             date: date,
@@ -135,12 +136,16 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
      * Updates the graph and emits relevant events
     */
     handleNewTweet: function(tweet, original_tweet, category) {
-        this.emit("new-link", this.addLink(tweet, original_tweet.user.id_str, tweet.user.id_str;));
-        this.emit("new-tweet", this.addTweet(tweet, category"));
+        this.emit("new-link", this.addLink(tweet, original_tweet.user.id_str, tweet.user.id_str));
+        this.emit("new-tweet", this.addTweet(tweet, category));
+    },
 
-        this.writeGraphRedis();
+    getTwitterIdFromScreenName: function(screenName, cb) {
+        this.database.findByScreenName({}, screenName, function(error, source) {
+            if (error) return cb()
 
-    }
+        })
+    },
 
     /*
      * This is a blocking call, waiting for new tweets (blocks redis connection)
@@ -170,7 +175,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
             // the originally retweeted tweet, we are only interested in retweets
             var original_tweet = tweet.retweeted_status;
-            if (!orignal_tweet) return this.handleTweet()
+            if (!original_tweet) return this.handleTweet()
 
             var sourceFollowerKey = this.campaign._id + ":sourceFollower:" + userId;
             var targetFriendKey = this.campaign._id + ":targetFriend:" + userId;
@@ -190,47 +195,55 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                 var isSource = this.isSource(userId);
                 var isTarget = this.isTarget(userId);
 
-                console.log("got sourceFollowers and targetFriends!")
-
-                var original_tweet_user = original_tweet.user;
                 var original_tweet_is_source = this.isSource(original_tweet.user.id_str);
                 var original_tweet_is_target = this.isTarget(original_tweet.user.id_str);
+
+                console.log("tweet is source? " + original_tweet_is_source)
 
                 // we only care when the retweeted tweet is tweeted by a a source
                 if (original_tweet_is_source) {
 
                     // source -> source
                     if (isSource) { 
-                        handleNewTweet(tweet, original_tweet, "source")
+                        console.info("Got a new source->source relation")
+                        this.handleNewTweet(tweet, original_tweet, "source")
                     }
                     // source -> target
                     else if (isTarget) { // source -> target
-                        handleNewTweet(tweet, original_tweet, "target")
+                        console.info("Got a new source->target relation")
+                        this.handleNewTweet(tweet, original_tweet, "target")
                     }
                     // source -> intermediate
                     // intermediate -> target(s)
                     else if (targets.length) { // intermediate user
+                        console.info("Got a new source->intermediate and intermediate->targets relation")
                         this.emit("new-node", this.addNode(user, "intermediate"));
-                        handleNewTweet(tweet, original_tweet, "intermediate")
+                        this.handleNewTweet(tweet, original_tweet, "intermediate")
 
                         _.forEach(targets, function(target) {
+                            console.log(target)
                             this.emit("new-link", this.addLink(null, userId, target));
-                        })
+                        }.bind(this))
+
+                        console.log(this.graph)
                     } 
                     // source -> unrelated
                     else {
-                        // otherwise, unrelated user
+                        console.info("Got a new source->unrelated relation")
                         this.emit("new-node", this.addNode(user, "unrelated"));
-                        handleNewTweet(tweet, original_tweet, "unrelated")
+                        this.handleNewTweet(tweet, original_tweet, "unrelated")
                     }
                 }
 
-            return this.handleTweet();
+                this.writeGraphRedis();
+                return this.handleTweet();
 
-            }
-        }.bind(this))
-        .catch(function(error) {
-            throw error;
+            }.bind(this))
+            .catch(function(error) {
+                console.error(error)
+
+                return this.handleTweet();
+            }.bind(this))
         }.bind(this))
     }
 });

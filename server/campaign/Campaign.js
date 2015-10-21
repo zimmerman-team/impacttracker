@@ -53,8 +53,6 @@ RunCampaign.prototype.start = function(socket) {
 
     this.bindSocketEvents(socket)
 
-    console.log(this.campaignResults)
-
     // campaignResults.on("new-node", socket.emit.bind(this, "new-node"));
     // campaignResults.on("new-link", socket.emit.bind(this, "new-link"));
 

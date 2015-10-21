@@ -75,7 +75,7 @@ var CampaignDetail = React.createClass({
             // change this to work with flux
             ApiService.createCampaign(campaign, function(id) {
                 console.log("transitioning")
-                RouterContainer.get().transitionTo('/home/campaign');
+                // RouterContainer.get().transitionTo('/home/campaign');
             });
             
         }

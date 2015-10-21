@@ -9,8 +9,6 @@ var targetApi = {
 
     getAll: function(user, res) {
         Target.findByUser({}, user._id, function(error, doc) {
-            console.log(doc)
-
             if (error) return res(error);
 
             return res(null, doc)

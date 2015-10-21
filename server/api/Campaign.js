@@ -16,16 +16,7 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     getAll: function(user, res) {
-        // console.log(user)
-        
-        // Campaign.find({}, function(error, doc) {
-        //     if (error) return res(error);
-
-        //     return res(null, doc)
-        // });
-
         Campaign.findByUser({}, user._id, function(error, doc) {
-            console.log(doc)
             if (error) return res(error);
 
             return res(null, doc)
@@ -92,13 +83,10 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     destroy: function(user, data, res) {
-        console.log(data);
         Campaign.remove({_id: data._id}, res)
     },
 
     stop: function(user, data, res) {
-        // Campaign.update({_id: data._id}, {state: "completed"}, res);
-
         Campaign.findByIdAndUpdate(data._id, {state: "completed"}, {"new": true}, res)
         CampaignApi.emit("stop", data._id)
     },
@@ -108,7 +96,6 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
         var redisClient = DatabaseContainer.getRedis();      
 
         var key = id + ":graph";
-
         redisClient.get(key, res);
     },
 
@@ -117,7 +104,6 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
         var redisClient = DatabaseContainer.getRedis();      
 
         var key = id + ":linegraph";
-
         redisClient.get(key, res);
     }
 })

@@ -421,7 +421,7 @@ var tip = d3.tip()
             case "target":
                 ntargets.push(item)
                 break;
-            case "intermediary":
+            case "intermediate":
                 nintermediaries.push(item)
                 break;
             case "unrelated":
@@ -598,7 +598,7 @@ var RetweetNetworkGraph = {
                 "uniqueNodeGroupClass": "sources",
                 "nodeGroup": "sources"
             }),
-            "intermediary": new LineContainer(line2, 0, line2, height, {
+            "intermediate": new LineContainer(line2, 0, line2, height, {
                "uniqueNodeGroupClass": "intermediaries",
                 "nodeGroup": "intermediaries"
             }),
@@ -627,6 +627,7 @@ var RetweetNetworkGraph = {
     },
 
     addNode: function(node, redraw=false) {
+        console.log(node.layer)
         _groups[node.layer].addNode(node.id, node.data, redraw);
 
         _layerDict[node.id] = node.layer;

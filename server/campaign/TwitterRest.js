@@ -40,7 +40,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                     this.getSources.bind(this, sources),
                     this.getTargets.bind(this, targets)
                     ], function(error) {
-                        if (error) throw error;
+                        if (error) console.error(error)
 
                         // DONE, emit completed
                         this.emit("completed")
@@ -54,13 +54,13 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         this.client.get('application/rate_limit_status', {
             resources: 'followers,friends,users'
         }, function(error, limits, res) {
-            if (error) throw error;
+            if (error) console.error(error)
 
             this.limits["/followers/ids"] = limits.resources.followers["/followers/ids"];
             this.limits["/friends/ids"] = limits.resources.friends["/friends/ids"];
             this.limits["/users/lookup"] = limits.resources.users["/users/lookup"];
 
-             if (cb) cb();        
+             if (cb) cb();
          }.bind(this));
     },
 
@@ -72,32 +72,43 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         }
     },
 
+    /*
+     * Parses error response returned by Twitter API
+     * TODO: make this handle more cases
+    */
+    _parseTwitterErrorMessage: function(error) {
+        errorRes = error[0]; // assume one error message for now
+        return errorRes.code + ": " + errorRes.message;
+    },
+
     // given user objects, return full twitter profiles, with twitter API
-    _performUserLookup: function(users, model, cb) {
+    _performUserLookup: function(model, users, cb) {
 
         limitTimeout = this._checkLimits('/users/lookup')
         if (limitTimeout > 0)
                 return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
         this.client.get('/users/lookup', {
-            screen_name: targetScreenNames
-        }, function(error, users, response) {
-            if (error) return done2("failed to get users");
+            screen_name: users
+        }, function(error, twitterUsers, response) {
+            if (error) console.error(this._parseTwitterErrorMessage(error));
+            if (error) return cb("failed to get any user in list " + users);
 
             // update model with retreived id
-            async.each(users, function(user, cb) {
+            async.each(twitterUsers, function(user, updatedcb) {
                 model.update(
                     { screen_name: user.screen_name },
                     { user_id: user.id_str },
                     function(error, doc) {
-                        cb(error)
+                        updatedcb(error)
                 });
             }, function(error) {
-                if (error) throw error
+                if (error) console.error(error)
+                cb();
+
                 console.log("done fetching users")
-                done2();
             })
-        });
+        }.bind(this));
     },
 
     getSourceTargetUsers: function(sources, targets, done) {
@@ -111,7 +122,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 getSources.bind(this),
                 getTargets.bind(this),
             ], function(error) {
-                if (error) throw error;
+                if (error) console.error(error);
 
                 console.log("getting campaign...")
 
@@ -185,7 +196,8 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         // friends list
         var listKey = this.campaign._id + ":" + source.screen_name + ":followers";
 
-        var source_name = source.screen_name
+        console.log(source)
+        var source_id = source.user_id
         var pre = this.campaign._id + ":sourceFollower:"
 
         _.forEach(ids, function(id) {
@@ -193,7 +205,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             this.redisClient.expire(listKey, this.ttl)
 
             var key = pre + id;
-            this.redisClient.sadd(key, source_name);
+            this.redisClient.sadd(key, source_id);
             this.redisClient.expire(key, this.ttl)            
         }.bind(this))
 
@@ -217,7 +229,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
         async.whilst(function() {
             console.log(this.limits)
-            return cursor !== 0 && count++ < 1;
+            return cursor !== 0;
         }.bind(this), function(cb) {
 
             limitTimeout = this._checkLimits('/friends/ids')
@@ -253,7 +265,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         // friends list
         var listKey = this.campaign._id + ":" + target.screen_name + ":friends";
 
-        var target_name = target.screen_name
+        var target_id = target.user_id
         var pre = this.campaign._id + ":targetFriend:"
 
         _.forEach(ids, function(id) {
@@ -261,7 +273,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             this.redisClient.expire(listKey, this.ttl)
 
             var key = pre + id;
-            this.redisClient.sadd(key, target_name);
+            this.redisClient.sadd(key, target_id);
             this.redisClient.expire(key, this.ttl)            
         }.bind(this))
 

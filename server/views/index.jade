@@ -1,0 +1,46 @@
+
+doctype html
+//if lt IE 7
+  html.no-js.lt-ie9.lt-ie8.lt-ie7  
+//if IE 7
+  html.no-js.lt-ie9.lt-ie8  
+//if IE 8
+  html.no-js.lt-ie9  
+// [if gt IE 8] <!
+html.no-js
+  // <![endif]
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    title
+    meta(name='description', content='')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='bower_components/react-date-picker/dist/react-datepicker.css')
+    link(rel='stylesheet', href='bower_components/bootstrap-social/bootstrap-social.css')
+    link(rel='stylesheet', href='css/bootstrap-datetimepicker.min.css')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css')
+    link(rel='stylesheet', href='css/graph.css')
+    link(rel='stylesheet', href='css/app.css')
+  body
+    //if lt IE 7
+      p.browsehappy
+        | You are using an 
+        strong outdated
+        |  browser. Please 
+        a(href='http://browsehappy.com/') upgrade your browser
+        |  to improve your experience.
+
+    if user
+        script(type='text/javascript').
+            var user =!{user}
+
+    #app
+    footer
+      .container
+        .row
+          .col-sm-3
+            a(href='http://www.zimmermanzimmerman.nl', target='_blank')
+              img(src='img/zz-logo.svg')
+    script(src='//localhost:9091')
+    script(src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js')
+    script(src='bundle.js')
