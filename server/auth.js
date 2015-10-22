@@ -13,11 +13,12 @@ module.exports = passport.use(new TwitterStrategy(config.passportTwitter,
       console.log(user);
       console.log(token);
       console.log(tokenSecret);
-      if (user) 
+      if (user) {
         user.access_token = token;
         user.access_token_secret = tokenSecret;
         user.save()
         return done(error, user);
+      }
 
       user = new TwitterAccount
       user.twitter_id = profile.id
