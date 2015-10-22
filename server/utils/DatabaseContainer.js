@@ -26,7 +26,17 @@ var DatabaseContainer = {
 
     getRedis: function() {
         return _redis;
+    },
+
+    setIo: function(io) {
+        _io = io;
+    },
+
+    getIo: function() {
+        return _io;
     }
+
+
 }
 
 module.exports = DatabaseContainer;

@@ -7,7 +7,7 @@ var objectAssign = require('object-assign');
 var moment = require("moment")
 
 var DatabaseContainer = require('../utils/DatabaseContainer')
-var Campaign = require('../api/Campaign')
+var Campaign = require('../models/campaign')
 
 function CampaignResults(campaign) {
     this.campaign = campaign;
@@ -19,14 +19,14 @@ function CampaignResults(campaign) {
 
     this.tweetList = campaign._id + ":tweets";
 
-    this.graph = {
+    this.graph = campaign.networkGraph || {
         directed: false,
         label: campaign.name,
         nodes: [],
         edges: []
     };
 
-    this.lineGraph = {};
+    this.lineGraph = campaign.lineGraph || {};
 
     this.stopped = false;
 }
@@ -34,7 +34,7 @@ function CampaignResults(campaign) {
 // CampaignResults.prototype = {
 CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmitter.prototype, {
 
-    start: function(handle) {
+    start: function(resume) {
 
         // initialize source and target nodes
         _.forEach(this.campaign.sources, function(source) {
@@ -45,10 +45,12 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
             this.addNode(target, "target")
         }.bind(this))
 
+        // // write initial graphs to database
+        this.writeDb()
+
         this.redisClient.select(config.redis.db, function(error, res) {
             if (error) throw error;
 
-            this.writeGraphRedis();
             this.handleTweet(); 
         }.bind(this))
 
@@ -73,7 +75,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
     addNode: function(user, layer) {
 
         var node = {
-            id: user.id_str || user.user_id, // todo: change all to id_str
+            id: user.id_str || user.user_id, // TODO: change all to id_str
             label: user.screen_name,
             layer: layer,
             data: {
@@ -120,7 +122,6 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
     },
 
     writeGraphRedis: function() { // write graph to redis for real-time results
-        console.log(this.lineGraph)
         this.redisClient.set(this.campaign._id + ":graph", JSON.stringify(this.graph))
         this.redisClient.set(this.campaign._id + ":linegraph", JSON.stringify(this.lineGraph))
     },
@@ -129,6 +130,8 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         Campaign.findByIdAndUpdate(this.campaign._id, {
             networkGraph: this.graph,
             lineGraph: this.lineGraph
+        }, function(error, doc) {
+            if (error) console.error(error)
         })
     },
 
@@ -221,11 +224,8 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                         this.handleNewTweet(tweet, original_tweet, "intermediate")
 
                         _.forEach(targets, function(target) {
-                            console.log(target)
                             this.emit("new-link", this.addLink(null, userId, target));
                         }.bind(this))
-
-                        console.log(this.graph)
                     } 
                     // source -> unrelated
                     else {
@@ -235,7 +235,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                     }
                 }
 
-                this.writeGraphRedis();
+                this.writeDb();
                 return this.handleTweet();
 
             }.bind(this))

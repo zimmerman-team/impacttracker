@@ -13,7 +13,13 @@ var Campaign = require('../models/campaign')
 
 function TwitterRest(campaign) {
     this.campaign = campaign;
-    this.client = new Twitter(config.twitter);
+
+    console.log(campaign)
+    this.twitterConfig = config.twitter;
+    this.twitterConfig.access_token_key = campaign.author.access_token;
+    this.twitterConfig.access_token_secret = campaign.author.access_token_secret;
+    console.log(this.twitterConfig)
+    this.client = new Twitter(this.twitterConfig);
 
     this.limits = {};
 

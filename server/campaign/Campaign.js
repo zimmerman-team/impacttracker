@@ -1,6 +1,7 @@
 var config = require("../config/config")
 var Q = require('q');
 var _ = require('lodash');
+var moment = require("moment")
 
 var Campaign = require('../models/campaign');
 
@@ -10,27 +11,32 @@ var CampaignResults = require('../campaign/CampaignResults')
 
 function RunCampaign(campaign) {
     this.campaign = campaign;
+
+    // A timeout to stop campaign on endDate
+    this.stopTimeout = null;
 }
 
-RunCampaign.prototype.stop = function() {
-    this.twitterStream.emit("stop");
-    this.twitterRest.emit("stop");
-    this.campaignResults.emit("stop");
+RunCampaign.prototype.setStopTimeout = function() {
 
-    // TODO: unbind events and the like
+    // var timeout = moment(moment()).diff(moment(this.endDate)), 'millisecond')
+
+    // if timeout > 0 {
+
+    // }
 }
 
-RunCampaign.prototype.bindSocketEvents = function(socket) {
+RunCampaign.prototype.bindSocketEvents = function(sockets) {
+    // TODO: bind these events using broadcast socket (all sockets)
     this.campaignResults.on("new-node", function(node) {
-        socket.broadcast.emit(this.campaign._id + ":new-node", node)
+        sockets.emit(this.campaign._id + ":new-node", node)
     }.bind(this));
 
     this.campaignResults.on("new-link", function(link) {
-        socket.broadcast.emit(this.campaign._id + ":new-link", link)
+        sockets.emit(this.campaign._id + ":new-link", link)
     }.bind(this));
 
     this.campaignResults.on("new-tweet", function(tweet) {
-        socket.broadcast.emit(this.campaign._id + ":new-tweet", tweet)
+        sockets.emit(this.campaign._id + ":new-tweet", tweet)
     }.bind(this));                    
 
     // socket.on("new-graph", function(data, res) {
@@ -39,7 +45,11 @@ RunCampaign.prototype.bindSocketEvents = function(socket) {
     // }.bind(this));
 }
 
-RunCampaign.prototype.start = function(socket) {
+/*
+ * Start a campaign
+ * {sockets} is a global broadcast socket
+*/
+RunCampaign.prototype.start = function(sockets) {
 
     // todo: cron-like scheduler / job-queue like celery or kue
     this.twitterStream = new TwitterStream(this.campaign); 
@@ -51,10 +61,10 @@ RunCampaign.prototype.start = function(socket) {
     // starts after twitterREST is completed
     this.campaignResults = new CampaignResults(this.campaign);
 
-    this.bindSocketEvents(socket)
+    this.bindSocketEvents(sockets)
 
-    // campaignResults.on("new-node", socket.emit.bind(this, "new-node"));
-    // campaignResults.on("new-link", socket.emit.bind(this, "new-link"));
+    // campaignResults.on("new-node", sockets.emit.bind(this, "new-node"));
+    // campaignResults.on("new-link", sockets.emit.bind(this, "new-link"));
 
     this.twitterRest.once("completed", function() {
         Campaign.findOnePopulated({_id: this.campaign._id}, function(error, campaign) {
@@ -64,7 +74,14 @@ RunCampaign.prototype.start = function(socket) {
             this.campaignResults.start()
         }.bind(this))
     }.bind(this));
+}
 
+RunCampaign.prototype.stop = function() {
+    this.twitterStream.emit("stop");
+    this.twitterRest.emit("stop");
+    this.campaignResults.emit("stop");
+
+    // TODO: unbind events and the like on stop (avoid memory leaks)
 }
 
 module.exports = RunCampaign; 

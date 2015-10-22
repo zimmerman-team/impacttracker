@@ -67,7 +67,8 @@ var NetworkGraph = React.createClass({
             if (error) throw error;
 
             console.log(typeof graph)
-            RetweetNetworkGraph.load(JSON.parse(graph))
+            console.log(graph)
+            RetweetNetworkGraph.load(graph)
         })
 
         ApiService.socketOn(this.props.campaign._id + ':new-node', function(node) {
@@ -181,7 +182,7 @@ var LineGraph = React.createClass({
         socket.emit("Campaign.getLineGraph", this.props.campaign._id, function(error, graph) {
             if (error) throw error;
 
-            RetweetLineGraph.load(prepareData(JSON.parse(graph)))
+            RetweetLineGraph.load(prepareData(graph))
         })
 
         // todo: real-time updating of the graph

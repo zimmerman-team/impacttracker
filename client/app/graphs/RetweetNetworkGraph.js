@@ -627,6 +627,8 @@ var RetweetNetworkGraph = {
     },
 
     addNode: function(node, redraw=false) {
+        console.log('got node')
+        console.log(node)
         console.log(node.layer)
         _groups[node.layer].addNode(node.id, node.data, redraw);
 

@@ -6,11 +6,12 @@ var Campaign = require('../models/campaign');
 var Source = require('../models/source')
 var Target = require('../models/target')
 
-var RunCampaign = require('../campaign/Campaign');
-
-var DatabaseContainer = require('../utils/DatabaseContainer')
+var startCampaign = require('../campaign/util').startCampaign;
+var planCampaign = require('../campaign/util').planCampaign;
+var stopCampaign = require('../campaign/util').stopCampaign;
 
 var CampaignApi = objectAssign({}, EventEmitter.prototype, {
+
     get: function(data, res) {
 
     },
@@ -26,55 +27,27 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     create: function(socket, user, data, res) {
         var campaign = new Campaign(data);
 
-        // var sourceIds = [];
-        // var targetIds = [];
+        console.log(data)
 
-        // _.forEach(data.sources, function(source) {
-        //     var source = new Source(source);
-        //     source.save(function(error) {
-        //         if (error) res(error);
-        //         sourceIds.push(source._id)
-        //     })
-        // })
-
-        // _.forEach(data.targets, function(target) {
-        //     var target = new Source(target);
-        //     target.save(function(error) {
-        //         if (error) res(error);
-        //         console.log(target);
-        //         targetIds.push(target._id)
-        //     })
-        // })
-
-        // data.sources = sourceIds,
-        // data.targets = targetIds;
-
+        if (campaign.startDate) campaign.startDate = new Date(campaign.startDate)
+        if (campaign.endDate) campaign.endDate = new Date(campaign.endDate)
         campaign.author = user._id
         campaign.state = "running"
 
         campaign.save(function(error) {
             if (error) return res(error, null);
 
-            // TODO: do this in model
-            Campaign.populate(campaign, [{path: "sources"}, {path: "targets"}], 
+            console.log(campaign)
+
+            Campaign.populate(campaign, [{path: "sources"}, {path: "targets"}, {path: "author"}], 
                 function(error, campaign) {
                     if (error) return res(error, null);
 
                     res(null, campaign)
+
+                    planCampaign(campaign)
                     
-                    runCampaign = new RunCampaign(campaign)
-                    runCampaign.start(socket)
-
-                    // TODO: for future work, this should be done in a more dynamic way
-                    CampaignApi.on("stop", function(id) {
-                        console.log("received stop event")
-                        if (id == campaign._id) {
-                            console.log("stopping campaign...")
-                            runCampaign.stop();
-                        }
-                    })
-
-                })
+                }.bind(this))
         });
     },
 
@@ -83,29 +56,33 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     destroy: function(user, data, res) {
+        stopCampaign(data._id)
         Campaign.remove({_id: data._id}, res)
     },
 
     stop: function(user, data, res) {
+        stopCampaign(data._id)
         Campaign.findByIdAndUpdate(data._id, {state: "completed"}, {"new": true}, res)
-        CampaignApi.emit("stop", data._id)
     },
 
-    getGraph: function(id, res) {
-        // TODO: persist the graph
-        var redisClient = DatabaseContainer.getRedis();      
+    getGraph: function(user, id, res) {
+        console.log(id)
+        Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
+            if (error) return res(error);
+            console.log(doc)
 
-        var key = id + ":graph";
-        redisClient.get(key, res);
+            return res(null, doc.networkGraph)
+        })
     },
 
-    getLineGraph: function(id, res) {
-        // TODO: persist the graph
-        var redisClient = DatabaseContainer.getRedis();      
+    getLineGraph: function(user, id, res) {
+        Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
+            if (error) return res(error);
 
-        var key = id + ":linegraph";
-        redisClient.get(key, res);
+            return res(null, doc.lineGraph)
+        })
     }
 })
+
 
 module.exports = CampaignApi;

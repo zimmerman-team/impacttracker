@@ -87,6 +87,7 @@ function onAuthorizeFail(data, message, error, accept){
 }
 
 var Campaign = require('./api/Campaign')
+var CampaignUtil = require('./campaign/util')
 var Source = require('./api/Source')
 var Target = require('./api/Target')
 
@@ -102,8 +103,8 @@ io.on('connection', function(socket) {
     socket.on('Campaign.destroy', Campaign.destroy.bind(null, user));
 
     socket.on("Campaign.stop", Campaign.stop.bind(null, user))
-    socket.on("Campaign.getGraph", Campaign.getGraph)
-    socket.on("Campaign.getLineGraph", Campaign.getLineGraph)
+    socket.on("Campaign.getGraph", Campaign.getGraph.bind(null, user))
+    socket.on("Campaign.getLineGraph", Campaign.getLineGraph.bind(null, user))
 
     socket.on('Source.create', Source.create.bind(null, user));
     socket.on('Source.getAll', Source.getAll.bind(null, user));
@@ -125,10 +126,14 @@ redisClient.select(config.redis.db, function(error, res) {
 
         DatabaseContainer.setDb(connection.db);
         DatabaseContainer.setRedis(redisClient);
+        DatabaseContainer.setIo(io);
 
         require('./routes')(app);
 
         server.listen(2000)
+
+        // Continue campaigns from last exit, plan campaigns that should happen in the future
+        CampaignUtil.initializeCampaigns();
     })
 })
 

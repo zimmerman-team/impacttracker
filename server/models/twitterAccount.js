@@ -6,7 +6,9 @@ var TwitterAccountSchema = new Schema({
     name: String,
     screen_name: String,
     description: String,
-    url: String
+    url: String,
+    access_token: String,
+    access_token_secret: String
 })
 
 module.exports = mongoose.model('TwitterAccount', TwitterAccountSchema)

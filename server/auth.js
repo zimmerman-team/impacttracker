@@ -11,7 +11,12 @@ module.exports = passport.use(new TwitterStrategy(config.passportTwitter,
   function(token, tokenSecret, profile, done) {
     TwitterAccount.findOne({twitter_id: profile.id}, function(error, user) {
       console.log(user);
+      console.log(token);
+      console.log(tokenSecret);
       if (user) 
+        user.access_token = token;
+        user.access_token_secret = tokenSecret;
+        user.save()
         return done(error, user);
 
       user = new TwitterAccount
@@ -20,6 +25,9 @@ module.exports = passport.use(new TwitterStrategy(config.passportTwitter,
       user.screen_name = profile.displayName
       user.description = profile._json.description
       user.url = profile._json.url
+
+      user.access_token = token
+      user.access_token_secret = tokenSecret
 
       user.save(function(error) {
         done(error, user);

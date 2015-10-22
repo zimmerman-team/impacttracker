@@ -156,17 +156,17 @@ var CampaignDetail = React.createClass({
                             </div>
                             </div>
 
-                            <div style={{display: "none"}} className="row">
+                            <div className="row">
                             <div className="col-lg-12">
                             <label for="startDate">Date range</label>
                             </div>
-                            <div className="col-lg-3 daterange" style={{display: "none"}}>
+                            <div className="col-lg-3 daterange">
                                 <DateTimeField 
                                     inputProps={{name: "startDate"}} 
                                     dateTime={moment(this.state.campaign.startDate).format('x')} 
                                     defaultText="select campaign start date" />
                             </div>
-                            <div className="col-lg-3 daterange" style={{display: "none"}}>
+                            <div className="col-lg-3 daterange">
                                 <DateTimeField 
                                     inputProps={{name: "endDate"}} 
                                     dateTime={moment(this.state.campaign.endDate).format('x')} 

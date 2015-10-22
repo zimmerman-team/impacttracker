@@ -27,9 +27,9 @@ module.exports = {
 
     "twitter": {
         consumer_key: '1XVhobp0z3j769iCZKAIiKQ5l',
-        consumer_secret: 'Z4RknHUl7LObheyXvGA4RjBBk0zPnlPQuyqHCMB5qotcoKj2YV',
-        access_token_key: '1646770106-rKdnWSmUVYAUqcHn2c0COo6XieZWE0qRjBfBj74',
-        access_token_secret: '4IWMzqe9B6Dq4c61jAC2hFr3P9Cj03IKMqYLP5ctaaFtv'
+        consumer_secret: 'Z4RknHUl7LObheyXvGA4RjBBk0zPnlPQuyqHCMB5qotcoKj2YV'
+        // access_token_key: '1646770106-rKdnWSmUVYAUqcHn2c0COo6XieZWE0qRjBfBj74', // default: application token
+        // access_token_secret: '4IWMzqe9B6Dq4c61jAC2hFr3P9Cj03IKMqYLP5ctaaFtv' // default: application token secret
     },
 
     "passportTwitter": {

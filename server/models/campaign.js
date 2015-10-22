@@ -9,7 +9,7 @@ var Target = require('./target')
 var campaignSchema = new Schema({
     name: String,
     description: String,
-    author: { type: Schema.Types.ObjectId, ref: 'Account' },
+    author: { type: Schema.Types.ObjectId, ref: 'TwitterAccount' },
     handle: String,
     creationDate: { type: Date, default: Date.now },
 
@@ -22,27 +22,22 @@ var campaignSchema = new Schema({
 
     sources: [{ type: Schema.Types.ObjectId, ref: 'Source'}],
     targets: [{ type: Schema.Types.ObjectId, ref: 'Target'}],
-    // sources: [Schema.Types.ObjectId],
-    // targets: [Schema.Types.ObjectId],
 
     networkGraph: Schema.Types.Mixed,
     lineGraph: Schema.Types.Mixed
-    // results: {
-    //     graph: 
-    // }
 })
 
 campaignSchema.statics.findPopulated = function(query, cb) {
     return this
         .find(query)
-        .populate([{path: "sources"}, {path: "targets"}])
+        .populate([{path: "sources"}, {path: "targets"}, {path: 'author'}])
         .exec(cb)
 }
 
 campaignSchema.statics.findOnePopulated = function(query, cb) {
     return this
         .findOne(query)
-        .populate([{path: "sources"}, {path: "targets"}])
+        .populate([{path: "sources"}, {path: "targets"}, {path: 'author'}])
         .exec(cb)
 }
 
@@ -52,7 +47,17 @@ campaignSchema.statics.findByUser = function(query, userId, cb) {
 
     return this
         .find(query)
-        .populate([{path: "sources"}, {path: "targets"}])
+        .populate([{path: "sources"}, {path: "targets"}, {path: 'author'}])
+        .exec(cb)
+}
+
+campaignSchema.statics.findOneByUser = function(query, userId, cb) {
+    query = query || {};
+    query.author = userId;
+
+    return this
+        .findOne(query)
+        .populate([{path: "sources"}, {path: "targets"}, {path: 'author'}])
         .exec(cb)
 }
 

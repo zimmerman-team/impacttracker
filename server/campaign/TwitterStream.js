@@ -6,7 +6,11 @@ var DatabaseContainer = require('../utils/DatabaseContainer')
 
 function TwitterStream(campaign) {
     this.campaign = campaign;
-    this.client = new Twitter(config.twitter);
+
+    this.twitterConfig = config.twitter;
+    this.twitterConfig.access_token_key = campaign.author.access_token;
+    this.twitterConfig.access_token_secret = campaign.author.access_token_secret;
+    this.client = new Twitter(this.twitterConfig);
  
     this.redisClient = DatabaseContainer.getRedis();
     this.redisKey = campaign._id + ":tweets"
@@ -48,7 +52,7 @@ TwitterStream.prototype = objectAssign({}, TwitterStream.prototype, EventEmitter
     },
 
     writeDb: function(tweet) {
-        console.log("writing to", this.redisKey)
+        // console.log("writing to", this.redisKey)
         this.redisClient.lpush(this.redisKey, JSON.stringify(tweet));
 
         // var pre = this.campaign._id + ":tweet:" + tweet.id
