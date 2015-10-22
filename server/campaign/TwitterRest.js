@@ -72,7 +72,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     },
 
     _checkLimits: function(endpoint) {
-        if (this.limits[endpoint].remaining <= 0) {
+        if (this.limits[endpoint].remaining <= 1) {
             var timeout = (this.limits[endpoint].reset - Math.floor(Date.now() / 1000)) * 1000;
             this.limits[endpoint].remaining -= 1;
             return timeout
@@ -141,10 +141,11 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                     function(error, campaign) {
                         if (error) console.error(error)
 
+                        console.log(campaign)
+
                         done(campaign.sources, campaign.targets);
 
                     }.bind(this))
-
             }.bind(this))
     },
 
@@ -182,7 +183,8 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 screen_name: source.screen_name,
                 count: 5000 // this is the maximum per call
             }, function(error, followers, response) {
-                if (error) return cb(error);
+                if (error) console.error(error);
+                if (error) return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
                 this.writeSourceFollowers(followers.ids, source);
 
