@@ -67,6 +67,7 @@ RunCampaign.prototype.start = function(sockets) {
     // campaignResults.on("new-link", sockets.emit.bind(this, "new-link"));
 
     this.twitterRest.once("completed", function() {
+        Campaign.findByIdAndUpdate(this.campaign._id, {state: "running"})
         Campaign.findOnePopulated({_id: this.campaign._id}, function(error, campaign) {
             if (error) throw error;
             console.log("starting campaign..")

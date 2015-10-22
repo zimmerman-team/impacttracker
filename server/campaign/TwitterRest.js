@@ -14,11 +14,9 @@ var Campaign = require('../models/campaign')
 function TwitterRest(campaign) {
     this.campaign = campaign;
 
-    console.log(campaign)
     this.twitterConfig = config.twitter;
     this.twitterConfig.access_token_key = campaign.author.access_token;
     this.twitterConfig.access_token_secret = campaign.author.access_token_secret;
-    console.log(this.twitterConfig)
     this.client = new Twitter(this.twitterConfig);
 
     this.limits = {};
@@ -62,19 +60,25 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         }, function(error, limits, res) {
             if (error) console.error(error)
 
+            console.log('got limits!')
+
             this.limits["/followers/ids"] = limits.resources.followers["/followers/ids"];
             this.limits["/friends/ids"] = limits.resources.friends["/friends/ids"];
             this.limits["/users/lookup"] = limits.resources.users["/users/lookup"];
 
+            console.log(this.limits)
              if (cb) cb();
          }.bind(this));
     },
 
     _checkLimits: function(endpoint) {
-        if (this.limits[endpoint].remaining === 0) {
-            var timeout = this.limits[endpoint].reset - Math.floor(Date.now() / 1000) * 1000;
+        if (this.limits[endpoint].remaining <= 0) {
+            var timeout = (this.limits[endpoint].reset - Math.floor(Date.now() / 1000)) * 1000;
             this.limits[endpoint].remaining -= 1;
             return timeout
+        } else {
+            this.limits[endpoint].remaining -= 1;
+            return 0
         }
     },
 
@@ -110,9 +114,9 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 });
             }, function(error) {
                 if (error) console.error(error)
+                console.log("done fetching users")
                 cb();
 
-                console.log("done fetching users")
             })
         }.bind(this));
     },
@@ -145,7 +149,6 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     },
 
 
-
     getSources: function(sources, cb) {
         async.each(sources, this.getSourceFollowers.bind(this), function(error) {
             console.log('sources done!')
@@ -169,6 +172,8 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         }, function(cb) {
 
             limitTimeout = this._checkLimits('/followers/ids')
+            console.log("limit timeout: ")
+            console.log(limitTimeout)
             if (limitTimeout > 0)
                 return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
@@ -202,7 +207,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         // friends list
         var listKey = this.campaign._id + ":" + source.screen_name + ":followers";
 
-        console.log(source)
+        console.log('writing source followers')
         var source_id = source.user_id
         var pre = this.campaign._id + ":sourceFollower:"
 
@@ -234,7 +239,6 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         // var count = 0; 
 
         async.whilst(function() {
-            console.log(this.limits)
             return cursor !== 0;
         }.bind(this), function(cb) {
 

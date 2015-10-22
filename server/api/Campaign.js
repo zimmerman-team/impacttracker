@@ -32,7 +32,8 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
         if (campaign.startDate) campaign.startDate = new Date(campaign.startDate)
         if (campaign.endDate) campaign.endDate = new Date(campaign.endDate)
         campaign.author = user._id
-        campaign.state = "running"
+        campaign.state = "getting followers/friends"
+        campaign.running = true
 
         campaign.save(function(error) {
             if (error) return res(error, null);
@@ -62,7 +63,7 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
 
     stop: function(user, data, res) {
         stopCampaign(data._id)
-        Campaign.findByIdAndUpdate(data._id, {state: "completed"}, {"new": true}, res)
+        Campaign.findByIdAndUpdate(data._id, {state: "completed"}, {running: false}, {"new": true}, res)
     },
 
     getGraph: function(user, id, res) {
