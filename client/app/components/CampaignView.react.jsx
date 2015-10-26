@@ -8,7 +8,6 @@ var TabbedArea = require('react-bootstrap').TabbedArea;
 var TabPane = require('react-bootstrap').TabPane;
 
 function getCampaignState(id) {
-    console.log('called get state!')
     return {
         campaign: CampaignStore.get(id),
         sources: CampaignStore.getAllSources(),
@@ -67,18 +66,12 @@ var NetworkGraph = React.createClass({
         var el = this.getDOMNode();
         RetweetNetworkGraph.create(el);
 
-        console.log("binding events...")
-
         var socket = ApiService.getSocket();
-
-        console.log(this.props.campaign._id)
 
         // gets initial graph
         socket.emit("Campaign.getGraph", this.props.campaign._id, function(error, graph) {
             if (error) throw error;
 
-            console.log(typeof graph)
-            console.log(graph)
             RetweetNetworkGraph.load(graph)
         })
 
@@ -117,7 +110,6 @@ var NetworkGraph = React.createClass({
     },
 
     _setScale: function(event) {
-        console.log(event.target.value)
         RetweetNetworkGraph.setScale(event.target.value)
     }
 })
@@ -165,43 +157,93 @@ var InfoBox = React.createClass({
 
 var RetweetLineGraph = require('../graphs/RetweetLineGraph');
 
+// group by multiple keys
+_.mixin({groupByMulti: function (obj, values, context) {
+    if (!values.length)
+        return obj;
+    var byFirst = _.groupBy(obj, values[0], context),
+        rest = values.slice(1);
+    for (var prop in byFirst) {
+        byFirst[prop] = _.groupByMulti(byFirst[prop], rest, context);
+    }
+    return byFirst;
+}});
 
 var _preparedGraph = [];
 
-var prepareData = function(graph) {
-    var renderedGraph = _.mapValues(graph, function(item) {
+var prepareData = function(graph, grouping="minute") {
+    console.log(graph)
+
+    switch(grouping) {
+        case "minute": 
+            graph = _.groupByMulti(graph, [function(x) {
+                return moment(new Date(x.tweet.created_at)).startOf('minute').format('x');
+            }, "layer"])
+            break;
+            
+        case "hour": 
+            graph = _.groupByMulti(graph, [function(x) {
+                return moment(new Date(x.tweet.created_at)).startOf('hour').format('x');
+            }, "layer"])
+            break;
+    }
+
+    // for (var prop in )
+    // console.log(graph)
+
+    // _.forEach(graph, function(elem) {
+    //     graph
+
+    // })
+
+    graph = _.mapValues(graph, function(item) {
         return _.mapValues(item, function(value) {
             return value.length
         })
     });
 
+    console.log(graph)
     // todo: improve performance by removing this iteration (and maybe all iterations)
-    _preparedGraph = _.map(renderedGraph, function(value, key) {
+    graph = _.map(graph, function(value, key) {
         value.date = new Date(parseInt(key));
 
         return value
     });
 
-    return _preparedGraph;
+    return graph;
 }
 
 
 var LineGraph = React.createClass({
 
-    componentDidMount: function() {
-        var el = this.getDOMNode();
-        RetweetLineGraph.create(el);
+    getInitialState: function() {
+        return {
+            dateRange: "minute",
+            data: null
+        }
+    },
 
+    _changeDateAxis: function(daterange) {
+        this.setState({dateRange: daterange, })
+        this._getGraph()
+    },
+
+    _getGraph: function() {
         var socket = ApiService.getSocket();
-
-        console.log("component mounted")
-
-        // gets initial graph
         socket.emit("Campaign.getLineGraph", this.props.campaign._id, function(error, graph) {
             if (error) throw error;
 
-            RetweetLineGraph.load(prepareData(graph))
-        })
+            this.setState({
+                data: prepareData(graph)
+            })
+
+        }.bind(this))
+    },
+
+    componentDidMount: function() {
+        RetweetLineGraph.create(this.refs.lineGraph.getDOMNode());
+
+        this._getGraph();
 
         // todo: real-time updating of the graph
         // ApiService.socketOn(this.props.campaign._id + ':new-tweet', function(tweet) {
@@ -229,13 +271,36 @@ var LineGraph = React.createClass({
     },
 
     render: function() {
-        return (
-            <div className="time-graph">
+        console.log('rerendering...')
+        console.log(this.state.data)
+        if (this.state.data)
+            RetweetLineGraph.load(this.state.data, this.state.dateRange)
 
+        return (
+            <div>
+                <SelectLineGraphAxes callback={this._changeDateAxis} />
+                <div className="time-graph" ref="lineGraph">
+
+                </div>
             </div>
         )
     }
 })
 
+var SelectLineGraphAxes = React.createClass({
+    change: function(event) {
+        console.log(event.target.value)
+        this.props.callback(event.target.value);
+    },
+
+    render: function() {
+        return (
+            <select onChange={this.change}>
+                <option value="minute">Tweets per minute</option>
+                <option value="hour">Tweets per hour</option>
+            </select>
+        )
+    }
+})
 
 module.exports = CampaignView;

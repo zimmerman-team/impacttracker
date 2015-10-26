@@ -26,7 +26,7 @@ function CampaignResults(campaign) {
         edges: []
     };
 
-    this.lineGraph = campaign.lineGraph || {};
+    this.lineGraph = campaign.lineGraph || [];
 
     this.stopped = false;
 }
@@ -38,11 +38,11 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
         // initialize source and target nodes
         _.forEach(this.campaign.sources, function(source) {
-            this.addNode(source, "source")
+            this.addNode(source.toObject(), "source")
         }.bind(this))
 
         _.forEach(this.campaign.targets, function(target) {
-            this.addNode(target, "target")
+            this.addNode(target.toObject(), "target")
         }.bind(this))
 
         // // write initial graphs to database
@@ -73,6 +73,9 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
     },
 
     addNode: function(user, layer) {
+
+        console.log('adding node...')
+        console.log(user)
 
         var node = {
             id: user.id_str || user.user_id, // TODO: change all to id_str
@@ -106,17 +109,19 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
     addTweet: function(tweet, layer) {
         console.log('adding tweet..')
-        var date = moment(new Date(tweet.created_at)).startOf('minute').format('x');
+        // var date = moment(new Date(tweet.created_at)).startOf('minute').format('x');
 
         var item = {
-            date: date,
+            // date: date,
             tweet: tweet,
             layer: layer
         }
 
-        this.lineGraph[date] = this.lineGraph[date] || {};
-        this.lineGraph[date][layer] = this.lineGraph[date][layer] || [];
-        this.lineGraph[date][layer].push(tweet);
+        this.lineGraph.push(item)
+
+        // this.lineGraph[date] = this.lineGraph[date] || {};
+        // this.lineGraph[date][layer] = this.lineGraph[date][layer] || [];
+        // this.lineGraph[date][layer].push(tweet);
 
         return item;
     },

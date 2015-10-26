@@ -124,8 +124,6 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     getSourceTargetUsers: function(sources, targets, done) {
         var sourceScreenNames = _.pluck(sources, "screen_name").join();
         var targetScreenNames = _.pluck(targets, "screen_name").join();
-        console.log(sourceScreenNames);
-        console.log(targetScreenNames);
         getSources = this._performUserLookup.bind(this, Source, sourceScreenNames);
         getTargets = this._performUserLookup.bind(this, Target, targetScreenNames);
 
@@ -219,7 +217,6 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             this.redisClient.expire(listKey, this.ttl)
 
             var key = pre + id;
-            console.log(source_id);
             this.redisClient.sadd(key, source_id);
             this.redisClient.expire(key, this.ttl)            
         }.bind(this))

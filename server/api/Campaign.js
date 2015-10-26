@@ -67,10 +67,8 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     getGraph: function(user, id, res) {
-        console.log(id)
         Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
             if (error) return res(error);
-            console.log(doc)
 
             return res(null, doc.networkGraph)
         })

@@ -70,6 +70,7 @@ RunCampaign.prototype.start = function(sockets) {
         Campaign.findByIdAndUpdate(this.campaign._id, {state: "running"})
         Campaign.findOnePopulated({_id: this.campaign._id}, function(error, campaign) {
             if (error) throw error;
+            console.log(campaign)
             console.log("starting campaign..")
             this.campaignResults.campaign = campaign
             this.campaignResults.start()

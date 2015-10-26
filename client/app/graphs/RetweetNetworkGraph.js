@@ -627,9 +627,6 @@ var RetweetNetworkGraph = {
     },
 
     addNode: function(node, redraw=false) {
-        console.log('got node')
-        console.log(node)
-        console.log(node.layer)
         _groups[node.layer].addNode(node.id, node.data, redraw);
 
         _layerDict[node.id] = node.layer;
@@ -642,12 +639,6 @@ var RetweetNetworkGraph = {
 
             var sourceLayer = _layerDict[source];
             var targetLayer = _layerDict[target];  
-
-            // console.log(source)
-            // console.log(target)
-
-            // console.log("sourceLayer: " + sourceLayer)
-            // console.log("targetLayer: " + targetLayer)
 
             addLink(sourceLayer + ":" + source, targetLayer + ":" + target, redraw);
     },

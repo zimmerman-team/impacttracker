@@ -1,12 +1,13 @@
 var c3 = require('c3')
 
 var _chart = null;
+var _formatter = function(x) { 
+    return x.getHours() + ":" + x.getMinutes()
+}
 
 var RetweetLineGraph = {
 
     create: function(el) {
-
-        console.log(el);
 
         _chart = c3.generate({
             bindto: el,
@@ -28,11 +29,13 @@ var RetweetLineGraph = {
                     label: "Time",
                     type: 'timeseries',
                     tick: {
-                        format: '%m-%d %H:%M:%S'
+                        format: function(x) {
+                            return _formatter(x);
+                        }
                     }
                 },
                 y: {
-                    label: "Tweets per minute"
+                    label: "Number of tweets"
                 }
             },
             size: {
@@ -50,7 +53,22 @@ var RetweetLineGraph = {
         _chart = null;
     },
 
-    load: function(json) {
+    load: function(json, daterange) {
+        console.log(daterange)
+
+        switch (daterange) {
+            case "minute":
+                _formatter = function(x) { return x.getHours() + ":" + x.getMinutes()}
+                break;
+            case "hour":
+                _formatter = function(x) { return x.getDay() + ":" + x.getHours()}
+                break;
+            case "default":
+                _formatter = function(x) { return x.getHours() + ":" + x.getMinutes()}
+        }
+
+        console.log(json)
+                
         _chart.load({
             json: json,
             keys: {
@@ -58,6 +76,8 @@ var RetweetLineGraph = {
                 value: ['unrelated', 'source', 'intermediate', 'target']
             }
         })
+
+        _chart.flush()
     },
 
     addTweet: function() {
