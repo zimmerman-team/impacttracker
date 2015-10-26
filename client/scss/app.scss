@@ -110,11 +110,11 @@ h2{
 	.btn-login{
 		border-radius: 4px;
 		color: #fff;
-		background-color: rgba(0,0,0,0.4);
+		background-color: rgba($brand-primary,0.6);
 		margin:20px 0;
 		transition:all .2s ease;
 		&:hover, &:focus {
-			background-color: rgba($brand-primary,0.6);
+			background-color: rgba($brand-primary,0.9);
 		}
 	}
 }
