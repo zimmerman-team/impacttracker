@@ -41,7 +41,7 @@ var Login = React.createClass({
                     <span className="icon-bar" />
                     <span className="icon-bar" />
                   </button>
-                  <a className="navbar-brand" href="/frontpage.html">
+                  <a className="navbar-brand" href="/">
                     <span> Impact Tracker</span><br />
                     <span className="sub-logo">beta version</span>
                   </a>
