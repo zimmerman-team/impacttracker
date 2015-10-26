@@ -210,6 +210,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         var source_id = source.user_id
         var pre = this.campaign._id + ":sourceFollower:"
 
+        if (!source_id) console.error('source user ' + source  + ' is not defined!!');
         if (!source_id) return false
 
         _.forEach(ids, function(id) {
@@ -217,6 +218,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             this.redisClient.expire(listKey, this.ttl)
 
             var key = pre + id;
+
             this.redisClient.sadd(key, source_id);
             this.redisClient.expire(key, this.ttl)            
         }.bind(this))
@@ -278,6 +280,9 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
         var target_id = target.user_id
         var pre = this.campaign._id + ":targetFriend:"
+
+        if (!target_id) console.error('target user ' + target + ' is not defined!!');
+        if (!target_id) return false
 
         _.forEach(ids, function(id) {
             this.redisClient.lpush(listKey, id)

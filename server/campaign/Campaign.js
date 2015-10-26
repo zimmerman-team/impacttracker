@@ -83,7 +83,7 @@ RunCampaign.prototype.stop = function() {
     this.twitterRest.emit("stop");
     this.campaignResults.emit("stop");
 
-    // TODO: unbind events and the like on stop (avoid memory leaks)
+    // TODO: unbind = and the like on stop (avoid memory leaks)
 }
 
 module.exports = RunCampaign; 
