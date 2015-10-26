@@ -66,14 +66,17 @@ var Campaign = React.createClass({
                 <div className="row">
                   <div className="col-lg-8">
                     <div className="logos">
-                      <img src="img/leiden-bl.svg" />
-                      <img src="img/hrw-bl.png" />
-                      <img src="img/zz-logo-bl.svg" />
+                      <a href="http://www.leidenuniv.nl/" target="_blank"><img src="img/leiden-bl.svg" /></a>
+                      <a href="https://www.hrw.org/" target="_blank"><img src="img/hrw-bl.png" /></a>
+                      <a href="https://www.zimmermanzimmerman.nl/" target="_blank"><img src="img/zz-logo-bl.svg" /></a>
                     </div>
+                  </div>
+                </div>
+                <div className="row foot bl">
+                  <div className="col-lg-4">
                     <p>
-                      <small>Questions about this project? Please contact Thomas Baar, Project Manager Peace Informactics Lab</small>
+                      <small>Questions about this project? Please contact <a href="http://campusdenhaag.nl/over/medewerkers-c4i/thomasbaar.html" target="_blank">Thomas Baar</a>, Project Manager Peace Informactics Lab</small>
                     </p>
-                    
                   </div>
                 </div>
 

@@ -90,6 +90,10 @@ h2{
 		color: #fff;
 		background-color: rgba(0,0,0,0.4);
 		margin:20px 0;
+		transition:all .2s ease;
+		&:hover, &:focus {
+			background-color: rgba($brand-primary,0.6);
+		}
 	}
 }
 
@@ -134,7 +138,7 @@ nav {
 	.navbar-brand {
 
 		padding: 10px 15px;
-		margin-right: 110px;
+		//margin-right: 110px;
 		height: 60px;
 		
 		a,span {
@@ -157,10 +161,26 @@ nav {
 	}
 }
 
+.foot {
+	a {
+		color:#fff;
+		text-decoration: underline;
+	}
+	&.bl {
+		a {
+			color:#222;
+		}
+	}
+}
+
 //campaign overview page
 .campaignview {
-	padding:40px 0;
+	padding-top:40px;
+	padding-bottom:40px;
 	.actions {
+		button {
+			margin:2px 0;
+		}
 		button:first-of-type {
 			margin-right: 10px;
 		}
@@ -259,7 +279,7 @@ nav {
 
 .campaigndetail {
 	.panel {
-		background:$gray-lighter;
+		background:#f9f9f9;
 		.panel-content {
 			padding:20px 25px;
 		}
@@ -315,19 +335,23 @@ footer {
 
 
 
-
-@media (min-width: 767px){
-	.navbar-nav li {
+.navbar-nav {
+	margin:0;
+	float: right;
+	li {
 		height: 60px;
-	}
-	.navbar-nav > li > a{
-		height: 60px;
-		padding-top: 18px;
-		padding-bottom: 18px;
-		padding-left: 27.5px;
-		padding-right: 27.5px;
+		float: left;
 	}
 }
+
+.navbar-nav > li > a{
+	height: 60px;
+	padding-top: 18px;
+	padding-bottom: 18px;
+	padding-left: 27.5px;
+	padding-right: 27.5px;
+}
+
 
 //text alignment
 .text-left-not-xs, .text-left-not-sm, .text-left-not-md, .text-left-not-lg {

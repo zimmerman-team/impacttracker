@@ -81,15 +81,15 @@ var Login = React.createClass({
                     </a>
                   </div>
                   <div className="col-lg-8 text-right-lg logos">
-                    <img src="img/leiden.svg" />
-                    <img src="img/hrw.png" />
-                    <img src="img/zz-logo.svg" />
+                    <a href="http://www.leidenuniv.nl/" target="_blank"><img src="img/leiden.svg" /></a>
+                    <a href="https://www.hrw.org/" target="_blank"><img src="img/hrw.png" /></a>
+                    <a href="https://www.zimmermanzimmerman.nl/" target="_blank"><img src="img/zz-logo.svg" /></a>
                   </div>
                 </div>
-                <div className="row">
+                <div className="row foot">
                   <div className="col-lg-4">
                     <p>
-                      <small>Questions about this project? Please contact Thomas Baar, Project Manager Peace Informactics Lab</small>
+                      <small>Questions about this project? Please contact <a href="http://campusdenhaag.nl/over/medewerkers-c4i/thomasbaar.html" target="_blank">Thomas Baar</a>, Project Manager Peace Informactics Lab</small>
                     </p>
                   </div>
                 </div>
