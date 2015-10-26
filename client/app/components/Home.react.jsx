@@ -64,7 +64,7 @@ var Home = Authenticated(React.createClass({
 
     render: function() {
         return (
-            <div class="project">
+            <div className="project">
               <Navbar inverse>
                 <a className="navbar-brand">
                     <span> Impact Tracker</span><br />

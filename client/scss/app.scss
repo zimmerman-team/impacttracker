@@ -156,6 +156,106 @@ nav {
 	}
 }
 
+.tabs-wrap {
+	background:#fff;
+	.tab-content {
+		background:#fff;
+	}
+	.nav-tabs {
+		border:0;
+		margin-top:20px;
+		li {
+			margin-bottom: 0;
+			margin-right: 20px;
+			a {
+				border:0;
+				background:#222;
+				color:#fff;
+				&:hover, &:focus {
+					border:0 !important;
+					color:#fff !important;
+					background:$brand-primary;
+				}
+			}
+			&.active {
+				a {
+					background:$brand-primary;
+				}
+			}
+		}
+		
+	}
+	#info-box {
+		position: relative;
+		width: 100%;
+		background:#f1f1f1;
+		border:0;
+		margin:0;
+		top:0;
+		left:0;
+		padding:0;
+		color:#222;
+		.head {
+			margin:10px 0;
+			font-weight: 400;
+		}
+		.hashtag {
+			margin-top:7px;
+			margin-bottom: 10px;
+		}
+		.legend {
+			background:lighten($gray-light,5%);
+			padding:10px 0;
+			color:#fff;
+			font-size: 16px;
+			.legend-icon {
+				margin:0 5px 0 20px;
+				&:first-of-type {
+					margin-left: 0;
+				}
+			}
+		}
+		.controls {
+			background:$gray;
+			padding:10px 0;
+			font-size: 16px;
+			color:#fff;
+			span {
+				margin-left:20px;
+				>span {
+					margin-left:0;
+					margin-right: 10px;
+				}
+				&:first-of-type {
+					margin-left: 0;
+				}
+				label {
+					margin-right:15px;
+					margin-bottom: 0;
+					font-weight: 400;
+				}
+				input {
+					margin-right:10px;
+				}
+			}
+		}
+	}
+}
+
+body .d3-tip {
+	top:295px !important;
+	right:15px !important;
+	height:70% !important;
+	overflow: auto;
+	&:after {
+		display: none;
+	}
+}
+
+nav.collapse.in {
+	@extend .container;
+}
+
 .fa-ul {
 	li {
 		margin:5px 0;

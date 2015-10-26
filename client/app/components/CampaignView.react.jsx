@@ -24,11 +24,22 @@ var CampaignView = React.createClass({
 
     render: function() {
         return (
-          <TabbedArea defaultActiveKey={2}>
-            { /*<TabPane eventKey={1} tab='Campaign'>this.state.campaign</TabPane>*/ }
-            <TabPane eventKey={2} tab='Retweet network graph'><NetworkGraph campaign={this.state.campaign}/></TabPane>
-            <TabPane eventKey={3} tab='Retweet line graph'><LineGraph campaign={this.state.campaign}/></TabPane>
-          </TabbedArea>
+            <div className="tabs-wrap">
+              <TabbedArea defaultActiveKey={2}>
+                    { /*<TabPane eventKey={1} tab='Campaign'>this.state.campaign</TabPane>*/ }
+                    <TabPane eventKey={2} tab='Retweet network graph'>
+                        <NetworkGraph campaign={this.state.campaign}/>
+                    </TabPane>
+                    <TabPane eventKey={3} tab='Retweet line graph'>
+                        <div id="info-box">
+                            <div className="container">
+                                <h1 className="head">{this.state.campaign.handle}</h1>
+                          </div>
+                        </div>
+                        <LineGraph campaign={this.state.campaign}/>
+                    </TabPane>
+              </TabbedArea>
+            </div>
         )
     },
 
@@ -124,22 +135,29 @@ var InfoBox = React.createClass({
     render: function() {
         return ( 
         <div id="info-box">
-          <h3 className="hashtag">#{this.props.subject}</h3>
-          <p>
-            {this.props.description}
-          </p>
-          <p>
-            <b>Legends</b><br />
-          </p><div className="legend-icon unrelated-color" />Unrelated<br />
-          <div className="legend-icon sources-color" />Sources<br />
-          <div className="legend-icon intermediaries-color" />Intermediaries<br />
-          <div className="legend-icon targets-color" />Targets<br />
-          <p />
-          <input type="checkbox" onChange={this.props.toggleLabels}/> Show all labels
-          <br />
-          Node size scale:
-          <input type="radio" name="scale" defaultValue="linear" onChange={this.props.setScale} defaultChecked /> Linear
-          <input type="radio" name="scale" defaultValue="log" onChange={this.props.setScale} /> Log (base 10)
+            <div className="container">
+                <h1 className="head">{this.props.subject}</h1>
+          </div>
+          <div className="legend">
+            <div className="container">
+              <div className="legend-icon unrelated-color" />Unrelated
+              <div className="legend-icon sources-color" />Sources
+              <div className="legend-icon intermediaries-color" />Intermediaries
+              <div className="legend-icon targets-color" />Targets
+            </div>
+          </div>
+          <div className="controls">
+            <div className="container">
+                <span>
+                  <input type="checkbox" onChange={this.props.toggleLabels} name="labels" id="labels" /><label htmlFor="labels">Show all labels</label>
+                </span>
+                <span>
+                  <span>Node size scale:</span>
+                  <input type="radio" name="scale" defaultValue="linear" onChange={this.props.setScale} id="linear" defaultChecked /><label htmlFor="linear">Linear</label>
+                  <input type="radio" name="scale" defaultValue="log" onChange={this.props.setScale} id="log" /><label htmlFor="log">Log (base 10)</label>
+                </span>
+            </div>
+          </div>
         </div>
         )
     }

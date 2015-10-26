@@ -35,7 +35,7 @@ var Campaign = React.createClass({
                 <div className="row">
                     <div className="col-lg-8">
                        <Button className="new-campaign" onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/new")} bsStyle="primary" bsSize="large"><Glyphicon glyph='plus' /> New campaign</Button>
-                        <span className="max10">* Max 10 campaigns, ask us for custom impact features for your organisation.</span>
+                        <span className="max10">* Max 5 campaigns, ask us for custom impact features for your organisation.</span>
                     </div>
                 </div>
                 <CampaignTable campaigns={this.state.campaigns}/>
