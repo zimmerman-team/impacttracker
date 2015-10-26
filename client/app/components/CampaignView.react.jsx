@@ -27,10 +27,10 @@ var CampaignView = React.createClass({
             <div className="tabs-wrap">
               <TabbedArea defaultActiveKey={2}>
                     { /*<TabPane eventKey={1} tab='Campaign'>this.state.campaign</TabPane>*/ }
-                    <TabPane eventKey={2} tab='Retweet network graph'>
+                    <TabPane eventKey={2} tab='Network visualisation'>
                         <NetworkGraph campaign={this.state.campaign}/>
                     </TabPane>
-                    <TabPane eventKey={3} tab='Retweet line graph'>
+                    <TabPane eventKey={3} tab='Graph visualisation'>
                         <div id="info-box">
                             <div className="container">
                                 <h1 className="head">{this.state.campaign.handle}</h1>
