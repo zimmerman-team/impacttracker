@@ -85,6 +85,27 @@ h2{
 	background-size: cover;
 	color: #fff;
 	padding-bottom:30px;
+	position:relative;
+	.campaignview {
+		padding-top:20px;
+	}
+
+	&.inverted {
+		color:#222;
+		background-image:none;
+		&:after {
+		  content: "";
+		  background-image: url('../img/bg.jpg');
+		  background-size: cover;
+		  opacity: 0.2;
+		  top: 0;
+		  left: 0;
+		  bottom: 0;
+		  right: 0;
+		  position: absolute;
+		  z-index: 0;   
+		}
+	}
 
 	.btn-login{
 		border-radius: 4px;
@@ -277,7 +298,9 @@ nav.collapse.in {
 //campaign overview page
 .campaignview {
 	padding-top:40px;
-	padding-bottom:40px;
+	padding-bottom:20px;
+	position:relative;
+	z-index:1;
 	.actions {
 		button {
 			margin:2px 0;

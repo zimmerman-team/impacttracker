@@ -31,7 +31,8 @@ var Campaign = React.createClass({
     render: function() {
 
         return (
-            <div className="container campaignview">
+            <div>
+              <div className="container campaignview">
                 <div className="row">
                     <div className="col-lg-8">
                        <Button className="new-campaign" onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/new")} bsStyle="primary" bsSize="large"><Glyphicon glyph='plus' /> New campaign</Button>
@@ -39,49 +40,51 @@ var Campaign = React.createClass({
                     </div>
                 </div>
                 <CampaignTable campaigns={this.state.campaigns}/>
+              </div>
 
-
-                <div className="row">
-                  <div className="col-lg-10">
-                    <h1>Help us further develop this prototype</h1>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-lg-4">
-                    <h2>
-                      Impact Tracker helps to monitor, 
-                      visualise and measure the impact 
-                      of your Twitter campaign
-                    </h2>
-                    <ul className="fa-ul">
-                      <li><i className="fa-li fa fa-check"></i>Monitor all communication streams</li>
-                      <li><i className="fa-li fa fa-check"></i>Track dissemination flows</li>
-                      <li><i className="fa-li fa fa-check"></i>Trace through whom you reach target audiences</li>
-                    </ul>
-                    <p>
-                      <small>Impact Tracker is developed by the Peace Informatics Lab (Leiden University) in collaboration with Human Rights Watch and Zimmerman & Zimmerman. </small>
-                    </p>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-lg-8">
-                    <div className="logos">
-                      <a href="http://www.leidenuniv.nl/" target="_blank"><img src="img/leiden-bl.svg" /></a>
-                      <a href="https://www.hrw.org/" target="_blank"><img src="img/hrw-bl.png" /></a>
-                      <a href="https://www.zimmermanzimmerman.nl/" target="_blank"><img src="img/zz-logo-bl.svg" /></a>
+              <div id="login-wrapper" className="inverted">
+                <div className="container campaignview">
+                  <div className="row">
+                    <div className="col-lg-10">
+                      <h1>Help us further develop this prototype</h1>
                     </div>
                   </div>
-                </div>
-                <div className="row foot bl">
-                  <div className="col-lg-4">
-                    <p>
-                      <small>Questions about this project? Please contact <a href="http://campusdenhaag.nl/over/medewerkers-c4i/thomasbaar.html" target="_blank">Thomas Baar</a>, Project Manager Peace Informactics Lab</small>
-                    </p>
+                  <div className="row">
+                    <div className="col-lg-4">
+                      <h2>
+                        Impact Tracker helps to monitor, 
+                        visualise and measure the impact 
+                        of your Twitter campaign
+                      </h2>
+                      <ul className="fa-ul">
+                        <li><i className="fa-li fa fa-check"></i>Monitor all communication streams</li>
+                        <li><i className="fa-li fa fa-check"></i>Track dissemination flows</li>
+                        <li><i className="fa-li fa fa-check"></i>Trace through whom you reach target audiences</li>
+                      </ul>
+                      <p>
+                        <small>Impact Tracker is developed by the Peace Informatics Lab (Leiden University) in collaboration with Human Rights Watch and Zimmerman & Zimmerman. </small>
+                      </p>
+                    </div>
                   </div>
+                  <div className="row">
+                    <div className="col-lg-8">
+                      <div className="logos">
+                        <a href="http://www.leidenuniv.nl/" target="_blank"><img src="img/leiden-bl.svg" /></a>
+                        <a href="https://www.hrw.org/" target="_blank"><img src="img/hrw-bl.png" /></a>
+                        <a href="https://www.zimmermanzimmerman.nl/" target="_blank"><img src="img/zz-logo-bl.svg" /></a>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row foot bl">
+                    <div className="col-lg-4">
+                      <p>
+                        <small>Questions about this project? Please contact <a href="http://campusdenhaag.nl/over/medewerkers-c4i/thomasbaar.html" target="_blank">Thomas Baar</a>, Project Manager Peace Informactics Lab</small>
+                      </p>
+                    </div>
+                  </div>
+
                 </div>
-
-
-
+              </div>
             </div>
 
         )
