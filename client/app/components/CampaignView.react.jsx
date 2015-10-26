@@ -271,6 +271,7 @@ var LineGraph = React.createClass({
     },
 
     render: function() {
+        console.log('called render')
         console.log('rerendering...')
         console.log(this.state.data)
         if (this.state.data)

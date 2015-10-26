@@ -512,6 +512,7 @@ var _sourceDict = {}; // keep track of source -> targets links
 var _targetDict = {}; // keep of track of sources <- target links
 var _layerDict = {}; // keep track of what layer the node with id x is in
 var _groups = {}; // layer to container dict
+var _json = {}; // last loaded json
 
 var _focusLock = false; // _focusLock for tooltip
 var _textToggle = false;
@@ -545,6 +546,8 @@ var RetweetNetworkGraph = {
         _svg = d3.select(el)
             .append("svg")
             .attr("class", "retweetNetworkChart") // todo: remove this, instead append to child of el
+            .attr('preserveAspectRatio', "xMidYMid")
+            .attr('viewBox', "0 0 " + clientWidth + " " + clientHeight)
             .call(drag)
             .on("click", function() {
                 if (d3.event.defaultPrevented) return;
@@ -557,8 +560,8 @@ var RetweetNetworkGraph = {
                     _svg.selectAll('.nodeText').style("opacity", 0);
                 }
             })
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            // .attr("width", width + margin.left + margin.right)
+            // .attr("height", height + margin.top + margin.bottom)
             .attr("overflow", "visible")
             .call(zoom) // zoom behaviour on parent container
             .append('g')
@@ -622,8 +625,16 @@ var RetweetNetworkGraph = {
     },
 
     resize: function() {
-        // todo: resize windows appropriately
+        var clientWidth = Window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth,
+            clientHeight = Window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight
 
+        console.log(clientWidth)
+
+        _svg.attr('width', clientWidth).attr('height', clientHeight);
+        // todo: resize windows appropriately
+        // _svg.remove();
+        // _svg = null;
+        // RetweetNetworkGraph.load(_json);
     },
 
     addNode: function(node, redraw=false) {
@@ -645,6 +656,7 @@ var RetweetNetworkGraph = {
 
     // initial load given a JSON graph file
     load: function(json) {
+        _json = json;
         var nodes = json.nodes;
         var links = json.edges;
 
