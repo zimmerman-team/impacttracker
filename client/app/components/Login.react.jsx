@@ -30,57 +30,65 @@ var Login = React.createClass({
 
     render: function() {
         return (
-        <div>
+          <div>
             <nav id="navi" className="navbar navbar-inverse">
-            <div className="container">
-              {/* Brand and toggle get grouped for better mobile display */}
-              <div className="navbar-header">
-                <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#nav-collapse" aria-expanded="false">
-                  <span className="sr-only">Toggle navigation</span>
-                  <span className="icon-bar" />
-                  <span className="icon-bar" />
-                  <span className="icon-bar" />
-                </button>
-                <a className="navbar-brand" href="/frontpage.html">
-                  <span><span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span> Impact Tracker</span>
-                </a>
-              </div>
-              {/* Collect the nav links, forms, and other content for toggling */}
-              <div className="collapse navbar-collapse " id="nav-collapse">
-                <ul className="nav navbar-nav">
-                  <li><a href="/frontpage.html#signup">Sign up</a></li>
-                  <li><a href="/frontpage.html#about">About</a></li>
-                  <li><a href="/frontpage.html#contact">Contact</a></li>
-                </ul>
-                <ul className="nav navbar-nav navbar-right">
-                  <li className="active"><a href="/#/login">Log in</a></li>
-                </ul>
-              </div>{/* /.navbar-collapse */}
-            </div>{/* /.container-fluid */}
-          </nav>
-          <div className="container login middle">
-            <div className="row">
-              <div className="col-lg-4 col-lg-offset-4">
-                <div className="panel panel-default">
-                    <a className="btn btn-block btn-social btn-twitter"
-                        onClick={this.login}>
-                        <i className="fa fa-twitter"></i>
-                        Sign in with Twitter
+              <div className="container">
+                {/* Brand and toggle get grouped for better mobile display */}
+                <div className="navbar-header">
+                  <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#nav-collapse" aria-expanded="false">
+                    <span className="sr-only">Toggle navigation</span>
+                    <span className="icon-bar" />
+                    <span className="icon-bar" />
+                    <span className="icon-bar" />
+                  </button>
+                  <a className="navbar-brand" href="/frontpage.html">
+                    <span> Impact Tracker</span><br />
+                    <span className="sub-logo">beta version</span>
+                  </a>
+                </div>
+                {/* Collect the nav links, forms, and other content for toggling */}
+              
+              </div>{/* /.container-fluid */}
+            </nav>
+            <div id="login-wrapper">
+              <div className="container">
+                <div className="row">
+                  <div className="col-lg-10">
+                    <h1>Do you know whether you reach your targets <br />
+                    – when you launch an advocacy campaign?</h1>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-lg-4">
+                    <h2>
+                      Impact Tracker helps to monitor, 
+                      visualise and measure the impact 
+                      of your Twitter campaign
+                    </h2>
+                    <p>
+                      ✔ Monitor all communication streams<br />
+                      ✔ Track dissemination flows<br />
+                      ✔ Trace through whom you reach target audiences
+                    </p>
+                    <p>
+                      Impact Tracker is developed by the Peace Informatics Lab (Leiden University) in collaboration with Human Rights Watch and Zimmerman & Zimmerman. 
+                    </p>
+                    <a className="btn btn-block btn-login" onClick={this.login}>
+                        Login here with your Twitter account <br />to create your first campaign
                     </a>
-                  {/*
-                  <h1>Log in</h1>
-                  <form onSubmit={this.login}>
-                    <Input type="text" defaultValue="test" ref="username" placeholder="Username" />
-                    <Input type="password" defaultValue="test" ref="password" placeholder="Password" />
-                    <ButtonInput type='submit' bsStyle="primary" defaultValue="Log in" />
-                </form>
-                */}
+                    <p>
+                      Questions about this project? Please contact Thomas Baar, Project Manager Peace Informactics Lab
+                    </p>
+                    
+                  </div>
+                  <div className="col-lg-8 text-right login-logos">
+                    <img src="img/university_leiden.png" />
+                    <img src="img/zimmermanzimmerman.png" />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
         );
     },
 

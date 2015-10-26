@@ -19,7 +19,7 @@ local_settings.py
 
 # npm
 node_modules
-npm-debug.log
+npm-debug.log*
 
 # coverage
 .coverage

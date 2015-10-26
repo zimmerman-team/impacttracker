@@ -67,15 +67,17 @@ var Home = Authenticated(React.createClass({
             <div class="project">
               <Navbar inverse>
                 <a className="navbar-brand">
-                    <span><Glyphicon glyph='screenshot' /> Impact Tracker</span>
+                    <span> Impact Tracker</span><br />
+                    <span className="sub-logo">beta version</span>
                 </a>
                 <Nav navbar>
-                  <NavItem eventKey={2} href='#/home/campaign'><Glyphicon glyph='th-large' /> Campaigns</NavItem>
+                  <NavItem style={{background: "#008CBA"}} eventKey={2} href='#/home/campaign'> Campaigns</NavItem>
+                  <NavItem eventKey={5} onClick={this._onLogoutClick}>Log out</NavItem>
                   <NavItem style={{display: "none"}} eventKey={3} href='#/home'><Glyphicon glyph='user' /> User profile</NavItem>
                   <NavItem style={{display: "none"}} eventKey={4} href='#/home'><Glyphicon glyph='info-sign' /> Support</NavItem>
                 </Nav>
                 <Nav navbar right>
-                  <NavItem eventKey={5} onClick={this._onLogoutClick}><Glyphicon glyph='lock' /> Log out</NavItem>
+                  
                 </Nav>
               </Navbar>
 

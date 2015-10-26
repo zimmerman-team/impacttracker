@@ -124,13 +124,14 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     getSourceTargetUsers: function(sources, targets, done) {
         var sourceScreenNames = _.pluck(sources, "screen_name").join();
         var targetScreenNames = _.pluck(targets, "screen_name").join();
-
+        console.log(sourceScreenNames);
+        console.log(targetScreenNames);
         getSources = this._performUserLookup.bind(this, Source, sourceScreenNames);
         getTargets = this._performUserLookup.bind(this, Target, targetScreenNames);
 
         async.parallel([
-                getSources.bind(this),
-                getTargets.bind(this),
+                getSources,
+                getTargets,
             ], function(error) {
                 if (error) console.error(error);
 
@@ -140,9 +141,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 Campaign.findOnePopulated({_id: this.campaign._id},
                     function(error, campaign) {
                         if (error) console.error(error)
-
-                        console.log(campaign)
-
+                        console.log(campaign);
                         done(campaign.sources, campaign.targets);
 
                     }.bind(this))
@@ -213,11 +212,14 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         var source_id = source.user_id
         var pre = this.campaign._id + ":sourceFollower:"
 
+        if (!source_id) return false
+
         _.forEach(ids, function(id) {
             this.redisClient.lpush(listKey, id)
             this.redisClient.expire(listKey, this.ttl)
 
             var key = pre + id;
+            console.log(source_id);
             this.redisClient.sadd(key, source_id);
             this.redisClient.expire(key, this.ttl)            
         }.bind(this))
