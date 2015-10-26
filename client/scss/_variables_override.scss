@@ -11,8 +11,8 @@
 $gray-base:              #000;
 $gray-darker:            lighten($gray-base, 13.5%); // #222
 $gray-dark:              lighten($gray-base, 20%);   // #333
-// $gray:                   lighten($gray-base, 33.5%) !default; // #555
-// $gray-light:             lighten($gray-base, 46.7%) !default; // #777
+$gray:                   lighten($gray-base, 33.5%) !default; // #555
+$gray-light:             lighten($gray-base, 46.7%) !default; // #777
 // $gray-lighter:           lighten($gray-base, 93.5%) !default; // #eee
 
 $brand-primary:         #008CBA; // #337ab7
@@ -43,13 +43,13 @@ $body-bg:               #fff;
 // //
 // //## Font, line-height, and color for body text, headings, and more.
 
-$font-family-sans-serif:  "Open Sans", sans-serif;
+$font-family-sans-serif:  "Raleway", sans-serif;
 // $font-family-serif:       Georgia, "Times New Roman", Times, serif !default;
 // //** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
 // $font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace !default;
 // $font-family-base:        $font-family-sans-serif !default;
 
-$font-size-base:          18px;
+$font-size-base:          14px;
 // $font-size-large:         ceil(($font-size-base * 1.25)) !default; // ~18px
 // $font-size-small:         ceil(($font-size-base * 0.85)) !default; // ~12px
 
@@ -61,7 +61,7 @@ $font-size-base:          18px;
 // $font-size-h6:            ceil(($font-size-base * 0.85)) !default; // ~12px
 
 // //** Unit-less `line-height` for use in components like buttons.
-$line-height-base:        1.428571429; // 20/14
+$line-height-base:        1.6; // 20/14
 // //** Computed "line-height" (`font-size` * `line-height`) for use with `margin`, `padding`, etc.
 $line-height-computed:    floor(($font-size-base * $line-height-base)); // ~20px
 
@@ -352,7 +352,7 @@ $grid-gutter-width:         30px;
 // $container-md:                 $container-desktop !default;
 
 // // Large screen / wide desktop
-$container-large-desktop:      (1340px + $grid-gutter-width);
+//$container-large-desktop:      (1340px + $grid-gutter-width);
 // //** For `$screen-lg-min` and up.
 // $container-lg:                 $container-large-desktop !default;
 

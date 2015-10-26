@@ -1,4 +1,6 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700);
+@import url(https://fonts.googleapis.com/css?family=Raleway:400,700);
+@import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css);
 @import "variables_override";
 // @import "animate";
 @import "bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
@@ -19,11 +21,6 @@ html {
 	font-family: 'Raleway', sans-serif;
 }
 
-body{
-	line-height: 1.3em;
-	font-size: 14px;
-}
-
 h1{
 	font-size: 36px;
 	font-weight: bold;
@@ -32,10 +29,7 @@ h1{
 
 h2{
 	font-size: 20px;
-}
-
-p{
-
+	line-height:1.5;
 }
 
 //main onepager 
@@ -88,13 +82,14 @@ p{
 #login-wrapper{
 	background-image: url('../img/bg.jpg');
 	background-size: cover;
-	height: 600px;
 	color: #fff;
+	padding-bottom:30px;
 
 	.btn-login{
 		border-radius: 4px;
 		color: #fff;
 		background-color: rgba(0,0,0,0.4);
+		margin:20px 0;
 	}
 }
 
@@ -114,8 +109,21 @@ p{
 	}
 }
 
+.logos {
+	margin:20px 0;
+	img {
+		width:25%;
+		&:first-of-type {
+			margin-left: 0;
+		}
+		&:last-of-type {
+			margin-right: 0;
+		}
+	}
+}
+
 nav {
-	background: #222222;
+	//background: #222222;
 
 	&.navbar{
 		margin-bottom: 0;
@@ -138,13 +146,30 @@ nav {
 			font-weight: normal;
 			font-size: 12px;
 			display: block;
+			color:$gray-light;
 		}
+	}
+}
+
+.fa-ul {
+	li {
+		margin:5px 0;
 	}
 }
 
 //campaign overview page
 .campaignview {
 	padding:40px 0;
+	.actions {
+		button:first-of-type {
+			margin-right: 10px;
+		}
+	}
+	.max10 {
+		color:$gray;
+		margin-left:10px;
+		font-size: 85%;
+	}
 	.toggle-tag {
 		margin-right:10px;
 		display:block;
@@ -286,18 +311,103 @@ footer {
 	padding:90px 0;
 	background:$gray-darker;
 	color:#fff;
-	overflow:hidden;
-	min-height: 500px;
 }
 
 
 
 
-@media (min-width: 768px){
+@media (min-width: 767px){
+	.navbar-nav li {
+		height: 60px;
+	}
 	.navbar-nav > li > a{
+		height: 60px;
 		padding-top: 18px;
 		padding-bottom: 18px;
 		padding-left: 27.5px;
 		padding-right: 27.5px;
 	}
+}
+
+//text alignment
+.text-left-not-xs, .text-left-not-sm, .text-left-not-md, .text-left-not-lg {
+    text-align: left;
+}
+.text-center-not-xs, .text-center-not-sm, .text-center-not-md, .text-center-not-lg {
+    text-align: center;
+}
+.text-right-not-xs, .text-right-not-sm, .text-right-not-md, .text-right-not-lg {
+    text-align: right;
+}
+.text-justify-not-xs, .text-justify-not-sm, .text-justify-not-md, .text-justify-not-lg {
+    text-align: justify;
+}
+
+@media (max-width: 767px) {
+    .text-left-not-xs, .text-center-not-xs, .text-right-not-xs, .text-justify-not-xs {
+        text-align: inherit;
+    }
+    .text-left-xs {
+        text-align: left;
+    }
+    .text-center-xs {
+        text-align: center;
+    }
+    .text-right-xs {
+        text-align: right;
+    }
+    .text-justify-xs {
+        text-align: justify;
+    }
+}
+@media (min-width: 768px) and (max-width: 991px) {
+    .text-left-not-sm, .text-center-not-sm, .text-right-not-sm, .text-justify-not-sm {
+        text-align: inherit;
+    }
+    .text-left-sm {
+        text-align: left;
+    }
+    .text-center-sm {
+        text-align: center;
+    }
+    .text-right-sm {
+        text-align: right;
+    }
+    .text-justify-sm {
+        text-align: justify;
+    }
+}
+@media (min-width: 992px) and (max-width: 1199px) {
+    .text-left-not-md, .text-center-not-md, .text-right-not-md, .text-justify-not-md {
+        text-align: inherit;
+    }
+    .text-left-md {
+        text-align: left;
+    }
+    .text-center-md {
+        text-align: center;
+    }
+    .text-right-md {
+        text-align: right;
+    }
+    .text-justify-md {
+        text-align: justify;
+    }
+}
+@media (min-width: 1200px) {
+    .text-left-not-lg, .text-center-not-lg, .text-right-not-lg, .text-justify-not-lg {
+        text-align: inherit;
+    }
+    .text-left-lg {
+        text-align: left;
+    }
+    .text-center-lg {
+        text-align: center;
+    }
+    .text-right-lg {
+        text-align: right;
+    }
+    .text-justify-lg {
+        text-align: justify;
+    }
 }

@@ -1,1 +1,0 @@
-console.error("ReactifyError: /Applications/MAMP/htdocs/it_dev/client/app/components/Login.react.jsx: Parse Error: Line 46: Expected corresponding JSX closing tag for img while parsing file: /Applications/MAMP/htdocs/it_dev/client/app/components/Login.react.jsx");

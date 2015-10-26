@@ -35,7 +35,7 @@ var Campaign = React.createClass({
                 <div className="row">
                     <div className="col-lg-8">
                        <Button className="new-campaign" onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/new")} bsStyle="primary" bsSize="large"><Glyphicon glyph='plus' /> New campaign</Button>
-                        * Max 10 campaigns, ask us for custom impact features for your organisation.
+                        <span className="max10">* Max 10 campaigns, ask us for custom impact features for your organisation.</span>
                     </div>
                 </div>
                 <CampaignTable campaigns={this.state.campaigns}/>
@@ -43,8 +43,7 @@ var Campaign = React.createClass({
 
                 <div className="row">
                   <div className="col-lg-10">
-                    <h1>Do you know whether you reach your targets <br />
-                    – when you launch an advocacy campaign?</h1>
+                    <h1>Help us further develop this prototype</h1>
                   </div>
                 </div>
                 <div className="row">
@@ -54,21 +53,25 @@ var Campaign = React.createClass({
                       visualise and measure the impact 
                       of your Twitter campaign
                     </h2>
+                    <ul className="fa-ul">
+                      <li><i className="fa-li fa fa-check"></i>Monitor all communication streams</li>
+                      <li><i className="fa-li fa fa-check"></i>Track dissemination flows</li>
+                      <li><i className="fa-li fa fa-check"></i>Trace through whom you reach target audiences</li>
+                    </ul>
                     <p>
-                      ✔ Monitor all communication streams<br />
-                      ✔ Track dissemination flows<br />
-                      ✔ Trace through whom you reach target audiences
+                      <small>Impact Tracker is developed by the Peace Informatics Lab (Leiden University) in collaboration with Human Rights Watch and Zimmerman & Zimmerman. </small>
                     </p>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-lg-8">
+                    <div className="logos">
+                      <img src="img/leiden-bl.svg" />
+                      <img src="img/hrw-bl.png" />
+                      <img src="img/zz-logo-bl.svg" />
+                    </div>
                     <p>
-                      Impact Tracker is developed by the Peace Informatics Lab (Leiden University) in collaboration with Human Rights Watch and Zimmerman & Zimmerman. 
-                    </p>
-                    <p>
-                        <img src="img/human_rights_watch_black.png" />
-                        <img src="img/university_leiden_black.png" />
-                        <img src="img/zimmermanzimmerman_black.png" />
-                    </p>
-                    <p>
-                      Questions about this project? Please contact Thomas Baar, Project Manager Peace Informactics Lab
+                      <small>Questions about this project? Please contact Thomas Baar, Project Manager Peace Informactics Lab</small>
                     </p>
                     
                   </div>
@@ -104,23 +107,27 @@ var CampaignTable = React.createClass({
         })
 
         return (
-            <div>
-               <div className="row">
-                   <div className="col-lg-3">
-                        Campaign name
-                   </div>
-                   <div className="col-lg-3">
-                        Start date
-                   </div>
-                   <div className="col-lg-2">
-                        State
-                   </div>
-                   <div className="col-lg-4">
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>
+                      Campaign name
+                  </th>
+                  <th>
+                      Start date
+                  </th>
+                  <th>
+                      State
+                  </th>
+                  <th>
 
-                   </div>
-               </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {rows}
-           </div>
+              </tbody>
+            </table>
         )
     }
 })
@@ -146,24 +153,24 @@ var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https
             : null
 
         return (
-            <div className="row">
-                <div className="col-lg-3">
+            <tr>
+                <td>
                     {campaign.name}
-                </div>
-                <div className="col-lg-3">
+                </td>
+                <td>
                     {moment(campaign.creationDate).format('MMMM Do YYYY, h:mm:ss a')}
-                </div>
-                <div className="col-lg-2">
+                </td>
+                <td>
                     {campaign.state}
-                </div>
-                <div className="col-lg-4">
+                </td>
+                <td>
                     <span className="actions">
                         <Button bsStyle='primary' onClick={RouterContainer.get().transitionTo.bind(null, "/home/campaign/view/" + campaign._id)}><Glyphicon glyph='stats' /> View</Button>
                         {stopButton}
                         <Button bsStyle='danger' onClick={this._onDeleteCampaignClick.bind(null, campaign._id)}><Glyphicon glyph='trash' /> Delete</Button>
                     </span>
-                </div>
-            </div>
+                </td>
+            </tr>
         )
     }
 })

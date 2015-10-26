@@ -54,8 +54,7 @@ var Login = React.createClass({
               <div className="container">
                 <div className="row">
                   <div className="col-lg-10">
-                    <h1>Do you know whether you reach your targets <br />
-                    – when you launch an advocacy campaign?</h1>
+                    <h1>Do you know whether you reach your targets – when you launch an advocacy campaign?</h1>
                   </div>
                 </div>
                 <div className="row">
@@ -65,25 +64,33 @@ var Login = React.createClass({
                       visualise and measure the impact 
                       of your Twitter campaign
                     </h2>
+                    <ul className="fa-ul">
+                      <li><i className="fa-li fa fa-check"></i>Monitor all communication streams</li>
+                      <li><i className="fa-li fa fa-check"></i>Track dissemination flows</li>
+                      <li><i className="fa-li fa fa-check"></i>Trace through whom you reach target audiences</li>
+                    </ul>
                     <p>
-                      ✔ Monitor all communication streams<br />
-                      ✔ Track dissemination flows<br />
-                      ✔ Trace through whom you reach target audiences
+                      <small>Impact Tracker is developed by the Peace Informatics Lab (Leiden University) in collaboration with Human Rights Watch and Zimmerman & Zimmerman. </small>
                     </p>
-                    <p>
-                      Impact Tracker is developed by the Peace Informatics Lab (Leiden University) in collaboration with Human Rights Watch and Zimmerman & Zimmerman. 
-                    </p>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-lg-4">
                     <a className="btn btn-block btn-login" onClick={this.login}>
                         Login here with your Twitter account <br />to create your first campaign
                     </a>
-                    <p>
-                      Questions about this project? Please contact Thomas Baar, Project Manager Peace Informactics Lab
-                    </p>
-                    
                   </div>
-                  <div className="col-lg-8 text-right login-logos">
-                    <img src="img/university_leiden.png" />
-                    <img src="img/zimmermanzimmerman.png" />
+                  <div className="col-lg-8 text-right-lg logos">
+                    <img src="img/leiden.svg" />
+                    <img src="img/hrw.png" />
+                    <img src="img/zz-logo.svg" />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-lg-4">
+                    <p>
+                      <small>Questions about this project? Please contact Thomas Baar, Project Manager Peace Informactics Lab</small>
+                    </p>
                   </div>
                 </div>
               </div>
