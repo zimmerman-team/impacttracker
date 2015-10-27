@@ -72,6 +72,8 @@ var NetworkGraph = React.createClass({
         socket.emit("Campaign.getGraph", this.props.campaign._id, function(error, graph) {
             if (error) throw error;
 
+            console.log(graph)
+
             RetweetNetworkGraph.load(graph)
         })
 
@@ -172,7 +174,6 @@ _.mixin({groupByMulti: function (obj, values, context) {
 var _preparedGraph = [];
 
 var prepareData = function(graph, grouping="minute") {
-    console.log(graph)
 
     switch(grouping) {
         case "minute": 
@@ -202,7 +203,6 @@ var prepareData = function(graph, grouping="minute") {
         })
     });
 
-    console.log(graph)
     // todo: improve performance by removing this iteration (and maybe all iterations)
     graph = _.map(graph, function(value, key) {
         value.date = new Date(parseInt(key));
@@ -271,9 +271,6 @@ var LineGraph = React.createClass({
     },
 
     render: function() {
-        console.log('called render')
-        console.log('rerendering...')
-        console.log(this.state.data)
         if (this.state.data)
             RetweetLineGraph.load(this.state.data, this.state.dateRange)
 
@@ -290,7 +287,6 @@ var LineGraph = React.createClass({
 
 var SelectLineGraphAxes = React.createClass({
     change: function(event) {
-        console.log(event.target.value)
         this.props.callback(event.target.value);
     },
 

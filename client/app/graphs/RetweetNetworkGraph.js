@@ -50,7 +50,7 @@ LineContainer.prototype.getCoords = function(i) {
     }
 }
 
-LineContainer.prototype.addNode = function(id, data, update) {
+LineContainer.prototype.addNode = function(id, data, update=false) {
     this.nodes.push({
         "id": id,
         "data": data
@@ -154,7 +154,7 @@ LineContainer.prototype.updateNodes = function() {
         .attr("dy", ".35em")
         .attr("opacity", 0)
         .text(function(d) {
-            return d.data.user.screen_name;
+            return d.data ? d.data.user.screen_name : d.id;
         })
         .attr("transform", function(d) {
             return "translate(" + d.x + "," + d.y + ")";
@@ -282,7 +282,7 @@ var getLinks = function(id) {
 }
 
 // Links are global
-var addLink = function(source, target, update) {
+var addLink = function(source, target, update=false) {
     var source = source.split(":");
     var target = target.split(":");
 
@@ -618,6 +618,7 @@ var RetweetNetworkGraph = {
     destroy: function() {
         // some cleanup
         _layerDict = {};
+        links = []
         _groups = {};
         _svg.remove();
         _svg = null;        
@@ -627,8 +628,6 @@ var RetweetNetworkGraph = {
     resize: function() {
         var clientWidth = Window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth,
             clientHeight = Window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight
-
-        console.log(clientWidth)
 
         _svg.attr('width', clientWidth).attr('height', clientHeight);
         // todo: resize windows appropriately
@@ -660,8 +659,12 @@ var RetweetNetworkGraph = {
         var nodes = json.nodes;
         var links = json.edges;
 
-        _.forEach(nodes, RetweetNetworkGraph.addNode);
-        _.forEach(links, RetweetNetworkGraph.addLink);
+        _.forEach(nodes, function(node) {
+            RetweetNetworkGraph.addNode(node, false)
+        });
+        _.forEach(links, function(link) {
+            RetweetNetworkGraph.addLink(link, false)
+        });
 
         _.forEach(_groups, function(group) {
             group.updateNodes();
