@@ -292,10 +292,14 @@ var SelectLineGraphAxes = React.createClass({
 
     render: function() {
         return (
-            <select onChange={this.change}>
-                <option value="minute">Tweets per minute</option>
-                <option value="hour">Tweets per hour</option>
-            </select>
+            <div className="controls">
+                <div className="container">
+                    <span>
+                        <input type="radio" name="scale" defaultValue="minute" onChange={this.change} id="minute" defaultChecked /><label htmlFor="minute">Tweets per minute</label>
+                        <input type="radio" name="scale" defaultValue="hour" onChange={this.change} id="hour" /><label htmlFor="hour">Tweets per hour</label>
+                    </span>
+                </div>
+            </div>
         )
     }
 })
