@@ -19,7 +19,7 @@ def writeCampaign(fileName, name, handle):
     }
 
     # mongodb user id, fill this in appropriately
-    userid = ObjectId('55ba3fb4c4f29ed665097c64')
+    userid = ObjectId('5630c26f447f9c693df5ed5d')
 
     campaign_file = open(fileName, 'r')
     campaign_json = json.load(campaign_file)
