@@ -110,6 +110,8 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                     { screen_name: user.screen_name },
                     { user_id: user.id_str },
                     function(error, doc) {
+                        console.log("Fetched a new source or target!")
+                        console.log(doc)
                         updatedcb(error)
                 });
             }, function(error) {

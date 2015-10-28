@@ -18,5 +18,14 @@ Target.statics.findByUser = function(query, userId, cb) {
         .exec(cb)
 }
 
+Target.statics.findOneByScreenName = function(query, screenName, cb) {
+    query = query || {};
+    query.screen_name = screenName;
+
+    return this
+        .findOne(query)
+        .exec(cb)
+}
+
 module.exports = mongoose.model('Target', Target)
 

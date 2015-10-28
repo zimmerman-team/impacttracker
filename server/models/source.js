@@ -18,12 +18,12 @@ Source.statics.findByUser = function(query, userId, cb) {
         .exec(cb)
 }
 
-Source.statics.findByScreenName = function(query, screenName, cb) {
+Source.statics.findOneByScreenName = function(query, screenName, cb) {
     query = query || {};
     query.screen_name = screenName;
 
     return this
-        .find(query)
+        .findOne(query)
         .exec(cb)
 }
 

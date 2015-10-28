@@ -26,6 +26,9 @@ def writeCampaign(fileName, name, handle):
 
     for node in campaign_json['nodes']:
         node['layer'] = layerMapping.get(node['LayerNo'], 'unrelated')
+        node['data'] = {}
+        node['data']['user'] = {}
+        node['data']['user']['screen_name'] = node['id']
 
     campaign = {
         'author': userid,

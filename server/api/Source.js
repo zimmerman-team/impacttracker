@@ -17,11 +17,19 @@ var SourceApi = {
 
     create: function(user, data, res) {
         data.author = user._id;
-        var source = new Source(data);
-
-        source.save(function(error) {
+        var screen_name = data.screen_name;
+        Source.findOneByScreenName({}, screen_name, function(error, doc) {
             if (error) return res(error);
-            return res(null, source);
+
+            if (doc) return res('doc already exists')
+
+            var source = new Source(data);
+
+            source.save(function(error) {
+                if (error) return res(error);
+
+                return res(null, source);
+            })
         })
     },
 

@@ -18,12 +18,20 @@ var targetApi = {
 
     create: function(user, data, res) {
         data.author = user._id;
-        var target = new Target(data);
+        var screen_name = data.screen_name;
 
-        target.save(function(error) {
+        Target.findOneByScreenName({}, screen_name, function(error, doc) {
             if (error) return res(error);
 
-            return res(null, target);
+            if (doc) return res('doc already exists')
+
+            var target = new Target(data);
+
+            target.save(function(error) {
+                if (error) return res(error);
+
+                return res(null, target);
+            })
         })
     },
 
