@@ -6,7 +6,8 @@ var Source = new Schema({
     author: { type: Schema.Types.ObjectId, ref: 'Account' },
     user_id: String,
     screen_name: String,
-    categories: [String]
+    categories: [String],
+    fetched_followers: {type: Boolean, default: false}
 })
 
 Source.statics.findByUser = function(query, userId, cb) {

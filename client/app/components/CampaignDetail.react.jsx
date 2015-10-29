@@ -70,12 +70,12 @@ var CampaignDetail = React.createClass({
 
         if (this.state.campaign._id) {
             ApiService.updateCampaign(this.state.campaign.id, campaign);      
-            // RouterContainer.get().transitionTo('/home/campaign');
+            RouterContainer.get().transitionTo('/home/campaign');
         } else {
             // change this to work with flux
             ApiService.createCampaign(campaign, function(id) {
                 console.log("transitioning")
-                // RouterContainer.get().transitionTo('/home/campaign');
+                RouterContainer.get().transitionTo('/home/campaign');
             });
             
         }

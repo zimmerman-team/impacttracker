@@ -6,7 +6,8 @@ var Target = new Schema({
     author: { type: Schema.Types.ObjectId, ref: 'Account' },
     user_id: String,
     screen_name: String,
-    categories: [String]
+    categories: [String],
+    fetched_friends: {type: Boolean, default: false}
 })
 
 Target.statics.findByUser = function(query, userId, cb) {

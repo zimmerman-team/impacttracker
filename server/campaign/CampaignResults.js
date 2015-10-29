@@ -176,17 +176,14 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
             var user = tweet.user;
             if (!user) { return this.handleTweet(); }
 
-            var sourceFollowerKey = this.campaign._id + ":sourceFollower:" + userId;
-            var targetFriendKey = this.campaign._id + ":targetFriend:" + userId;
-
             var userId = user.id_str;
 
             // the originally retweeted tweet, we are only interested in retweets
             var original_tweet = tweet.retweeted_status;
             if (!original_tweet) return this.handleTweet()
 
-            var sourceFollowerKey = this.campaign._id + ":sourceFollower:" + userId;
-            var targetFriendKey = this.campaign._id + ":targetFriend:" + userId;
+            var sourceFollowerKey = ":sourceFollower:" + userId;
+            var targetFriendKey = ":targetFriend:" + userId;
 
             /*
              * Check if the source is a follower of a friend and/or a friend of a target

@@ -24,7 +24,7 @@ function TwitterRest(campaign) {
     this.redisClient = DatabaseContainer.getRedis();
 
     // ttl for redis keys
-    this.ttl = 60 * 10;
+    this.ttl = 60 * 60 * 24 * 14;
 }
 
 TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.prototype, {
@@ -47,6 +47,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                         if (error) console.error(error)
 
                         // DONE, emit completed
+                        console.log('done, going to analyse tweets...')
                         this.emit("completed")
 
                     }.bind(this));
@@ -150,7 +151,14 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
 
     getSources: function(sources, cb) {
-        async.each(sources, this.getSourceFollowers.bind(this), function(error) {
+        async.each(sources, function(source, cb) {
+            if (!source.fetched_followers) {
+                this.getSourceFollowers(source, cb)
+            } else {
+                console.log('source ' + source.screen_name + ' already fetched')
+                cb()
+            }
+        }.bind(this), function(error) {
             console.log('sources done!')
             cb(error);
         })
@@ -172,19 +180,20 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         }, function(cb) {
 
             limitTimeout = this._checkLimits('/followers/ids')
-            console.log("limit timeout: ")
-            console.log(limitTimeout)
+            console.log("limit timeout: " + limitTimeout)
             if (limitTimeout > 0)
                 return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
             // https://dev.twitter.com/rest/reference/get/followers/ids
             this.client.get('followers/ids', { 
                 screen_name: source.screen_name,
+                cursor: cursor,
                 count: 5000 // this is the maximum per call
             }, function(error, followers, response) {
                 if (error) console.error(error);
                 if (error) return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
+                console.log('cursor: ' + cursor)
                 this.writeSourceFollowers(followers.ids, source);
 
                 cursor = followers.next_cursor;
@@ -193,6 +202,11 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             }.bind(this));
         }.bind(this), function (error) {
             if (error) console.error(error)
+            if (!error) {
+                // mark source as retreived
+                source.fetched_followers = true;
+                source.save()
+            }
             done()
         }.bind(this))
     },
@@ -206,18 +220,18 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     */
     writeSourceFollowers: function(ids, source) {
         // friends list
-        var listKey = this.campaign._id + ":" + source.screen_name + ":followers";
+        var listKey = source.screen_name + ":followers";
 
         console.log('writing source followers')
         var source_id = source.user_id
-        var pre = this.campaign._id + ":sourceFollower:"
+        var pre = "sourceFollower:"
 
         if (!source_id) console.error('source user ' + source  + ' is not defined!!');
         if (!source_id) return false
 
         _.forEach(ids, function(id) {
-            this.redisClient.lpush(listKey, id)
-            this.redisClient.expire(listKey, this.ttl)
+            // this.redisClient.lpush(listKey, id)
+            // this.redisClient.expire(listKey, this.ttl)
 
             var key = pre + id;
 
@@ -228,7 +242,15 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     },
 
     getTargets: function(targets, cb) {
-        async.each(targets, this.getTargetFriends.bind(this), function(error) {
+        async.each(targets, function(target, cb) {
+            if (!target.fetched_friends) {
+                // todo: flush redis before starting
+                this.getTargetFriends(target, cb)
+            } else {
+                console.log('target ' + target.screen_name + ' already fetched')
+                cb()
+            }
+        }.bind(this), function(error) {
             console.log('targets done!')
             cb(error);
         })
@@ -237,8 +259,8 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     /*
      * get Target's friends from the Twitter API
     */
-    getTargetFriends: function(source, done) {
-        if (!source.screen_name) return done();
+    getTargetFriends: function(target, done) {
+        if (!target.screen_name) return done();
 
         var cursor = -1;
         // var count = 0; 
@@ -253,18 +275,25 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
             // https://dev.twitter.com/rest/reference/get/followers/ids
             this.client.get('friends/ids', { 
-                screen_name: source.screen_name,
+                screen_name: target.screen_name,
+                cursor: cursor,
                 count: 5000
             }, function(error, friends, response) {
                 if (error) return cb(error)
 
-                this.writeTargetFriends(friends.ids, source);
+                this.writeTargetFriends(friends.ids, target);
 
                 cursor = friends.next_cursor;
 
                 return cb();
             }.bind(this));
         }.bind(this), function (error) {
+            if (error) console.error(error);
+            if (!error) {
+                // mark target as retreived
+                target.fetched_friends = true;
+                target.save()
+            }
             done(error);
         })
     },
@@ -278,17 +307,17 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     writeTargetFriends: function(ids, target) {
 
         // friends list
-        var listKey = this.campaign._id + ":" + target.screen_name + ":friends";
+        var listKey = target.screen_name + ":friends";
 
         var target_id = target.user_id
-        var pre = this.campaign._id + ":targetFriend:"
+        var pre = "targetFriend:"
 
         if (!target_id) console.error('target user ' + target + ' is not defined!!');
         if (!target_id) return false
 
         _.forEach(ids, function(id) {
-            this.redisClient.lpush(listKey, id)
-            this.redisClient.expire(listKey, this.ttl)
+            // this.redisClient.lpush(listKey, id)
+            // this.redisClient.expire(listKey, this.ttl)
 
             var key = pre + id;
             this.redisClient.sadd(key, target_id);
