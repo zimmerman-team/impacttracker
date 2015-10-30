@@ -21,7 +21,7 @@ function TwitterRest(campaign) {
     this.client = new Twitter(this.twitterConfig);
 
     this.limits = {};
-    this.lastLimitUpdate
+    this.lastLimitUpdate = moment('2014-04-23T09:54:51'); // random historic date
 
     this.redisClient = DatabaseContainer.getRedis();
 
