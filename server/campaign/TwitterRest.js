@@ -59,10 +59,9 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
     getLimits: function(cb) {
         var diff = moment().diff(this.lastLimitUpdate, 'seconds')
-        if (diff > 10) {
-            this.lastLimitUpdate = moment()
-            cb()
-        }
+        if (diff <= 10) cb()
+
+        this.lastLimitUpdate = moment()
 
         this.client.get('application/rate_limit_status', {
             resources: 'followers,friends,users'
