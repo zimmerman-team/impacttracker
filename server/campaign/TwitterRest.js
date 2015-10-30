@@ -1,5 +1,6 @@
 var _ = require('lodash')
 var async = require('async');
+var moment = require('moment')
 var config = require("../config/config")
 var Twitter = require('twitter')
 var EventEmitter = require('events').EventEmitter
@@ -20,6 +21,7 @@ function TwitterRest(campaign) {
     this.client = new Twitter(this.twitterConfig);
 
     this.limits = {};
+    this.lastLimitUpdate
 
     this.redisClient = DatabaseContainer.getRedis();
 
@@ -56,10 +58,17 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
     },
 
     getLimits: function(cb) {
+        var diff = moment().diff(this.lastLimitUpdate, 'seconds')
+        if (diff > 10) {
+            this.lastLimitUpdate = moment()
+            cb()
+        }
+
         this.client.get('application/rate_limit_status', {
             resources: 'followers,friends,users'
         }, function(error, limits, res) {
             if (error) console.error(error)
+            if (error) cb()
 
             console.log('got limits!')
 
@@ -107,6 +116,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
             // update model with retreived id
             async.each(twitterUsers, function(user, updatedcb) {
+                console.log(user.id_str)
                 model.update(
                     { screen_name: user.screen_name },
                     { user_id: user.id_str },
@@ -204,6 +214,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             if (error) console.error(error)
             if (!error) {
                 // mark source as retreived
+                console.log("Done fetching source " + source.screen_name)
                 source.fetched_followers = true;
                 source.save()
             }
@@ -291,6 +302,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             if (error) console.error(error);
             if (!error) {
                 // mark target as retreived
+                console.log("Done fetching target " + target.screen_name)
                 target.fetched_friends = true;
                 target.save()
             }

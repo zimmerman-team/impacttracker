@@ -92,46 +92,79 @@ var CampaignDetail = React.createClass({
         ApiService.createTarget(targetInput);
     },
 
-    _onSourceChange: function(sourceId, event) {
+    _onSourceChange: function(index, event) {
+        this.state.sources[index].checked = !this.state.sources[index].checked
+        this.setState({
+            sources: this.state.sources 
+        })
+    },
+
+    _onTargetChange: function(index, event) {
+        this.state.targets[index].checked = !this.state.targets[index].checked
+        this.setState({
+            targets: this.state.targets
+        })
         // var checked = event.target.checked;
     },
 
-    _onTargetChange: function(targetId, event) {
-        // var checked = event.target.checked;
+    _onSourceToggleAll: function(event) {
+        this.setState({
+            sources: _.map(this.state.sources, function(source) {
+                source.checked = !source.checked
+                return source
+            })
+        })
     },
 
+    _onTargetToggleAll: function(event) {
+        this.setState({
+            targets: _.map(this.state.targets, function(target) {
+                target.checked = !target.checked
+                return target
+            })
+        })
+    },
+
+    // also apply front-end relevant properties (like checked variable)
     getInitialState: function() {
-        return getCampaignState();
+        var state = getCampaignState();
+
+        var sourceCampaigns = state.campaign.sources
+        var targetCampaigns = state.campaign.targets
+
+        state.sources = _.map(state.sources, function(source) {
+            source.checked = _.find(sourceCampaigns, {_id: source._id}) ? true : false
+            return source
+        });
+        state.targets = _.map(state.targets, function(target) {
+            target.checked = _.find(targetCampaigns, {_id: target._id}) ? true : false
+            return target
+        });
+
+        return state;
     },
 
     render: function() {
-        console.log(this.state.campaign)
 
-        var sources = this.state.sources
-        var targets = this.state.targets
-
-        var sourceCampaigns = this.state.campaign.sources
-        var targetCampaigns = this.state.campaign.targets
-
-        var sourceChecks = [];
-        var targetChecks = [];
-
-
-        _.forEach(sources, function(source) {
-            if (_.find(sourceCampaigns, {_id: source._id})) {
-                sourceChecks.push(<Input type='checkbox' value={source._id} name="source" onChange={this._onSourceChange.bind(null, source._id)} label={source.screen_name} checked />)
-            } else {
-                sourceChecks.push(<Input type='checkbox' value={source._id} name="source" onChange={this._onSourceChange.bind(null, source._id)} label={source.screen_name} />)
-            }
+        var sourceChecks = _.map(this.state.sources, function(source, index) {
+            return (
+                <Input type='checkbox' value={source._id} name="source" onChange={this._onSourceChange.bind(null, index)} label={source.screen_name} checked={source.checked} />
+        )
         }.bind(this))
 
-        _.forEach(targets, function(target){
-            if (_.find(targetCampaigns, {_id: target._id})) {
-                targetChecks.push(<Input type='checkbox' value={target._id} name="target" onChange={this._onTargetChange.bind(null, target._id)} label={target.screen_name} checked />)
-            } else {
-                targetChecks.push(<Input type='checkbox' value={target._id} name="target" onChange={this._onTargetChange.bind(null, target._id)} label={target.screen_name} />)
-            }
+        var targetChecks = _.map(this.state.targets, function(target, index) {
+            return (
+                <Input type='checkbox' value={target._id} name="target" onChange={this._onTargetChange.bind(null, index)} label={target.screen_name} checked={target.checked} />
+        )
         }.bind(this))
+
+        var sourceCheckAll = (
+            <Input type='checkbox' name='sourceCheckAll' onChange={this._onSourceToggleAll} label="Check all" />
+        )
+        var targetCheckAll = (
+            <Input type='checkbox' name='targetCheckAll' onChange={this._onTargetToggleAll} label="Check all" />
+        )
+
 
 
         return (
@@ -176,6 +209,7 @@ var CampaignDetail = React.createClass({
                             
                             <div className="row">
                             <div className="col-lg-4 cb">
+                            {sourceCheckAll}
                             <label for="sourceInput">Sources</label>
                             {sourceChecks}
                             <Input type="text" ref="sourceInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddSourceClick} value="Add source" placeholder="Add a new source"/>} />  
@@ -184,6 +218,7 @@ var CampaignDetail = React.createClass({
 
                             <div className="row">
                             <div className="col-lg-4 cb">
+                            {targetCheckAll}
                             <label for="targetInput">Targets</label>
                             {targetChecks}
                             <Input type="text" ref="targetInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddTargetClick} value="Add target" placeholder="Add a new target" />} />  
