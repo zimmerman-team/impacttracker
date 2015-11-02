@@ -59,7 +59,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
     getLimits: function(cb) {
         var diff = moment().diff(this.lastLimitUpdate, 'seconds')
-        if (diff <= 10) cb()
+        if (diff <= 5) return cb()
 
         this.lastLimitUpdate = moment()
 
@@ -67,23 +67,25 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             resources: 'followers,friends,users'
         }, function(error, limits, res) {
             if (error) console.error(error)
-            if (error) cb()
-
-            console.log('got limits!')
+	    if (error) console.error('rate limit exceeded for getting rate limits..');
+            if (error) return cb()
 
             this.limits["/followers/ids"] = limits.resources.followers["/followers/ids"];
             this.limits["/friends/ids"] = limits.resources.friends["/friends/ids"];
             this.limits["/users/lookup"] = limits.resources.users["/users/lookup"];
 
+            console.log('got limits!')
             console.log(this.limits)
-             if (cb) cb();
+            return cb();
          }.bind(this));
     },
 
     _checkLimits: function(endpoint) {
-        if (this.limits[endpoint].remaining <= 1) {
-            var timeout = (this.limits[endpoint].reset - Math.floor(Date.now() / 1000)) * 1000;
-            this.limits[endpoint].remaining -= 1;
+        if (this.limits[endpoint].remaining < 1) {
+	    
+            // todo: more efficient timeouts (hard because of having to call API once)
+            // var timeout = (this.limits[endpoint].reset - Math.floor(Date.now() / 1000)) * 1000;
+            var timeout = 1000 * 60 * 15;
             return timeout
         } else {
             this.limits[endpoint].remaining -= 1;
@@ -200,6 +202,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 count: 5000 // this is the maximum per call
             }, function(error, followers, response) {
                 if (error) console.error(error);
+		if (error) throw error
                 if (error) return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
                 console.log('cursor: ' + cursor)
@@ -217,7 +220,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 source.fetched_followers = true;
                 source.save()
             }
-            done()
+            return done()
         }.bind(this))
     },
 
