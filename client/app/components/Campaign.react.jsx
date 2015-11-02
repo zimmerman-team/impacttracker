@@ -154,7 +154,7 @@ var CampaignRow = React.createClass({ // todo: fix react-bootstrap routes: https
     render: function() {
         var campaign = this.props.campaign;
 
-        var stopButton = campaign.state === "running" ?
+        var stopButton = campaign.state != "completed" ?
             <Button bsStyle='info' onClick={this._onStopCampaignClick.bind(null, campaign._id)}><Glyphicon glyph='edit' /> Stop</Button>
             : null
 

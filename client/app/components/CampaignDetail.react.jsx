@@ -41,8 +41,6 @@ var CampaignDetail = React.createClass({
         // var elements = this.refs.form.getDOMNode().elements;
         var formData = $(event.target).serializeArray();
 
-        console.log(formData)
-
         var sources = _.pluck(_.filter(formData, {name: "source"}), "value")
         var targets = _.pluck(_.filter(formData, {name: "target"}), "value")
 
