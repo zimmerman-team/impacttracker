@@ -100,7 +100,6 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
 
             var redisClient = DatabaseContainer.getRedis();      
             var key = id + ":linegraph";
-            redisClient.get(key, res);
 
             redisClient.get(key, function(error, doc) {
                 return res(null, doc)
