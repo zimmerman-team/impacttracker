@@ -37,9 +37,9 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
     start: function(resume) {
 
         // initialize source and target nodes
-        _.forEach(this.campaign.sources, function(source) {
-            this.addNode(source.toObject(), "source")
-        }.bind(this))
+        // _.forEach(this.campaign.sources, function(source) {
+        //     this.addNode(source.toObject(), "source")
+        // }.bind(this))
 
         _.forEach(this.campaign.targets, function(target) {
             this.addNode(target.toObject(), "target")
@@ -144,6 +144,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
      * Updates the graph and emits relevant events
     */
     handleNewTweet: function(tweet, original_tweet, category) {
+        // if (_.find(this.sources, jj))
         this.emit("new-link", this.addLink(tweet, original_tweet.user.id_str, tweet.user.id_str));
         this.emit("new-tweet", this.addTweet(tweet, category));
     },
@@ -237,7 +238,8 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                     }
                 }
 
-                this.writeDb();
+                // this.writeDb();
+                this.writeGraphRedis()
                 return this.handleTweet();
 
             }.bind(this))

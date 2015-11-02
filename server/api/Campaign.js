@@ -10,6 +10,8 @@ var startCampaign = require('../campaign/util').startCampaign;
 var planCampaign = require('../campaign/util').planCampaign;
 var stopCampaign = require('../campaign/util').stopCampaign;
 
+var DatabaseContainer = require('../utils/DatabaseContainer')
+
 var CampaignApi = objectAssign({}, EventEmitter.prototype, {
 
     get: function(data, res) {
@@ -67,19 +69,29 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     getGraph: function(user, id, res) {
-        Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
-            if (error) return res(error);
+        var redisClient = DatabaseContainer.getRedis();      
 
-            return res(null, doc.networkGraph)
-        })
+        var key = id + ":graph";
+        redisClient.get(key, res);
+
+        // Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
+        //     if (error) return res(error);
+
+        //     return res(null, doc.networkGraph)
+        // })
     },
 
     getLineGraph: function(user, id, res) {
-        Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
-            if (error) return res(error);
+        var redisClient = DatabaseContainer.getRedis();      
 
-            return res(null, doc.lineGraph)
-        })
+        var key = id + ":linegraph";
+        redisClient.get(key, res);
+
+        // Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
+        //     if (error) return res(error);
+
+        //     return res(null, doc.lineGraph)
+        // })
     }
 })
 
