@@ -72,7 +72,8 @@ var NetworkGraph = React.createClass({
         socket.emit("Campaign.getGraph", this.props.campaign._id, function(error, graph) {
             if (error) throw error;
 
-            console.log(graph)
+            if (typeof graph === "string")
+                graph = JSON.parse(graph)
 
             RetweetNetworkGraph.load(graph)
         })

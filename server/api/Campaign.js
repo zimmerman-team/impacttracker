@@ -69,10 +69,16 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     getGraph: function(user, id, res) {
-        var redisClient = DatabaseContainer.getRedis();      
+        Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
+            if (doc.state === "completed") {
+                return res(null, doc.networkGraph)
+            }
 
-        var key = id + ":graph";
-        redisClient.get(key, res);
+            var redisClient = DatabaseContainer.getRedis();      
+
+            var key = id + ":graph";
+            redisClient.get(key, res);
+        })
 
         // Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
         //     if (error) return res(error);
@@ -82,16 +88,19 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
     },
 
     getLineGraph: function(user, id, res) {
-        var redisClient = DatabaseContainer.getRedis();      
+        Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
+            if (error) return res(error);
 
-        var key = id + ":linegraph";
-        redisClient.get(key, res);
+            if (doc.state === "completed") {
+                return res(null, doc.networkGraph)
+            }
 
-        // Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
-        //     if (error) return res(error);
+            var redisClient = DatabaseContainer.getRedis();      
+            var key = id + ":linegraph";
+            redisClient.get(key, res);
 
-        //     return res(null, doc.lineGraph)
-        // })
+            return res(null, doc.lineGraph)
+        })
     }
 })
 

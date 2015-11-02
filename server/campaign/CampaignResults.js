@@ -36,10 +36,10 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
     start: function(resume) {
 
-        // initialize source and target nodes
-        // _.forEach(this.campaign.sources, function(source) {
-        //     this.addNode(source.toObject(), "source")
-        // }.bind(this))
+        initialize source and target nodes
+        _.forEach(this.campaign.sources, function(source) {
+            this.addNode(source.toObject(), "source")
+        }.bind(this))
 
         _.forEach(this.campaign.targets, function(target) {
             this.addNode(target.toObject(), "target")
