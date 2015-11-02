@@ -63,7 +63,7 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
 
     stop: function(user, data, res) {
         stopCampaign(data._id)
-        Campaign.findByIdAndUpdate(data._id, {state: "completed"}, {running: false}, {"new": true}, res)
+        Campaign.findByIdAndUpdate(data._id, {state: "completed", running: false}, {"new": true}, res)
     },
 
     getGraph: function(user, id, res) {
