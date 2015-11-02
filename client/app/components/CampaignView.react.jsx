@@ -76,15 +76,16 @@ var NetworkGraph = React.createClass({
                 graph = JSON.parse(graph)
 
             RetweetNetworkGraph.load(graph)
+
+            ApiService.socketOn(this.props.campaign._id + ':new-node', function(node) {
+                RetweetNetworkGraph.addNode(node, true);   
+            });
+
+            ApiService.socketOn(this.props.campaign._id + ':new-link', function(link) {
+                RetweetNetworkGraph.addLink(link, true);
+            });
         })
 
-        ApiService.socketOn(this.props.campaign._id + ':new-node', function(node) {
-            RetweetNetworkGraph.addNode(node, true);   
-        });
-
-        ApiService.socketOn(this.props.campaign._id + ':new-link', function(link) {
-            RetweetNetworkGraph.addLink(link, true);
-        });
     },
 
     componentWillUnmount: function() {
