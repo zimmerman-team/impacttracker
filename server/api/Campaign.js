@@ -70,6 +70,7 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
 
     getGraph: function(user, id, res) {
         Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
+            if (error) return res(error);
             if (doc.state === "completed") {
                 return res(null, doc.networkGraph)
             }
@@ -77,7 +78,9 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
             var redisClient = DatabaseContainer.getRedis();      
 
             var key = id + ":graph";
-            redisClient.get(key, res);
+            redisClient.get(key, function(error, doc) {
+                return res(null, doc)
+            });
         })
 
         // Campaign.findOneByUser({_id: id}, user._id, function(error, doc) {
@@ -99,7 +102,9 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
             var key = id + ":linegraph";
             redisClient.get(key, res);
 
-            return res(null, doc.lineGraph)
+            redisClient.get(key, function(error, doc) {
+                return res(null, doc)
+            });
         })
     }
 })

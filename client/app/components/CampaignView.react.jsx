@@ -84,7 +84,7 @@ var NetworkGraph = React.createClass({
             ApiService.socketOn(this.props.campaign._id + ':new-link', function(link) {
                 RetweetNetworkGraph.addLink(link, true);
             });
-        })
+        }.bind(this))
 
     },
 
