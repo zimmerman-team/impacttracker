@@ -36,10 +36,10 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
     start: function(resume) {
 
-        initialize source and target nodes
-        _.forEach(this.campaign.sources, function(source) {
-            this.addNode(source.toObject(), "source")
-        }.bind(this))
+        // initialize source and target nodes
+        // _.forEach(this.campaign.sources, function(source) {
+        //     this.addNode(source.toObject(), "source")
+        // }.bind(this))
 
         _.forEach(this.campaign.targets, function(target) {
             this.addNode(target.toObject(), "target")
@@ -58,6 +58,12 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
             this.redisClient.lpush(this.tweetList, "stop");
         }.bind(this))
 
+        console.log("listening for tweets on " + this.tweetList);
+
+    },
+
+    getSource: function(userId) {
+        return _.find(this.campaign.sources, {'user_id': userId})
     },
 
     isSource: function(userId) {
@@ -209,6 +215,13 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                 // we only care when the retweeted tweet is tweeted by a a source
                 if (original_tweet_is_source) {
 
+                    // add source node if not added already
+                    var source = this.getSource(original_tweet.user.id_str)
+                    if (!source.hasLinks) {
+                        this.emit("new-node", this.addNode(source.toObject(), "source"));
+                        source.hasLinks = true;
+                    }
+
                     // source -> source
                     if (isSource) { 
                         console.info("Got a new source->source relation")
@@ -236,6 +249,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
                         this.emit("new-node", this.addNode(user, "unrelated"));
                         this.handleNewTweet(tweet, original_tweet, "unrelated")
                     }
+
                 }
 
                 // this.writeDb();

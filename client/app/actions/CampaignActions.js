@@ -80,6 +80,20 @@ var CampaignActions = {
             id: target._id,
             target: target
         })
+    },
+
+    removeSource: function(id) {
+        AppDispatcher.dispatch({
+            actionType: ApiConstants.DESTROY_SOURCE,
+            id: id,
+        })
+    },
+
+    removeTarget: function(id) {
+        AppDispatcher.dispatch({
+            actionType: ApiConstants.DESTROY_TARGET,
+            id: id,
+        })
     }
 }
 

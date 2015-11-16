@@ -108,9 +108,11 @@ io.on('connection', function(socket) {
 
     socket.on('Source.create', Source.create.bind(null, user));
     socket.on('Source.getAll', Source.getAll.bind(null, user));
+    socket.on('Source.remove', Source.remove.bind(null, user));
     
     socket.on('Target.create', Target.create.bind(null, user));
     socket.on('Target.getAll', Target.getAll.bind(null, user));
+    socket.on('Target.remove', Target.remove.bind(null, user));
 
 })
 

@@ -201,8 +201,9 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 cursor: cursor,
                 count: 5000 // this is the maximum per call
             }, function(error, followers, response) {
+                // user has a private account
+                if (response.code === 401) return cb(error); 
                 if (error) console.error(error);
-		if (error) throw error
                 if (error) return setTimeout(this.getLimits.bind(this, cb), limitTimeout);
 
                 console.log('cursor: ' + cursor)
@@ -249,7 +250,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
             var key = pre + id;
 
             this.redisClient.sadd(key, source_id);
-            this.redisClient.expire(key, this.ttl)            
+            // this.redisClient.expire(key, this.ttl)            
         }.bind(this))
 
     },
@@ -292,6 +293,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 cursor: cursor,
                 count: 5000
             }, function(error, friends, response) {
+                if (response.code === 401) return cb(error); 
                 if (error) return cb(error)
 
                 this.writeTargetFriends(friends.ids, target);
@@ -335,7 +337,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
 
             var key = pre + id;
             this.redisClient.sadd(key, target_id);
-            this.redisClient.expire(key, this.ttl)            
+            // this.redisClient.expire(key, this.ttl)            
         }.bind(this))
 
     }

@@ -26,8 +26,16 @@ function createSource(id, source) {
     _sources[id] = source;
 }
 
+function deleteSource(id) {
+    delete _sources[id];
+}
+
 function createTarget(id, target) {
     _targets[id] = target;
+}
+
+function deleteTarget(id) {
+    delete _targets[id];
 }
 
 function addSource(campaignId, sourceId) {
@@ -94,8 +102,20 @@ var CampaignStore = objectAssign({}, BaseStore, {
                 CampaignStore.emitChange();
                 break;
 
+            case ApiConstants.DESTROY_SOURCE:
+                console.log('destroying source...')
+                deleteSource(action.id)
+                CampaignStore.emitChange();
+                break;
+
             case ApiConstants.CREATE_TARGET:
                 createTarget(action.id, action.target)
+                CampaignStore.emitChange();
+                break;
+
+            case ApiConstants.DESTROY_TARGET:
+                console.log('destroying target...')
+                deleteTarget(action.id)
                 CampaignStore.emitChange();
                 break;
 

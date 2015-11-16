@@ -105,6 +105,15 @@ var CampaignDetail = React.createClass({
         // var checked = event.target.checked;
     },
 
+    _onSourceRemove: function(index) {
+        ApiService.removeSource(this.state.sources[index]._id)
+    },
+
+    _onTargetRemove: function(index) {
+        console.log('clicked')
+        ApiService.removeTarget(this.state.targets[index]._id)
+    },
+
     _onSourceToggleAll: function(event) {
         this.setState({
             sources: _.map(this.state.sources, function(source) {
@@ -134,10 +143,13 @@ var CampaignDetail = React.createClass({
             source.checked = _.find(sourceCampaigns, {_id: source._id}) ? true : false
             return source
         });
+
         state.targets = _.map(state.targets, function(target) {
             target.checked = _.find(targetCampaigns, {_id: target._id}) ? true : false
             return target
         });
+
+        console.log(state)
 
         return state;
     },
@@ -146,21 +158,27 @@ var CampaignDetail = React.createClass({
 
         var sourceChecks = _.map(this.state.sources, function(source, index) {
             return (
-                <Input type='checkbox' value={source._id} name="source" onChange={this._onSourceChange.bind(null, index)} label={source.screen_name} checked={source.checked} />
+                <div>
+                    <Input type='checkbox' value={source._id} name="source" onChange={this._onSourceChange.bind(null, index)} label={source.screen_name} checked={source.checked} />
+                    <button type="button" onClick={this._onSourceRemove.bind(null, index)} className="btn btn-default"><span className="glyphicon glyphicon-remove"></span></button>
+                </div>
         )
         }.bind(this))
 
         var targetChecks = _.map(this.state.targets, function(target, index) {
             return (
-                <Input type='checkbox' value={target._id} name="target" onChange={this._onTargetChange.bind(null, index)} label={target.screen_name} checked={target.checked} />
+                <div>
+                    <Input type='checkbox' value={target._id} name="target" onChange={this._onTargetChange.bind(null, index)} label={target.screen_name} checked={target.checked} />
+                    <button type="button" onClick={this._onTargetRemove.bind(null, index)} className="btn btn-default"><span className="glyphicon glyphicon-remove"></span></button>
+                </div>
         )
         }.bind(this))
 
         var sourceCheckAll = (
-            <Input type='checkbox' name='sourceCheckAll' onChange={this._onSourceToggleAll} label="Check all" />
+            <button type='button' className="btn btn-primary" onClick={this._onSourceToggleAll}>Check All</button>
         )
         var targetCheckAll = (
-            <Input type='checkbox' name='targetCheckAll' onChange={this._onTargetToggleAll} label="Check all" />
+            <button type='button' className="btn btn-primary" onClick={this._onTargetToggleAll}>Check All</button>
         )
 
 
@@ -194,13 +212,14 @@ var CampaignDetail = React.createClass({
                             <div className="col-lg-3 daterange">
                                 <DateTimeField 
                                     inputProps={{name: "startDate"}} 
-                                    dateTime={moment(this.state.campaign.startDate).format('x')} 
+                                    minDate={moment()}
                                     defaultText="select campaign start date" />
                             </div>
                             <div className="col-lg-3 daterange">
                                 <DateTimeField 
                                     inputProps={{name: "endDate"}} 
-                                    dateTime={moment(this.state.campaign.endDate).format('x')} 
+                                    minDate={moment()}
+                                    maxDate={moment().add('days', 3)}
                                     defaultText="select campaign end date" />
                             </div>
                             </div> 

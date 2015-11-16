@@ -6,7 +6,6 @@ var _socket = null;
 
 var ApiService = {
 
-
     socketOn: function(event, cb) {
         _socket.on(event, cb)
     },
@@ -85,7 +84,7 @@ var ApiService = {
 
     getSources: function() {
         _socket.emit('Source.getAll', function(error, data) {
-            console.log("got a reponse")
+            console.log("got sources")
             if (error) throw error;
 
             var sources = {};
@@ -98,7 +97,9 @@ var ApiService = {
     },
 
     getTargets: function() {
+        console.log('called getTargets')
         _socket.emit('Target.getAll', function(error, data) {
+            console.log('got targets')
             if (error) throw error;
 
             var targets = {};
@@ -118,11 +119,28 @@ var ApiService = {
         })
     },
 
+    removeSource: function(id) {
+        _socket.emit("Source.remove", {_id: id}, function(error, data) {
+            if (error) throw error;
+
+            ApiActions.removeSource(id);
+        })
+    },
+
     createTarget: function(screenName) {
         _socket.emit("Target.create", {screen_name: screenName}, function(error, data) {
             if (error) throw error;
 
             ApiActions.createTarget(data);
+        })
+    },
+
+    removeTarget: function(id) {
+        console.log('emitting remove target')
+        _socket.emit("Target.remove", {_id: id}, function(error, data) {
+            if (error) throw error;
+
+            ApiActions.removeTarget(id);
         })
     }
 }

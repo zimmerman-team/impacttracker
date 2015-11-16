@@ -39,8 +39,10 @@ var targetApi = {
 
     },
 
-    remove: function(data, res) {
-
+    remove: function(user, data, res) {
+        console.log('called remove target')
+        console.log(data)
+        Target.remove({_id: data._id}, res)
     }
 }
 

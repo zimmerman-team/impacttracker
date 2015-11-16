@@ -1,9 +1,8 @@
 var c3 = require('c3')
+var moment = require('moment')
 
 var _chart = null;
-var _formatter = function(x) { 
-    return x.getHours() + ":" + x.getMinutes()
-}
+var _formatter = function(x) { return moment(x).format('YYYY-MM-DD HH:mm') }
 
 var RetweetLineGraph = {
 
@@ -12,6 +11,7 @@ var RetweetLineGraph = {
         _chart = c3.generate({
             bindto: el,
             data: {
+                labels: true,
                 json: [
                     // {date: '2014-01-01', unrelated: 100, source: 200, intermediate: 300, target: 400, },
                     // {date: '2014-01-02', unrelated: 100, source: 200, intermediate: 300, target: 400, },
@@ -29,6 +29,12 @@ var RetweetLineGraph = {
                     label: "Time",
                     type: 'timeseries',
                     tick: {
+                        // culling: {
+                        //     max: 4
+                        // },
+                        fit: true,
+                        count: 20,
+                        // format: '%m-%d:%H'
                         format: function(x) {
                             return _formatter(x);
                         }
@@ -54,20 +60,21 @@ var RetweetLineGraph = {
     },
 
     load: function(json, daterange) {
-        console.log(daterange)
 
         switch (daterange) {
             case "minute":
-                _formatter = function(x) { return x.getHours() + ":" + x.getMinutes()}
+                _formatter = function(x) { return moment(x).format('YYYY-MM-DD HH:mm') }
                 break;
             case "hour":
-                _formatter = function(x) { return x.getDay() + ":" + x.getHours()}
+                _formatter = function(x) { return moment(x).format('YYYY-MM-DD HH:mm') }
                 break;
             case "default":
-                _formatter = function(x) { return x.getHours() + ":" + x.getMinutes()}
-        }
+                _formatter = function(x) { return moment(x).format('YYYY-MM-DD HH:mm') }
+       }
 
-        console.log(json)
+        // console.log('loading chart...')
+        // console.log(json)
+        // console.log(daterange)
                 
         _chart.load({
             json: json,

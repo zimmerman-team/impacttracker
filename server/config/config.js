@@ -4,7 +4,7 @@ var env = process.env.NODE_ENV;
 // passport Twitter auth
 var CONSUMER_KEY = "P9Id7LbihYtpChutifnC8Kt4y",
     CONSUMER_SECRET = "XoR7DtehlDOAELUbAuu7vpl4ILbgUqnFBjmCPiudSHOGoc9Vxk",
-    CALLBACK_URL = "http://impacttracker.zz-demos.net/auth/twitter/callback";
+    CALLBACK_URL = "http://localhost:2000/auth/twitter/callback";
 
 module.exports = {
     'port': 2000,

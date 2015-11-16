@@ -36,6 +36,7 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
         campaign.author = user._id
         campaign.state = "getting followers/friends"
         campaign.running = true
+        campaign.handle.replace(/#/g, ''); // remove hashtag, not supported by twitter API
 
         campaign.save(function(error) {
             if (error) return res(error, null);

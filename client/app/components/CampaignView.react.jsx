@@ -177,6 +177,8 @@ var _preparedGraph = [];
 
 var prepareData = function(graph, grouping="minute") {
 
+    console.log('called prepareData')
+    console.log(grouping)
     switch(grouping) {
         case "minute": 
             graph = _.groupByMulti(graph, [function(x) {
@@ -185,6 +187,7 @@ var prepareData = function(graph, grouping="minute") {
             break;
             
         case "hour": 
+            console.log('got hour')
             graph = _.groupByMulti(graph, [function(x) {
                 return moment(new Date(x.tweet.created_at)).startOf('hour').format('x');
             }, "layer"])
@@ -208,6 +211,7 @@ var prepareData = function(graph, grouping="minute") {
     // todo: improve performance by removing this iteration (and maybe all iterations)
     graph = _.map(graph, function(value, key) {
         value.date = new Date(parseInt(key));
+        // console.log(value.date)
 
         return value
     });
@@ -226,7 +230,8 @@ var LineGraph = React.createClass({
     },
 
     _changeDateAxis: function(daterange) {
-        this.setState({dateRange: daterange, })
+        console.log('called with ' + daterange)
+        this.setState({dateRange: daterange})
         this._getGraph()
     },
 
@@ -235,8 +240,15 @@ var LineGraph = React.createClass({
         socket.emit("Campaign.getLineGraph", this.props.campaign._id, function(error, graph) {
             if (error) throw error;
 
+            if (typeof graph === "string")
+                graph = JSON.parse(graph)
+
+            console.log('called with...')
+            console.log(graph)
+            console.log(this.state.dateRange)
+
             this.setState({
-                data: prepareData(graph)
+                data: prepareData(graph, this.state.dateRange)
             })
 
         }.bind(this))
