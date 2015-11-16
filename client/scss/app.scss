@@ -402,6 +402,15 @@ nav.collapse.in {
 }
 
 .campaigndetail {
+	table {
+		.glyphicon-remove {
+			color:darken(red, 10%);
+			cursor: pointer;
+			&:hover {
+				color:darken(red, 20%);
+			}
+		}
+	}
 	.panel {
 		background:#f9f9f9;
 		.panel-content {
@@ -415,6 +424,15 @@ nav.collapse.in {
 		}
 		.checkbox {
 			margin:0;
+			label {
+				padding:0;
+				margin:0;
+			}
+			input {
+				position: relative;
+				margin:0;
+				margin-right: 5px;
+			}
 		}
 		.cb {
 			margin-bottom: 15px;

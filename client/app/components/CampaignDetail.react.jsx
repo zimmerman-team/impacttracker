@@ -158,27 +158,27 @@ var CampaignDetail = React.createClass({
 
         var sourceChecks = _.map(this.state.sources, function(source, index) {
             return (
-                <div>
-                    <Input type='checkbox' value={source._id} name="source" onChange={this._onSourceChange.bind(null, index)} label={source.screen_name} checked={source.checked} />
-                    <button type="button" onClick={this._onSourceRemove.bind(null, index)} className="btn btn-default"><span className="glyphicon glyphicon-remove"></span></button>
-                </div>
+                <tr>
+                    <td><Input type='checkbox' value={source._id} name="source" onChange={this._onSourceChange.bind(null, index)} label={source.screen_name} checked={source.checked} /></td>
+                    <td><span className="glyphicon glyphicon-remove" onClick={this._onSourceRemove.bind(null, index)}></span></td>
+                </tr>
         )
         }.bind(this))
 
         var targetChecks = _.map(this.state.targets, function(target, index) {
             return (
-                <div>
-                    <Input type='checkbox' value={target._id} name="target" onChange={this._onTargetChange.bind(null, index)} label={target.screen_name} checked={target.checked} />
-                    <button type="button" onClick={this._onTargetRemove.bind(null, index)} className="btn btn-default"><span className="glyphicon glyphicon-remove"></span></button>
-                </div>
+                <tr>
+                    <td><Input type='checkbox' value={target._id} name="target" onChange={this._onTargetChange.bind(null, index)} label={target.screen_name} checked={target.checked} /></td>
+                    <td><span className="glyphicon glyphicon-remove" onClick={this._onTargetRemove.bind(null, index)} ></span></td>
+                </tr>
         )
         }.bind(this))
 
         var sourceCheckAll = (
-            <button type='button' className="btn btn-primary" onClick={this._onSourceToggleAll}>Check All</button>
+            <th><Input type='checkbox' onClick={this._onSourceToggleAll} label="Check all" /></th>
         )
         var targetCheckAll = (
-            <button type='button' className="btn btn-primary" onClick={this._onTargetToggleAll}>Check All</button>
+            <th><Input type='checkbox' onClick={this._onTargetToggleAll} label="Check all"/></th>
         )
 
 
@@ -225,22 +225,41 @@ var CampaignDetail = React.createClass({
                             </div> 
                             
                             <div className="row">
-                            <div className="col-lg-4 cb">
-                            {sourceCheckAll}
-                            <label for="sourceInput">Sources</label>
-                            {sourceChecks}
-                            <Input type="text" ref="sourceInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddSourceClick} value="Add source" placeholder="Add a new source"/>} />  
-                            </div>
+                                <div className="col-lg-4 cb">
+                                    <label for="sourceInput">Sources</label>
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                {sourceCheckAll}
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {sourceChecks}
+                                        </tbody>
+                                    </table>
+                                    <Input type="text" ref="sourceInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddSourceClick} value="Add source" placeholder="Add a new source"/>} />  
+                                </div>
                             </div>
 
                             <div className="row">
-                            <div className="col-lg-4 cb">
-                            {targetCheckAll}
-                            <label for="targetInput">Targets</label>
-                            {targetChecks}
-                            <Input type="text" ref="targetInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddTargetClick} value="Add target" placeholder="Add a new target" />} />  
-                            <buttonInput value="Add target" />
-                            </div>
+                                <div className="col-lg-4 cb">
+                                    
+                                    <label for="targetInput">Targets</label>
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                {targetCheckAll}
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {targetChecks}
+                                        </tbody>
+                                    </table>
+                                    <Input type="text" ref="targetInput" buttonAfter={<ButtonInput bsStyle="primary" onClick={this._onAddTargetClick} value="Add target" placeholder="Add a new target" />} />  
+                                    <buttonInput value="Add target" />
+                                </div>
                             </div>
 
                             <div className="row">
