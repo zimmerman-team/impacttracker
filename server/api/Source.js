@@ -37,7 +37,7 @@ var SourceApi = {
 
     },
 
-    remove: function(data, res) {
+    remove: function(user, data, res) {
         console.log('called remove')
         console.log(data)
         Source.remove({_id: data._id}, res)

@@ -34,10 +34,11 @@ var ApiService = {
         _socket.emit('Campaign.create', campaign, function(error, data) {
             console.log("got campaign response")
             console.log(data)
-            if (error) throw error;
+            if (cb && error) return cb(error);
+
             ApiActions.create(data._id, data);
 
-            if (cb) cb(data._id);
+            if (cb) return cb(null, data._id);
         })
     },
 

@@ -61,6 +61,20 @@ campaignSchema.statics.findOneByUser = function(query, userId, cb) {
         .exec(cb)
 }
 
+// Is this user already running a campaign?
+campaignSchema.statics.hasRunning = function(userId, cb) {
+    var query = {}
+    query.author = userId;
+    query.state = {$ne: 'completed'}
+
+    return this
+        .findOne(query)
+        .exec(function(error, result) {
+            if (error) cb(error);
+            cb(null, !!result);
+        })
+}
+
 var Campaign = mongoose.model('Campaign', campaignSchema);
 
 // Campaign.schema.path('sources').validate(function (sources, cb) {

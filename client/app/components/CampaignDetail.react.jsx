@@ -7,6 +7,7 @@ var CampaignStore = require("../stores/CampaignStore")
 var Input = require('react-bootstrap').Input;
 var SplitButton = require('react-bootstrap').SplitButton;
 var ButtonInput = require('react-bootstrap').ButtonInput;
+var Alert = require('react-bootstrap').Alert;
 
 var ApiService = require('../services/ApiService')
 var ApiActions = require("../actions/CampaignActions")
@@ -50,6 +51,9 @@ var CampaignDetail = React.createClass({
         var name = _.find(formData, {name: "name"}).value
         var keywords = _.find(formData, {name: "keywords"}).value
 
+        if (!name || !keywords) return;
+        if (!sources.length || !targets.length) return;
+        if (!startDate || !endDate) return;
         // if (!startDate || !endDate && !handle && !sources.length && !targets.length)
         //     return;
 
@@ -71,8 +75,15 @@ var CampaignDetail = React.createClass({
             RouterContainer.get().transitionTo('/home/campaign');
         } else {
             // change this to work with flux
-            ApiService.createCampaign(campaign, function(id) {
+            ApiService.createCampaign(campaign, (error, id) => {
                 console.log("transitioning")
+                if (error) {
+                    return this.setState({
+                        showAlert: true,
+                        alertMessage: error
+                    })
+                }
+
                 RouterContainer.get().transitionTo('/home/campaign');
             });
             
@@ -82,12 +93,14 @@ var CampaignDetail = React.createClass({
 
     _onAddSourceClick: function(event) {
         var sourceInput = this.refs.sourceInput.getValue()
-        ApiService.createSource(sourceInput);
+        console.log(React.findDOMNode(this.refs.sourceInput))
+        if (sourceInput) ApiService.createSource(sourceInput);
     },
 
     _onAddTargetClick: function(event) {
         var targetInput = this.refs.targetInput.getValue()
-        ApiService.createTarget(targetInput);
+        React.findDOMNode(this.refs.targetInput).reset()
+        if (targetInput) ApiService.createTarget(targetInput);
     },
 
     _onSourceChange: function(index, event) {
@@ -110,7 +123,6 @@ var CampaignDetail = React.createClass({
     },
 
     _onTargetRemove: function(index) {
-        console.log('clicked')
         ApiService.removeTarget(this.state.targets[index]._id)
     },
 
@@ -149,7 +161,8 @@ var CampaignDetail = React.createClass({
             return target
         });
 
-        console.log(state)
+        state.showAlert = false;
+        state.alertMessage = "";
 
         return state;
     },
@@ -263,9 +276,12 @@ var CampaignDetail = React.createClass({
                             </div>
 
                             <div className="row">
-                            <div className="col-lg-3">
-                            <ButtonInput type='submit' bsStyle="primary" value={this.state.campaign._id ? 'Update' : 'Create'} />
-                            </div>
+                                <div className="col-lg-3">
+                                    <ButtonInput type='submit' bsStyle="primary" value={this.state.campaign._id ? 'Update' : 'Create'} />
+                                </div>
+                                <Alert bsStyle="danger" dismissAfter={5000} hidden={!this.state.showAlert}>
+                                    {this.state.alertMessage}
+                                </Alert>
                             </div>
                         </form>
                     </div>

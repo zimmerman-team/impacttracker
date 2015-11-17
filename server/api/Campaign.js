@@ -30,29 +30,34 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
         var campaign = new Campaign(data);
 
         console.log(data)
-
-        if (campaign.startDate) campaign.startDate = new Date(campaign.startDate)
-        if (campaign.endDate) campaign.endDate = new Date(campaign.endDate)
-        campaign.author = user._id
-        campaign.state = "getting followers/friends"
-        campaign.running = true
-        campaign.handle.replace(/#/g, ''); // remove hashtag, not supported by twitter API
-
-        campaign.save(function(error) {
+        Campaign.hasRunning(user._id, function(error, hasRunning) {
             if (error) return res(error, null);
 
-            console.log(campaign)
+            if (hasRunning) return res("You already have a campaign running", null)
 
-            Campaign.populate(campaign, [{path: "sources"}, {path: "targets"}, {path: "author"}], 
-                function(error, campaign) {
-                    if (error) return res(error, null);
+            if (campaign.startDate) campaign.startDate = new Date(campaign.startDate)
+            if (campaign.endDate) campaign.endDate = new Date(campaign.endDate)
+            campaign.author = user._id
+            campaign.state = "getting followers/friends"
+            campaign.running = true
+            campaign.handle.replace(/#/g, ''); // remove hashtag, not supported by twitter API
 
-                    res(null, campaign)
+            campaign.save(function(error) {
+                if (error) return res(error, null);
 
-                    planCampaign(campaign)
-                    
-                }.bind(this))
-        });
+                console.log(campaign)
+
+                Campaign.populate(campaign, [{path: "sources"}, {path: "targets"}, {path: "author"}], 
+                    function(error, campaign) {
+                        if (error) return res(error, null);
+
+                        res(null, campaign)
+
+                        planCampaign(campaign)
+                        
+                    }.bind(this))
+            });
+        })
     },
 
     update: function(data, res) {

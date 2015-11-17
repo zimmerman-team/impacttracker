@@ -617,6 +617,7 @@ var RetweetNetworkGraph = {
 
     destroy: function() {
         // some cleanup
+        tip.hide();
         _layerDict = {};
         links = []
         _groups = {};
