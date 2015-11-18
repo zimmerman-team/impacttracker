@@ -93,13 +93,11 @@ var CampaignDetail = React.createClass({
 
     _onAddSourceClick: function(event) {
         var sourceInput = this.refs.sourceInput.getValue()
-        console.log(React.findDOMNode(this.refs.sourceInput))
         if (sourceInput) ApiService.createSource(sourceInput);
     },
 
     _onAddTargetClick: function(event) {
         var targetInput = this.refs.targetInput.getValue()
-        React.findDOMNode(this.refs.targetInput).reset()
         if (targetInput) ApiService.createTarget(targetInput);
     },
 

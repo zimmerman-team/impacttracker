@@ -270,6 +270,12 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
         })
     },
 
+    handleUserError: function(error, response) {
+        if (response.code === 401) return;
+        if (error) return error;
+        return;
+    },
+
     /*
      * get Target's friends from the Twitter API
     */
@@ -293,8 +299,7 @@ TwitterRest.prototype = objectAssign({}, TwitterRest.prototype, EventEmitter.pro
                 cursor: cursor,
                 count: 5000
             }, function(error, friends, response) {
-                if (response.code === 401) return cb(error); 
-                if (error) return cb(error)
+                if (this.handleUserError(error, response)) return cb(error);
 
                 this.writeTargetFriends(friends.ids, target);
 

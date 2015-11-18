@@ -26,7 +26,6 @@ function startCampaign(campaign) {
 }
 
 function stopCampaign(campaignId) {
-    console.log('stopping campaign...')
     campaign = _campaigns[campaignId];
     if (campaign) {
         _campaigns[campaignId].stop();
@@ -59,7 +58,7 @@ function initializeCampaigns() {
     Campaign.findPopulated({
         startDate: {"$lte": Date.now()},
         endDate: {"$gte": Date.now() },
-        state: "running"
+        state: { $ne: "completed" }
     }, function(error, campaigns) {
         console.log(campaigns)
         if (error) return console.error(error);
@@ -69,7 +68,7 @@ function initializeCampaigns() {
     // 2.
     Campaign.findPopulated({
         startDate: {"$gte": Date.now()},
-        state: "completed"
+        state: { $ne: "completed" }
     }, function(error, campaigns) {
         console.log(campaigns)
         if (error) return console.error(error);
