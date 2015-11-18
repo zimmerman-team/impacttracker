@@ -56,7 +56,9 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
         this.once("stop", function() {
             console.log('called stop, pushing stop to redis')
-            this.redisClient.lpush(this.tweetList, "stop");
+            var redisClient = redis.createClient();
+            redisClient.lpush(this.tweetList, "stop");
+            redisClient.quit()
         }.bind(this))
 
         console.log("listening for tweets on " + this.tweetList);
@@ -89,7 +91,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
             label: user.screen_name,
             layer: layer,
             data: {
-                user: user
+                user: _.pick(user, ['name', 'id', 'id_str', 'screen_name'])
             }
         }
 
@@ -105,7 +107,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
             directed: true,
             // label: tweet.text,
             data: {
-                tweet: tweet
+                tweet: _.pick(tweet, ['id', 'id_str', 'created_at'])
             }
         }
 
@@ -120,7 +122,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
 
         var item = {
             // date: date,
-            tweet: tweet,
+            tweet: _.pick(tweet, ['id', 'id_str', 'created_at']),
             layer: layer
         }
 
@@ -170,7 +172,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         this.redisClient.brpop([this.tweetList, 0], function(list, tweet) {
             
             // stop event emitted by Campaign, write graphs to database
-            if (tweet === "stop") {
+            if (tweet[1] === "stop") {
                 console.log('called writedb')
                 return this.writeDb(); 
             }

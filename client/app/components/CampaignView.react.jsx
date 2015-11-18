@@ -182,7 +182,6 @@ var prepareData = function(graph, grouping="minute") {
     switch(grouping) {
         case "minute": 
             graph = _.groupByMulti(graph, [function(x) {
-                console.log(x)
                 return moment(new Date(x.tweet.created_at)).startOf('minute').format('x');
             }, "layer"])
             break;

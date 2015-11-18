@@ -101,7 +101,7 @@ var CampaignApi = objectAssign({}, EventEmitter.prototype, {
             if (error) return res(error);
 
             if (doc.state === "completed") {
-                return res(null, doc.networkGraph)
+                return res(null, doc.lineGraph)
             }
 
             var redisClient = DatabaseContainer.getRedis();      
