@@ -648,8 +648,16 @@ var RetweetNetworkGraph = {
             var source = link.source;
             var target = link.target;
 
+            // console.log(link)
+
             var sourceLayer = _layerDict[source];
             var targetLayer = _layerDict[target];  
+
+            if (!sourceLayer || !targetLayer) {
+                console.log('called')
+                console.log(link)
+                return;
+            }
 
             addLink(sourceLayer + ":" + source, targetLayer + ":" + target, redraw);
     },

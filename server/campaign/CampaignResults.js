@@ -55,6 +55,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
         }.bind(this))
 
         this.once("stop", function() {
+            console.log('called stop, pushing stop to redis')
             this.redisClient.lpush(this.tweetList, "stop");
         }.bind(this))
 
@@ -170,6 +171,7 @@ CampaignResults.prototype = objectAssign({}, CampaignResults.prototype, EventEmi
             
             // stop event emitted by Campaign, write graphs to database
             if (tweet === "stop") {
+                console.log('called writedb')
                 return this.writeDb(); 
             }
 

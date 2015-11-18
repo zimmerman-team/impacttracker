@@ -182,6 +182,7 @@ var prepareData = function(graph, grouping="minute") {
     switch(grouping) {
         case "minute": 
             graph = _.groupByMulti(graph, [function(x) {
+                console.log(x)
                 return moment(new Date(x.tweet.created_at)).startOf('minute').format('x');
             }, "layer"])
             break;
@@ -224,7 +225,7 @@ var LineGraph = React.createClass({
 
     getInitialState: function() {
         return {
-            dateRange: "minute",
+            dateRange: "hour",
             data: null
         }
     },
@@ -309,8 +310,8 @@ var SelectLineGraphAxes = React.createClass({
             <div className="controls">
                 <div className="container">
                     <span>
-                        <input type="radio" name="scale" defaultValue="minute" onChange={this.change} id="minute" defaultChecked /><label htmlFor="minute">Tweets per minute</label>
-                        <input type="radio" name="scale" defaultValue="hour" onChange={this.change} id="hour" /><label htmlFor="hour">Tweets per hour</label>
+                        <input type="radio" name="scale" defaultValue="minute" onChange={this.change} id="minute" /><label htmlFor="minute">Tweets per minute</label>
+                        <input type="radio" name="scale" defaultValue="hour" onChange={this.change} id="hour" defaultChecked /><label htmlFor="hour">Tweets per hour</label>
                     </span>
                 </div>
             </div>
